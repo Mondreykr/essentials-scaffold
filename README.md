@@ -8,9 +8,18 @@ Claude Code loses context between sessions — every `/clear` or new conversatio
 
 ## Quick install
 
-1. Copy the `commands/` folder to `.claude/commands/` in your project root
-2. Open Claude Code in your project
-3. Run `/setup`
+From your project root:
+
+```bash
+npx degit Mondreykr/essentials-scaffold/commands .claude/commands
+```
+
+Or copy the `commands/` folder to `.claude/commands/` manually if you already have the repo.
+
+Then:
+
+1. Open Claude Code in your project
+2. Run `/setup`
 
 That's it. The setup command creates your context files and walks you through filling them in.
 
