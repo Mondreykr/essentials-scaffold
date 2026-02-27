@@ -1,3 +1,8 @@
+---
+description: Initialize essentials scaffold — context persistence for Claude Code
+argument-hint: [--deep]
+---
+
 I'm setting up the essentials scaffold for this project — a lightweight system of
 markdown files that maintain context across sessions.
 

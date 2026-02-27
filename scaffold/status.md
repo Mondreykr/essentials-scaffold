@@ -1,3 +1,7 @@
+---
+description: Session briefing — read scaffold files and orient on current state
+---
+
 Read the following files in order:
 1. CLAUDE.md
 2. .scaffold/project.md

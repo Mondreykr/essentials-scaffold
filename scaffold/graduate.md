@@ -1,3 +1,8 @@
+---
+description: Graduate to a heavier framework — snapshot, archive, and hand off
+argument-hint: [--thorough]
+---
+
 **Precondition:** Verify that all five scaffold files exist: CLAUDE.md,
 `.scaffold/project.md`, `.scaffold/state.md`,
 `.scaffold/roadmap.md`, `.scaffold/decisions.md`.

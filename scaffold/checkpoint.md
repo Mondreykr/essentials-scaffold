@@ -1,3 +1,8 @@
+---
+description: Save session progress — update scaffold files and commit
+argument-hint: [--audit]
+---
+
 **Precondition:** Verify that CLAUDE.md, `.scaffold/state.md`, and
 `.scaffold/roadmap.md` exist. If any are missing, stop and say:
 "Scaffold files missing — run /scaffold:setup first."
