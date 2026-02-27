@@ -15,9 +15,13 @@ Then give me a brief orientation:
 4. **Open threads** — Any open questions or things I was figuring out
 5. **Suggested pickup** — What makes sense to work on now, based on "Next session"
    in CLAUDE-state.md plus your own judgment
-6. **Health check** — Flag any contradictions between files (e.g., state says
-   something is broken but roadmap shows it as done). If everything is consistent,
-   say so.
+6. **Health check** — Flag any contradictions between files. Examples:
+   - State says something is broken but roadmap shows it as done
+   - Roadmap shows something "in progress" but state's "Next session" treats it as not started
+   - A decision in CLAUDE-decisions.md contradicts the current tech stack in CLAUDE.md
+   - Project scope boundaries say "no X" but roadmap includes X
+
+   If everything is consistent, say so.
 
 If parking lot has 5+ items, mention: "You have X parking lot items — worth a
 quick review?"

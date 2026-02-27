@@ -1,15 +1,23 @@
+**Precondition:** Verify that CLAUDE.md, CLAUDE-state.md, and CLAUDE-roadmap.md exist.
+If any are missing, stop and say: "Scaffold files missing — run /setup first."
+
 Review everything we did and discussed this session. Then update the scaffold files:
 
 **1. CLAUDE-state.md** (always update)
 - Update "What's not working" — add new issues, remove resolved ones
 - Update "Open questions" — add new ones, remove answered ones
 - Update "What's working well" if I expressed a preference or positive reaction
-- Review "Parking lot" — remove done/irrelevant/superseded items, add new ideas.
-  Don't just add — curate.
+- Review "Parking lot" — prune items that meet any of these criteria:
+  - **Done:** already built or merged
+  - **Irrelevant:** no longer fits the project's direction
+  - **Superseded:** replaced by a different approach or decision
+  - **Stale:** 5+ sessions with no interest or discussion
+  Add new ideas that came up. The goal is a short, relevant list.
 - Write 2-3 specific, actionable items in "Next session" based on where we left off
 
 **2. CLAUDE-roadmap.md** (always update)
-- Move completed items to "Done"
+- Move completed items to "Done" — an item is done when it is merged and working.
+  Features with known bugs stay in "In progress" until the bugs are resolved.
 - Update "In progress" to reflect what's actively being worked on
 - Adjust "Up next" and "Later" if priorities shifted
 - Update "Current phase" if the nature of the work has changed
@@ -22,7 +30,8 @@ Review everything we did and discussed this session. Then update the scaffold fi
 - Skip trivial decisions (variable names, minor styling, etc.)
 - If we reversed or reconsidered a previous decision, update its status and move
   the entry to Archived
-- If 20+ active entries, suggest archiving older stable ones
+- If 20+ active entries: suggest archiving older stable ones, but keep any decision
+  still referenced by active roadmap items or open questions
 
 **4. CLAUDE-project.md** (update only if vision/scope evolved)
 - Update "What is this?" if our understanding of the project sharpened
@@ -41,3 +50,4 @@ Review everything we did and discussed this session. Then update the scaffold fi
   reworded) — not just "updated state file". Keep it scannable but precise.
 - List any open questions or loose threads heading into next session.
 - If git is initialized: `git add CLAUDE-*.md && git commit -m "checkpoint: [brief summary of session]"`
+  If the commit fails, show the error and stop. Don't retry automatically.

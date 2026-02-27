@@ -24,6 +24,31 @@ That's it. The setup command creates your context files and walks you through fi
 | `CLAUDE-roadmap.md` | Progress — current phase, done, in progress, up next, later |
 | `CLAUDE-decisions.md` | Record — why things are the way they are, with dates and reasoning |
 
+## Directory layout
+
+```
+CLAUDE.md                              <- root, auto-read by Claude Code
+CLAUDE-project.md                      <- root, visible
+CLAUDE-state.md
+CLAUDE-roadmap.md
+CLAUDE-decisions.md
+.claude/
+  commands/
+    setup.md
+    status.md
+    checkpoint.md
+    graduate.md
+  scaffold/
+    archive/                           <- brownfield collision storage (created by /setup if needed)
+      commands/                        <- scaffold commands after graduation
+    snapshot/                          <- graduation output (created by /graduate)
+      PROJECT-CONTEXT.md
+```
+
+- `archive/` = old stuff preserved but inert
+- `snapshot/` = useful context for the next framework
+- Separate locations prevent confusion about which files matter
+
 ## Daily workflow
 
 ```
@@ -54,6 +79,17 @@ Delete `CLAUDE-state.md` and `CLAUDE-roadmap.md`, then run `/checkpoint` to rege
 
 When the project outgrows the scaffold — you need structured planning, task breakdown, or execution discipline — run `/graduate`. It consolidates all five files into a single snapshot, archives the scaffold commands, and gets out of the way. Point your new framework at the snapshot for full project context.
 
-## Full reference
+## What this doesn't do
 
-See [essentials-scaffold.md](essentials-scaffold.md) for complete file templates, design rationale, the decisions file format, and everything else under the hood.
+**Context rot within a session.** If you work for hours in a single session, Claude
+degrades as the conversation grows. This scaffold solves between-session memory, not
+within-session degradation. Recovery: `/clear` then `/status` to start fresh from files.
+
+**Automated planning or task breakdown.** This tracks what you're doing, not what you
+should do. For structured planning, graduate to a heavier framework.
+
+**Code quality enforcement.** This is a memory system, not a development methodology.
+For execution discipline (testing, code review, structured implementation), add a
+dedicated tool for that.
+
+This scaffold is the foundation layer. It plays nicely underneath any tool you add later.

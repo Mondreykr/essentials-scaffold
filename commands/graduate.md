@@ -1,3 +1,7 @@
+**Precondition:** Verify that all five scaffold files exist: CLAUDE.md,
+CLAUDE-project.md, CLAUDE-state.md, CLAUDE-roadmap.md, CLAUDE-decisions.md.
+If any are missing, stop and report which files are absent.
+
 The project is graduating from the essentials scaffold to a more capable framework.
 Your job is to consolidate everything into a clean handoff package and remove the
 scaffold so it doesn't conflict.
@@ -44,16 +48,30 @@ consolidates everything worth carrying forward:
 - Move all scaffold commands (setup.md, status.md, checkpoint.md, graduate.md)
   from `.claude/commands/` to `.claude/scaffold/archive/commands/`
 
-**4. Update CLAUDE.md:**
+**4. Verify the archive:**
+Before modifying CLAUDE.md, confirm all expected files landed in their archive
+locations:
+- `.claude/scaffold/archive/CLAUDE-project.md`
+- `.claude/scaffold/archive/CLAUDE-state.md`
+- `.claude/scaffold/archive/CLAUDE-roadmap.md`
+- `.claude/scaffold/archive/CLAUDE-decisions.md`
+- `.claude/scaffold/archive/commands/setup.md`
+- `.claude/scaffold/archive/commands/status.md`
+- `.claude/scaffold/archive/commands/checkpoint.md`
+- `.claude/scaffold/archive/commands/graduate.md`
+
+If anything is missing, stop and report what failed to move.
+
+**5. Update CLAUDE.md:**
 - Remove all scaffold-specific rules (the /status and /checkpoint references,
   the file-reading rules)
 - Keep "Who I am", "Hard constraints", and "Tech stack"
 - Add a pointer: "Previous scaffold context is at `.claude/scaffold/snapshot/PROJECT-CONTEXT.md`"
 
-**5. Commit:**
+**6. Commit:**
 `git add -A && git commit -m "graduate: essentials scaffold -> [new framework]"`
 
-**6. Tell me:**
+**7. Tell me:**
 - What was consolidated into the snapshot
 - What was archived
 - "Point your new framework at `.claude/scaffold/snapshot/PROJECT-CONTEXT.md` for
