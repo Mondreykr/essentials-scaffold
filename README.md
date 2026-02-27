@@ -11,15 +11,15 @@ Claude Code loses context between sessions — every `/clear` or new conversatio
 From your project root:
 
 ```bash
-npx degit Mondreykr/essentials-scaffold/commands .claude/commands
+npx degit Mondreykr/essentials-scaffold/scaffold .claude/commands/scaffold
 ```
 
-Or copy the `commands/` folder to `.claude/commands/` manually if you already have the repo.
+Or copy the `scaffold/` folder to `.claude/commands/scaffold/` manually if you already have the repo.
 
 Then:
 
 1. Open Claude Code in your project
-2. Run `/setup`
+2. Run `/scaffold:setup`
 
 That's it. The setup command creates your context files and walks you through filling them in.
 
@@ -43,33 +43,34 @@ CLAUDE.md                    <- root, auto-read by Claude Code
   roadmap.md                 <- progress tracking
   decisions.md               <- decision record with reasoning
   archive/                   <- brownfield collision storage + graduation archive
-    commands/                <- scaffold commands after graduation
-  snapshot/                  <- graduation output (created by /graduate)
+    scaffold/                <- scaffold commands after graduation
+  snapshot/                  <- graduation output (created by /scaffold:graduate)
     PROJECT-CONTEXT.md
 .claude/
   commands/
-    setup.md
-    status.md
-    checkpoint.md
-    graduate.md
+    scaffold/
+      setup.md
+      status.md
+      checkpoint.md
+      graduate.md
 ```
 
 - `.scaffold/` = project documentation, lives at root alongside your code
 - `archive/` = old stuff preserved but inert
 - `snapshot/` = useful context for the next framework
-- `.claude/commands/` = slash commands (Claude Code internals)
+- `.claude/commands/scaffold/` = slash commands (Claude Code internals)
 
 ## Daily workflow
 
 ```
-Start:    /status
+Start:    /scaffold:status
 Work:     [build, iterate, discuss]
-Close:    /checkpoint
-Resume:   /status (new session after /clear or new conversation)
-Graduate: /graduate (when moving to a heavier framework)
+Close:    /scaffold:checkpoint
+Resume:   /scaffold:status (new session after /clear or new conversation)
+Graduate: /scaffold:graduate (when moving to a heavier framework)
 ```
 
-`/status` reads your files and gives a briefing. `/checkpoint` reviews the session, shows you what changed, and commits after your approval. That's the whole loop.
+`/scaffold:status` reads your files and gives a briefing. `/scaffold:checkpoint` reviews the session, shows you what changed, and commits after your approval. That's the whole loop.
 
 ## Enhanced modes
 
@@ -77,9 +78,9 @@ Each command has an optional enhanced mode. The base commands work without argum
 
 | Command | What it adds |
 |---------|-------------|
-| `/setup --deep` | Launches a codebase analysis after standard setup — maps architecture, surfaces conventions, and feeds findings into scaffold files. Best for brownfield projects. |
-| `/checkpoint --audit` | After the standard checkpoint commits, verifies scaffold claims against actual code — checks that done items exist, tech stack matches manifests, decisions match reality. Reports discrepancies without modifying files. |
-| `/graduate --thorough` | Before graduating, scans the entire codebase for references to scaffold file paths that would break after archiving. Reports findings and waits for you to resolve them. |
+| `/scaffold:setup --deep` | Launches a codebase analysis after standard setup — maps architecture, surfaces conventions, and feeds findings into scaffold files. Best for brownfield projects. |
+| `/scaffold:checkpoint --audit` | After the standard checkpoint commits, verifies scaffold claims against actual code — checks that done items exist, tech stack matches manifests, decisions match reality. Reports discrepancies without modifying files. |
+| `/scaffold:graduate --thorough` | Before graduating, scans the entire codebase for references to scaffold file paths that would break after archiving. Reports findings and waits for you to resolve them. |
 
 ## Recovery
 
@@ -87,23 +88,23 @@ Each command has an optional enhanced mode. The base commands work without argum
 `git diff .scaffold/` to see what changed. `git checkout -- .scaffold/<file>` to revert any file to its last commit.
 
 **Files contradict each other:**
-Run `/status` — the health check flags contradictions. Tell Claude which file is correct and it will fix the other.
+Run `/scaffold:status` — the health check flags contradictions. Tell Claude which file is correct and it will fix the other.
 
 **Everything feels stale:**
-Delete `.scaffold/state.md` and `.scaffold/roadmap.md`, then run `/checkpoint` to regenerate them from the codebase and conversation.
+Delete `.scaffold/state.md` and `.scaffold/roadmap.md`, then run `/scaffold:checkpoint` to regenerate them from the codebase and conversation.
 
 **Context rot mid-session:**
-`/clear` then `/status` to start fresh from files.
+`/clear` then `/scaffold:status` to start fresh from files.
 
 ## Graduation
 
-When the project outgrows the scaffold — you need structured planning, task breakdown, or execution discipline — run `/graduate`. It consolidates all five files into a single snapshot, archives the scaffold commands, and gets out of the way. Point your new framework at the snapshot for full project context.
+When the project outgrows the scaffold — you need structured planning, task breakdown, or execution discipline — run `/scaffold:graduate`. It consolidates all five files into a single snapshot, archives the scaffold commands, and gets out of the way. Point your new framework at the snapshot for full project context.
 
 ## What this doesn't do
 
 **Context rot within a session.** If you work for hours in a single session, Claude
 degrades as the conversation grows. This scaffold solves between-session memory, not
-within-session degradation. Recovery: `/clear` then `/status` to start fresh from files.
+within-session degradation. Recovery: `/clear` then `/scaffold:status` to start fresh from files.
 
 **Automated planning or task breakdown.** This tracks what you're doing, not what you
 should do. For structured planning, graduate to a heavier framework.

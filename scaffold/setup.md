@@ -55,11 +55,11 @@ For new projects, use the placeholder text as-is.
 - Communication: [e.g. "Explain the why, skip the how unless I ask"]
 
 ## Rules
-- Run /status at the start of every session. If /status wasn't run, read .scaffold/project.md, .scaffold/state.md, and .scaffold/roadmap.md before doing any work.
+- Run /scaffold:status at the start of every session. If /scaffold:status wasn't run, read .scaffold/project.md, .scaffold/state.md, and .scaffold/roadmap.md before doing any work.
 - Consult .scaffold/decisions.md when making or revisiting technology/architecture/design choices
 - Ask before making major architectural or structural changes
 - If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly before proceeding.
-- When I say "checkpoint" — run /checkpoint
+- When I say "checkpoint" — run /scaffold:checkpoint
 - If we made decisions, found bugs, discussed scope changes, or planned future work and I haven't said "checkpoint" — remind me before the session ends
 
 ## Hard constraints
@@ -208,15 +208,15 @@ separately. Claude has strong familiarity with the SDK.
 [Reversed or superseded decisions. Kept for historical context.]
 ```
 
-6. **Create the `.claude/commands/` directory** if it doesn't exist, and confirm
-   that `status.md`, `checkpoint.md`, and `graduate.md` are present. If they're
-   not, tell me — I need to add them manually.
+6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
+   and `graduate.md` exist as sibling files in this same folder. If any are
+   missing, tell me — they should have been installed together.
 
 **After creating everything:**
 - If git is initialized: `git add CLAUDE.md .scaffold/ && git commit -m "init: essentials scaffold"`
 - Give me a summary of what was set up, what was archived (if anything), and what I should fill in or verify.
 
-**Enhanced mode (`/setup --deep`):**
+**Enhanced mode (`/scaffold:setup --deep`):**
 
 If "--deep" appears in the arguments, do everything above AND launch an Explore
 subagent (thoroughness: "very thorough") after creating scaffold files to:

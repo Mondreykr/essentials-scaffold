@@ -1,6 +1,6 @@
 **Precondition:** Verify that CLAUDE.md, `.scaffold/state.md`, and
 `.scaffold/roadmap.md` exist. If any are missing, stop and say:
-"Scaffold files missing — run /setup first."
+"Scaffold files missing — run /scaffold:setup first."
 
 Review everything we did and discussed this session. Then update the scaffold files.
 
@@ -75,7 +75,7 @@ Review everything we did and discussed this session. Then update the scaffold fi
   If the commit fails, show the error and stop. Don't retry automatically.
 - List any open questions or loose threads heading into next session.
 
-**Enhanced mode (`/checkpoint --audit`):**
+**Enhanced mode (`/scaffold:checkpoint --audit`):**
 
 If "--audit" appears in the arguments, after the standard checkpoint completes
 (including user approval and git commit), launch an Explore subagent

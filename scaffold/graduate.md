@@ -48,7 +48,7 @@ consolidates everything worth carrying forward:
   `.scaffold/roadmap.md`, `.scaffold/decisions.md`
   to `.scaffold/archive/`
 - Move all scaffold commands (setup.md, status.md, checkpoint.md, graduate.md)
-  from `.claude/commands/` to `.scaffold/archive/commands/`
+  from `.claude/commands/scaffold/` to `.scaffold/archive/scaffold/`
 
 **4. Verify the archive:**
 Before modifying CLAUDE.md, confirm all expected files landed in their archive
@@ -57,15 +57,15 @@ locations:
 - `.scaffold/archive/state.md`
 - `.scaffold/archive/roadmap.md`
 - `.scaffold/archive/decisions.md`
-- `.scaffold/archive/commands/setup.md`
-- `.scaffold/archive/commands/status.md`
-- `.scaffold/archive/commands/checkpoint.md`
-- `.scaffold/archive/commands/graduate.md`
+- `.scaffold/archive/scaffold/setup.md`
+- `.scaffold/archive/scaffold/status.md`
+- `.scaffold/archive/scaffold/checkpoint.md`
+- `.scaffold/archive/scaffold/graduate.md`
 
 If anything is missing, stop and report what failed to move.
 
 **5. Update CLAUDE.md:**
-- Remove all scaffold-specific rules (the /status and /checkpoint references,
+- Remove all scaffold-specific rules (the /scaffold:status and /scaffold:checkpoint references,
   the file-reading rules)
 - Keep "Who I am", "Hard constraints", and "Tech stack"
 - Add a pointer: "Previous scaffold context is at `.scaffold/snapshot/PROJECT-CONTEXT.md`"
@@ -79,7 +79,7 @@ If anything is missing, stop and report what failed to move.
 - "Point your new framework at `.scaffold/snapshot/PROJECT-CONTEXT.md` for
   full project context."
 
-**Enhanced mode (`/graduate --thorough`):**
+**Enhanced mode (`/scaffold:graduate --thorough`):**
 
 If "--thorough" appears in the arguments, before running the standard graduation,
 launch an Explore subagent (thoroughness: "very thorough") to find all
