@@ -5,16 +5,17 @@ markdown files that maintain context across sessions.
 - Check if git is initialized. If not, warn: "This project has no git repo.
   The scaffold works without it, but git gives you undo for checkpoint. Consider
   running `git init` first."
-- Scan for existing files in the project root:
-  - **Scaffold filenames** (`CLAUDE.md`, `CLAUDE-project.md`, `CLAUDE-state.md`,
-    `CLAUDE-roadmap.md`, `CLAUDE-decisions.md`) are **collisions** — archive them
-    to `.claude/scaffold/archive/` before creating fresh scaffold files. Log what
-    was archived and why.
+- Scan for existing files:
+  - **New-path scaffold files** (`.scaffold/project.md`, `.scaffold/state.md`,
+    `.scaffold/roadmap.md`, `.scaffold/decisions.md`, and `CLAUDE.md` in root)
+    are **collisions** — if all five exist AND look like scaffold files, tell me and stop —
+    this project is already set up.
+  - **Legacy scaffold files** (`CLAUDE-project.md`, `CLAUDE-state.md`, `CLAUDE-roadmap.md`,
+    `CLAUDE-decisions.md` in project root) — archive them to `.scaffold/archive/`
+    before creating fresh scaffold files. Log what was archived and why.
   - **Everything else** (`README.md`, `NOTES.md`, `CONTEXT.md`, `TODO.md`,
     `ARCHITECTURE.md`, etc.) is a **context source** — read for context but leave
     in place.
-- If all five scaffold files already exist AND look like scaffold files (not archived
-  leftovers), tell me and stop — this project is already set up.
 
 **Scope analysis (existing projects only — skip for empty/new projects):**
 
@@ -31,7 +32,7 @@ If this project has existing code, do these three things before creating files:
    report:
    - The filename
    - Which scaffold file its content maps to (e.g., `TODO.md` → parking lot in
-     CLAUDE-state.md, `ARCHITECTURE.md` → CLAUDE-decisions.md)
+     `.scaffold/state.md`, `ARCHITECTURE.md` → `.scaffold/decisions.md`)
    - A one-line summary of what it contains
 
 3. **Ask before incorporating:** Present the scan results and wait for confirmation
@@ -43,7 +44,7 @@ Create all five files using the templates below. For existing projects, populate
 the templates with information gathered during scope analysis (after confirmation).
 For new projects, use the placeholder text as-is.
 
-1. **CLAUDE.md** — The hub. Claude reads this automatically.
+1. **CLAUDE.md** — The hub. Claude reads this automatically. Lives in project root.
 
 ```markdown
 # [Project Name]
@@ -54,11 +55,12 @@ For new projects, use the placeholder text as-is.
 - Communication: [e.g. "Explain the why, skip the how unless I ask"]
 
 ## Rules
-- Run /status at the start of every session. If /status wasn't run, read CLAUDE-project.md, CLAUDE-state.md, and CLAUDE-roadmap.md before doing any work.
-- Consult CLAUDE-decisions.md when making or revisiting technology/architecture/design choices
+- Run /status at the start of every session. If /status wasn't run, read .scaffold/project.md, .scaffold/state.md, and .scaffold/roadmap.md before doing any work.
+- Consult .scaffold/decisions.md when making or revisiting technology/architecture/design choices
 - Ask before making major architectural or structural changes
 - If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly before proceeding.
 - When I say "checkpoint" — run /checkpoint
+- If we made decisions, found bugs, discussed scope changes, or planned future work and I haven't said "checkpoint" — remind me before the session ends
 
 ## Hard constraints
 - [Things that must be true. Examples:]
@@ -72,9 +74,10 @@ For new projects, use the placeholder text as-is.
 - [Empty is fine early on]
 ```
 
-2. **CLAUDE-project.md** — The vision. What this project is and where it's going.
+2. **`.scaffold/project.md`** — The vision. What this project is and where it's going.
 
 ```markdown
+<!-- Last updated: [today's date] -->
 # Project Vision
 
 ## What is this?
@@ -96,9 +99,10 @@ this feel real? e.g. "I can add stops to a map and it saves them."]
 e.g. "Not a social network. No sharing features yet. Single user only for now."]
 ```
 
-3. **CLAUDE-state.md** — Health and context. Changes every session.
+3. **`.scaffold/state.md`** — Health and context. Changes every session.
 
 ```markdown
+<!-- Last updated: [today's date] -->
 # Current State
 
 ## What's not working
@@ -129,9 +133,10 @@ e.g. "Not a social network. No sharing features yet. Single user only for now."]
 - [e.g. "No idea yet — ask me what I'm thinking about"]
 ```
 
-4. **CLAUDE-roadmap.md** — The plan. All progress lives here.
+4. **`.scaffold/roadmap.md`** — The plan. All progress lives here.
 
 ```markdown
+<!-- Last updated: [today's date] -->
 # Roadmap
 
 ## Current phase
@@ -159,11 +164,12 @@ or "Getting the MVP functional" or "Just exploring"]
 - [e.g. "Deploy to production"]
 ```
 
-5. **CLAUDE-decisions.md** — The record. Why things are the way they are.
+5. **`.scaffold/decisions.md`** — The record. Why things are the way they are.
 
 Organize decisions under category headers. Each entry uses this format:
 
 ```markdown
+<!-- Last updated: [today's date] -->
 # Decisions
 
 ## Tech
@@ -207,5 +213,27 @@ separately. Claude has strong familiarity with the SDK.
    not, tell me — I need to add them manually.
 
 **After creating everything:**
-- If git is initialized: `git add CLAUDE-*.md .claude/ && git commit -m "init: essentials scaffold"`
+- If git is initialized: `git add CLAUDE.md .scaffold/ && git commit -m "init: essentials scaffold"`
 - Give me a summary of what was set up, what was archived (if anything), and what I should fill in or verify.
+
+**Enhanced mode (`/setup --deep`):**
+
+If "--deep" appears in the arguments, do everything above AND launch an Explore
+subagent (thoroughness: "very thorough") after creating scaffold files to:
+
+1. Analyze code structure — identify top-level modules, key entry points,
+   and how the codebase is organized
+2. Map architectural patterns — routing approach, state management, data flow,
+   API layer structure
+3. Surface conventions — naming patterns, file organization rules, import style,
+   test location conventions
+4. Identify undocumented dependencies — things that aren't in manifests but
+   matter (build tools, CI assumptions, environment requirements)
+
+Feed subagent findings back into the scaffold files:
+- Architectural patterns → .scaffold/decisions.md (as discovered conventions, not decisions)
+- Module structure → .scaffold/project.md "What is this?" section
+- Known issues or TODOs found in code → .scaffold/state.md
+
+If the subagent fails or times out, the standard setup is already complete.
+Tell the user what the deep scan found and what was added to which files.

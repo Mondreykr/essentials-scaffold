@@ -1,5 +1,6 @@
 **Precondition:** Verify that all five scaffold files exist: CLAUDE.md,
-CLAUDE-project.md, CLAUDE-state.md, CLAUDE-roadmap.md, CLAUDE-decisions.md.
+`.scaffold/project.md`, `.scaffold/state.md`,
+`.scaffold/roadmap.md`, `.scaffold/decisions.md`.
 If any are missing, stop and report which files are absent.
 
 The project is graduating from the essentials scaffold to a more capable framework.
@@ -7,30 +8,30 @@ Your job is to consolidate everything into a clean handoff package and remove th
 scaffold so it doesn't conflict.
 
 **1. Read all scaffold files:**
-- CLAUDE-project.md
-- CLAUDE-state.md
-- CLAUDE-roadmap.md
-- CLAUDE-decisions.md
+- `.scaffold/project.md`
+- `.scaffold/state.md`
+- `.scaffold/roadmap.md`
+- `.scaffold/decisions.md`
 - CLAUDE.md
 
 **2. Create the snapshot:**
-Create `.claude/scaffold/snapshot/PROJECT-CONTEXT.md` — a single structured file that
+Create `.scaffold/snapshot/PROJECT-CONTEXT.md` — a single structured file that
 consolidates everything worth carrying forward:
 
 ```
 # Project Context (Scaffold Graduation Snapshot)
 
 ## Vision
-[From CLAUDE-project.md — what this is, who it's for, success criteria, scope]
+[From .scaffold/project.md — what this is, who it's for, success criteria, scope]
 
 ## Current State
-[From CLAUDE-state.md — what's broken, open questions, things working well]
+[From .scaffold/state.md — what's broken, open questions, things working well]
 
 ## Roadmap
-[From CLAUDE-roadmap.md — current phase, done, in progress, up next, later]
+[From .scaffold/roadmap.md — current phase, done, in progress, up next, later]
 
 ## Decisions
-[From CLAUDE-decisions.md — all active decisions with their context and reasoning]
+[From .scaffold/decisions.md — all active decisions with their context and reasoning]
 
 ## Tech Stack
 [From CLAUDE.md]
@@ -43,22 +44,23 @@ consolidates everything worth carrying forward:
 ```
 
 **3. Archive the scaffold:**
-- Move CLAUDE-project.md, CLAUDE-state.md, CLAUDE-roadmap.md, CLAUDE-decisions.md
-  to `.claude/scaffold/archive/`
+- Move `.scaffold/project.md`, `.scaffold/state.md`,
+  `.scaffold/roadmap.md`, `.scaffold/decisions.md`
+  to `.scaffold/archive/`
 - Move all scaffold commands (setup.md, status.md, checkpoint.md, graduate.md)
-  from `.claude/commands/` to `.claude/scaffold/archive/commands/`
+  from `.claude/commands/` to `.scaffold/archive/commands/`
 
 **4. Verify the archive:**
 Before modifying CLAUDE.md, confirm all expected files landed in their archive
 locations:
-- `.claude/scaffold/archive/CLAUDE-project.md`
-- `.claude/scaffold/archive/CLAUDE-state.md`
-- `.claude/scaffold/archive/CLAUDE-roadmap.md`
-- `.claude/scaffold/archive/CLAUDE-decisions.md`
-- `.claude/scaffold/archive/commands/setup.md`
-- `.claude/scaffold/archive/commands/status.md`
-- `.claude/scaffold/archive/commands/checkpoint.md`
-- `.claude/scaffold/archive/commands/graduate.md`
+- `.scaffold/archive/project.md`
+- `.scaffold/archive/state.md`
+- `.scaffold/archive/roadmap.md`
+- `.scaffold/archive/decisions.md`
+- `.scaffold/archive/commands/setup.md`
+- `.scaffold/archive/commands/status.md`
+- `.scaffold/archive/commands/checkpoint.md`
+- `.scaffold/archive/commands/graduate.md`
 
 If anything is missing, stop and report what failed to move.
 
@@ -66,7 +68,7 @@ If anything is missing, stop and report what failed to move.
 - Remove all scaffold-specific rules (the /status and /checkpoint references,
   the file-reading rules)
 - Keep "Who I am", "Hard constraints", and "Tech stack"
-- Add a pointer: "Previous scaffold context is at `.claude/scaffold/snapshot/PROJECT-CONTEXT.md`"
+- Add a pointer: "Previous scaffold context is at `.scaffold/snapshot/PROJECT-CONTEXT.md`"
 
 **6. Commit:**
 `git add -A && git commit -m "graduate: essentials scaffold -> [new framework]"`
@@ -74,5 +76,26 @@ If anything is missing, stop and report what failed to move.
 **7. Tell me:**
 - What was consolidated into the snapshot
 - What was archived
-- "Point your new framework at `.claude/scaffold/snapshot/PROJECT-CONTEXT.md` for
+- "Point your new framework at `.scaffold/snapshot/PROJECT-CONTEXT.md` for
   full project context."
+
+**Enhanced mode (`/graduate --thorough`):**
+
+If "--thorough" appears in the arguments, before running the standard graduation,
+launch an Explore subagent (thoroughness: "very thorough") to find all
+references to scaffold files across the codebase:
+
+1. Search for string references to scaffold file paths (`.scaffold/state.md`,
+   `.scaffold/roadmap.md`, etc.) in all project files
+2. Check README.md and any documentation for mentions of scaffold files
+3. Check CI/CD config files for scaffold-related steps
+4. Check any scripts that reference scaffold paths
+
+Report findings: "Found N references to scaffold files that will break after
+graduation:" followed by file:line for each.
+
+Wait for the user to resolve flagged references before proceeding with
+standard graduation. If there are no references, proceed immediately.
+
+If the subagent fails or times out, warn the user and ask whether to
+proceed with standard graduation anyway.

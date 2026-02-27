@@ -19,35 +19,36 @@ That's it. The setup command creates your context files and walks you through fi
 | File | Purpose |
 |------|---------|
 | `CLAUDE.md` | Hub — who you are, rules, constraints, tech stack (auto-read by Claude) |
-| `CLAUDE-project.md` | Vision — what you're building, for whom, success criteria |
-| `CLAUDE-state.md` | Health — bugs, open questions, parking lot, next session pickup |
-| `CLAUDE-roadmap.md` | Progress — current phase, done, in progress, up next, later |
-| `CLAUDE-decisions.md` | Record — why things are the way they are, with dates and reasoning |
+| `.scaffold/project.md` | Vision — what you're building, for whom, success criteria |
+| `.scaffold/state.md` | Health — bugs, open questions, parking lot, next session pickup |
+| `.scaffold/roadmap.md` | Progress — current phase, done, in progress, up next, later |
+| `.scaffold/decisions.md` | Record — why things are the way they are, with dates and reasoning |
 
 ## Directory layout
 
 ```
-CLAUDE.md                              <- root, auto-read by Claude Code
-CLAUDE-project.md                      <- root, visible
-CLAUDE-state.md
-CLAUDE-roadmap.md
-CLAUDE-decisions.md
+CLAUDE.md                    <- root, auto-read by Claude Code
+.scaffold/
+  project.md                 <- vision and scope
+  state.md                   <- health, bugs, open questions, parking lot
+  roadmap.md                 <- progress tracking
+  decisions.md               <- decision record with reasoning
+  archive/                   <- brownfield collision storage + graduation archive
+    commands/                <- scaffold commands after graduation
+  snapshot/                  <- graduation output (created by /graduate)
+    PROJECT-CONTEXT.md
 .claude/
   commands/
     setup.md
     status.md
     checkpoint.md
     graduate.md
-  scaffold/
-    archive/                           <- brownfield collision storage (created by /setup if needed)
-      commands/                        <- scaffold commands after graduation
-    snapshot/                          <- graduation output (created by /graduate)
-      PROJECT-CONTEXT.md
 ```
 
+- `.scaffold/` = project documentation, lives at root alongside your code
 - `archive/` = old stuff preserved but inert
 - `snapshot/` = useful context for the next framework
-- Separate locations prevent confusion about which files matter
+- `.claude/commands/` = slash commands (Claude Code internals)
 
 ## Daily workflow
 
@@ -59,18 +60,28 @@ Resume:   /status (new session after /clear or new conversation)
 Graduate: /graduate (when moving to a heavier framework)
 ```
 
-`/status` reads your files and gives a briefing. `/checkpoint` reviews the session and updates every file that changed. That's the whole loop.
+`/status` reads your files and gives a briefing. `/checkpoint` reviews the session, shows you what changed, and commits after your approval. That's the whole loop.
+
+## Enhanced modes
+
+Each command has an optional enhanced mode. The base commands work without arguments — these just add deeper analysis when you want it.
+
+| Command | What it adds |
+|---------|-------------|
+| `/setup --deep` | Launches a codebase analysis after standard setup — maps architecture, surfaces conventions, and feeds findings into scaffold files. Best for brownfield projects. |
+| `/checkpoint --audit` | After the standard checkpoint commits, verifies scaffold claims against actual code — checks that done items exist, tech stack matches manifests, decisions match reality. Reports discrepancies without modifying files. |
+| `/graduate --thorough` | Before graduating, scans the entire codebase for references to scaffold file paths that would break after archiving. Reports findings and waits for you to resolve them. |
 
 ## Recovery
 
 **Checkpoint wrote bad state:**
-`git diff CLAUDE-*.md` to see what changed. `git checkout -- <file>` to revert any file to its last commit.
+`git diff .scaffold/` to see what changed. `git checkout -- .scaffold/<file>` to revert any file to its last commit.
 
 **Files contradict each other:**
 Run `/status` — the health check flags contradictions. Tell Claude which file is correct and it will fix the other.
 
 **Everything feels stale:**
-Delete `CLAUDE-state.md` and `CLAUDE-roadmap.md`, then run `/checkpoint` to regenerate them from the codebase and conversation.
+Delete `.scaffold/state.md` and `.scaffold/roadmap.md`, then run `/checkpoint` to regenerate them from the codebase and conversation.
 
 **Context rot mid-session:**
 `/clear` then `/status` to start fresh from files.
