@@ -19,8 +19,8 @@ markdown files that maintain context across sessions.
     `CLAUDE-decisions.md` in project root) — archive them to `.scaffold/archive/`
     before creating fresh scaffold files. Log what was archived and why.
   - **Everything else** (`README.md`, `NOTES.md`, `CONTEXT.md`, `TODO.md`,
-    `ARCHITECTURE.md`, etc.) is a **context source** — read for context but leave
-    in place.
+    `ARCHITECTURE.md`, etc.) is a **context source** — read for context. Most
+    will be incorporated into scaffold files and archived (see Scope analysis).
 
 **Scope analysis (existing projects only — skip for empty/new projects):**
 
@@ -39,9 +39,14 @@ If this project has existing code, do these three things before creating files:
    - Which scaffold file its content maps to (e.g., `TODO.md` → parking lot in
      `.scaffold/state.md`, `ARCHITECTURE.md` → `.scaffold/decisions.md`)
    - A one-line summary of what it contains
+   - Whether it will be archived or left in place
 
-3. **Ask before incorporating:** Present the scan results and wait for confirmation
-   before pulling any discovered content into scaffold files. Don't silently merge.
+3. **Incorporate and archive by default:** The scaffold supersedes these files:
+   - Pull content into the appropriate scaffold file during creation
+   - Move originals to `.scaffold/archive/` (e.g. `TODO.md` → `.scaffold/archive/TODO.md`)
+   - Log what was incorporated, where it went, and that the original was archived
+   - **Exception:** `README.md` stays in place (serves GitHub/npm/external purposes) — read for context only
+   - Present scan results and tell the user what will happen. Don't wait for file-by-file confirmation. If the user objects to a specific file being archived, respect that.
 
 **Create the file structure:**
 
@@ -218,8 +223,8 @@ separately. Claude has strong familiarity with the SDK.
    missing, tell me — they should have been installed together.
 
 **After creating everything:**
-- If git is initialized: `git add CLAUDE.md .scaffold/ && git commit -m "init: essentials scaffold"`
-- Give me a summary of what was set up, what was archived (if anything), and what I should fill in or verify.
+- If git is initialized: stage new files and any deletions from archiving, then commit: `git add CLAUDE.md .scaffold/ && git add -u && git commit -m "init: essentials scaffold"`
+- Give me a summary of what was set up, what content was incorporated (and from where), what was archived, and what I should fill in or verify.
 
 **Enhanced mode (`/scaffold:setup --deep`):**
 

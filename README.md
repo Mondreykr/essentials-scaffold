@@ -23,6 +23,16 @@ Then:
 
 That's it. The setup command creates your context files and walks you through filling them in.
 
+## Updating
+
+To update the scaffold commands in an existing project:
+
+```bash
+npx degit Mondreykr/essentials-scaffold/scaffold .claude/commands/scaffold --force
+```
+
+This is safe — it only replaces the command files in `.claude/commands/scaffold/`. Your project data in `.scaffold/` and `CLAUDE.md` is never touched.
+
 ## What it creates
 
 | File | Purpose |
