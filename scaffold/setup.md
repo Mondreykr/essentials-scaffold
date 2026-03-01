@@ -65,7 +65,9 @@ For new projects, use the placeholder text as-is.
 - Communication: [e.g. "Explain the why, skip the how unless I ask"]
 
 ## Rules
-- Run /scaffold:status at the start of every session. If /scaffold:status wasn't run, read .scaffold/project.md, .scaffold/state.md, and .scaffold/roadmap.md before doing any work.
+- Run /scaffold:status at the start of every session. For substantial work, discuss direction with the user, then run /scaffold:plan in plan mode.
+- If /scaffold:status wasn't run, read .scaffold/project.md, .scaffold/state.md, and .scaffold/roadmap.md before doing any work.
+- Before checkpoint: verify claims with evidence (run tests, check output). Don't claim "done" without verification.
 - Consult .scaffold/decisions.md when making or revisiting technology/architecture/design choices
 - Ask before making major architectural or structural changes
 - If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly before proceeding.
@@ -219,8 +221,29 @@ separately. Claude has strong familiarity with the SDK.
 ```
 
 6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
-   and `graduate.md` exist as sibling files in this same folder. If any are
-   missing, tell me — they should have been installed together.
+   `plan.md`, and `graduate.md` exist as sibling files in this same folder. If
+   any are missing, tell me — they should have been installed together.
+
+7. **Create or update `.claude/hooks.json`** — SessionStart hook for automatic
+   scaffold context loading.
+
+   If `.claude/hooks.json` does not exist, create it:
+   ```json
+   {
+     "hooks": {
+       "SessionStart": [
+         {
+           "type": "command",
+           "command": "test -f .scaffold/state.md && echo '{\"additionalContext\": \"[SCAFFOLD] This project uses essentials-scaffold for context persistence. Scaffold files are at .scaffold/. Run /scaffold:status to orient before starting work. Do not skip this step even if the task seems simple.\"}' || true"
+         }
+       ]
+     }
+   }
+   ```
+
+   If `.claude/hooks.json` already exists, add the SessionStart hook entry
+   to the existing hooks without overwriting other hooks. If a SessionStart
+   hook already exists, append to the array.
 
 **After creating everything:**
 - If git is initialized: stage new files and any deletions from archiving, then commit: `git add CLAUDE.md .scaffold/ && git add -u && git commit -m "init: essentials scaffold"`

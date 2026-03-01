@@ -7,6 +7,46 @@ argument-hint: [--audit]
 `.scaffold/roadmap.md` exist. If any are missing, stop and say:
 "Scaffold files missing — run /scaffold:setup first."
 
+**Pre-persist verification:**
+
+Before updating scaffold files, check that claims about this session's work
+are accurate:
+
+1. **If code was changed and test/lint/build commands exist** (check package.json
+   scripts, Makefile, pytest, cargo test, go test, etc.):
+   - Run them. If they fail, report results to the user.
+   - Do NOT record work as "done" in roadmap if tests are failing.
+   - Let the user decide: fix now, or checkpoint with issues noted in state.md.
+
+2. **Evidence-based updates:**
+   - Moving an item to roadmap "Done" requires evidence it works (test output,
+     observed behavior, or user confirmation).
+   - Removing a bug from "What's not working" requires evidence the fix works.
+   - "It should work" or "I didn't change anything that would break it" is NOT
+     evidence. Run verification if possible.
+
+3. **If verification is not possible** (no tests, can't run the app, etc.):
+   - Note this honestly in state.md: "Completed X — not yet verified (no tests)"
+   - Do NOT claim verified completion.
+
+If verification reveals issues, present them before proceeding with the
+checkpoint. Let the user decide whether to fix now or note and move on.
+
+**Check for plan file:**
+
+Look for a recent plan file (in `~/.claude/plans/`). If one exists for this
+session, read it for additional routing sources:
+
+- **Deferred Items section** → route each item to roadmap.md "Up next" or
+  "Later" as specified in the plan file
+- **Decisions for decisions.md section** → route each decision to decisions.md
+  with the context captured during planning
+- **Investigation "Output to" fields** → route findings to the scaffold files
+  specified in each investigation task
+
+These items were captured during planning (Phase A) and survive context clear
+via the plan file. The conversation (Phase B) may not contain them.
+
 Review everything we did and discussed this session. Then update the scaffold files.
 
 **Capture routing — map conversation content to the right file:**
@@ -18,6 +58,9 @@ Review everything we did and discussed this session. Then update the scaffold fi
 - Feature specs discussed but not built → .scaffold/roadmap.md (as detail under the relevant "Up next" or "Later" item)
 - Preferences or positive reactions → .scaffold/state.md "What's working well"
 - Approaches explicitly rejected → .scaffold/decisions.md (as context on the decision that won)
+- Deferred work items from plan file → .scaffold/roadmap.md "Up next" or "Later"
+- Planning-phase decisions from plan file → .scaffold/decisions.md
+- Investigation findings with "Output to" field → route to specified scaffold file
 
 **1. `.scaffold/state.md`** (always update)
 - Update "What's not working" — add new issues, remove resolved ones
