@@ -18,6 +18,7 @@ scaffold so it doesn't conflict.
 - `.scaffold/roadmap.md`
 - `.scaffold/decisions.md`
 - CLAUDE.md
+- Any plan files in `.scaffold/plans/` and scratch files in `.scaffold/scratch/`
 
 **2. Create the snapshot:**
 Create `.scaffold/snapshot/PROJECT-CONTEXT.md` — a single structured file that
@@ -52,7 +53,8 @@ consolidates everything worth carrying forward:
 - Move `.scaffold/project.md`, `.scaffold/state.md`,
   `.scaffold/roadmap.md`, `.scaffold/decisions.md`
   to `.scaffold/archive/`
-- Move all scaffold commands (setup.md, status.md, checkpoint.md, graduate.md)
+- Move `.scaffold/plans/` and `.scaffold/scratch/` to `.scaffold/archive/` (if they exist)
+- Move all scaffold commands (setup.md, status.md, plan.md, checkpoint.md, graduate.md)
   from `.claude/commands/scaffold/` to `.scaffold/archive/scaffold/`
 
 **4. Verify the archive:**
@@ -64,6 +66,7 @@ locations:
 - `.scaffold/archive/decisions.md`
 - `.scaffold/archive/scaffold/setup.md`
 - `.scaffold/archive/scaffold/status.md`
+- `.scaffold/archive/scaffold/plan.md`
 - `.scaffold/archive/scaffold/checkpoint.md`
 - `.scaffold/archive/scaffold/graduate.md`
 
@@ -91,7 +94,7 @@ launch an Explore subagent (thoroughness: "very thorough") to find all
 references to scaffold files across the codebase:
 
 1. Search for string references to scaffold file paths (`.scaffold/state.md`,
-   `.scaffold/roadmap.md`, etc.) in all project files
+   `.scaffold/roadmap.md`, `.scaffold/plans/`, `.scaffold/scratch/`, etc.) in all project files
 2. Check README.md and any documentation for mentions of scaffold files
 3. Check CI/CD config files for scaffold-related steps
 4. Check any scripts that reference scaffold paths

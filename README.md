@@ -52,6 +52,10 @@ CLAUDE.md                    <- root, auto-read by Claude Code
   state.md                   <- health, bugs, open questions, parking lot
   roadmap.md                 <- progress tracking
   decisions.md               <- decision record with reasoning
+  plans/                     <- session plan files (created by /scaffold:plan)
+    session-YYYY-MM-DD-slug.md
+  scratch/                   <- investigation findings (created during execution)
+    YYYYMMDD-#-topic.md
   archive/                   <- brownfield collision storage + graduation archive
     scaffold/                <- scaffold commands after graduation
   snapshot/                  <- graduation output (created by /scaffold:graduate)
@@ -106,7 +110,7 @@ Each command has an optional enhanced mode. The base commands work without argum
 Run `/scaffold:status` — the health check flags contradictions. Tell Claude which file is correct and it will fix the other.
 
 **Everything feels stale:**
-Delete `.scaffold/state.md` and `.scaffold/roadmap.md`, then run `/scaffold:checkpoint` to regenerate them from the codebase and conversation.
+Clear the contents of `.scaffold/state.md` and `.scaffold/roadmap.md` (keep the files with empty sections), then run `/scaffold:checkpoint` to regenerate them from the codebase and conversation.
 
 **Context rot mid-session:**
 `/clear` then `/scaffold:status` to start fresh from files.
@@ -131,3 +135,15 @@ For execution discipline (testing, code review, structured implementation), add 
 dedicated tool for that.
 
 This scaffold is the foundation layer. It plays nicely underneath any tool you add later.
+
+## Known limitations
+
+**Claude compliance.** The persistence chain depends on Claude following the SessionStart hook and CLAUDE.md rules. Nothing forces `/scaffold:status` to run — the system reinforces this via hook + CLAUDE.md auto-read, but can't enforce it.
+
+**No re-setup.** Setup checks if all five files exist and stops. To re-detect tech stack or pick up new context files, delete the scaffold files and re-run setup, or update them manually.
+
+**Solo-only.** No multi-user conflict detection. Git handles merge conflicts at the file level.
+
+**No session history.** Git commits serve as the session record. There's no built-in session log beyond what checkpoint commits capture.
+
+**Graduation limbo.** After graduating, if you don't immediately set up a replacement framework, you'll have a CLAUDE.md pointer to the snapshot but no active context system. The snapshot is readable but inert.

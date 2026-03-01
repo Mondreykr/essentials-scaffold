@@ -2,6 +2,10 @@
 description: Session briefing — read scaffold files and orient on current state
 ---
 
+**Precondition:** Verify that CLAUDE.md, `.scaffold/project.md`,
+`.scaffold/state.md`, and `.scaffold/roadmap.md` exist. If any are missing,
+stop and say: "Scaffold files missing — run /scaffold:setup first."
+
 Read the following files in order:
 1. CLAUDE.md
 2. .scaffold/project.md

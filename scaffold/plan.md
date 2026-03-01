@@ -2,8 +2,10 @@
 description: Session planning — triage, consult, scope, write plan
 ---
 
-**Precondition:** Verify that `.scaffold/state.md` and `.scaffold/roadmap.md`
-exist. If missing: "Scaffold files missing — run /scaffold:setup first."
+**Precondition:** Verify that all five scaffold files exist: CLAUDE.md,
+`.scaffold/project.md`, `.scaffold/state.md`, `.scaffold/roadmap.md`,
+`.scaffold/decisions.md`. If any are missing, stop and say:
+"Scaffold files missing — run /scaffold:setup first."
 
 ## Phase 1: Triage
 
@@ -57,9 +59,16 @@ the scaffold files suggest. If they conflict, follow the user.
 
 For each task:
 - **What:** one sentence describing the work
+- **Type:** build | validate | investigate | design | debug
+- **Execute:** agent | direct
 - **Why:** how it connects to the user's stated goal
+- **Key files:** files to read or modify (helps agent tasks start with the right context)
 - **Done when:** specific, verifiable condition
 - **Verify by:** concrete action (command to run, behavior to check, output to see)
+
+Execution mode routing:
+- build / validate → `agent` (dispatch to general-purpose Agent subagent with fresh context)
+- investigate / design / debug → `direct` (execute directly, user in loop)
 
 **Task sizing and scoping — what's "this session" vs. "later":**
 
@@ -84,9 +93,12 @@ If a task can't be stated in 1-2 sentences, it's too big — break it down
 or defer parts.
 
 **Route based on work type:**
-- **Investigate:** tasks are questions to answer. Each task includes:
+- **Investigate:** tasks are questions to answer. Cap at 2-3 focused questions
+  per session — investigation burns context fast. Each task includes:
   - **What:** the question to answer
   - **Done when:** question answered or enough known to decide next step
+  - **Scratch file:** `.scaffold/scratch/YYYYMMDD-#-topic.md` — write findings
+    here as you work so they persist outside context
   - **Output to:** which scaffold file(s) findings route to at checkpoint:
     - Findings that inform a decision → decisions.md
     - Findings that change scope → project.md
@@ -104,26 +116,53 @@ or defer parts.
 
 **If in plan mode (recommended for substantial work):**
 
-Write the plan to the plan file. The plan file MUST be self-contained — after
-context clear, it will be the ONLY thing guiding execution. Include:
+Write the plan to the plan file. Also write a copy to
+`.scaffold/plans/session-YYYY-MM-DD-[brief-slug].md` (create the directory if
+needed). The `.scaffold/plans/` copy is what checkpoint reads — it's
+project-local and reliable.
 
-1. **Session goal** — what we're doing and why (from the discussion, not just docs)
-2. **Context pointers** — which .scaffold/ files to read for project context
-3. **Key decisions from discussion** — anything the user said that affects execution.
+The plan file MUST be self-contained — after context clear, it will be the
+ONLY thing guiding execution. Include:
+
+1. **Project** — identifier for checkpoint matching:
+   ```
+   **Root:** [absolute path to project root]
+   **Name:** [from .scaffold/project.md]
+   ```
+2. **Session goal** — what we're doing and why (from the discussion, not just docs)
+3. **Context pointers** — which .scaffold/ files to read for project context
+4. **Key decisions from discussion** — anything the user said that affects execution.
    Especially: concerns raised, constraints stated, direction chosen over alternatives.
-4. **Tasks** — full task list with what/why/done-when/verify-by
-   For investigation tasks: include "Output to" field specifying which scaffold
-   file(s) findings should route to at checkpoint.
-5. **Deferred items** — work identified but not scoped to this session, with
-   where it should go in the roadmap (Up next / Later). Omit if nothing deferred.
-6. **Decisions for decisions.md** — decisions made during the planning discussion
+5. **Tasks** — full task list with what/type/execute/why/key-files/done-when/verify-by
+   For investigation tasks: include "Output to" and "Scratch file" fields.
+6. **Deferred items (for awareness)** — work identified but not scoped to this
+   session, with where it should go in the roadmap (Up next / Later). Listed
+   visibly so the user and Claude see them during execution. If any turn out
+   to be blocking, stop and discuss before pulling them in. Omit if nothing deferred.
+7. **Decisions for decisions.md** — decisions made during the planning discussion
    that should be recorded at checkpoint. Omit if no decisions made.
-7. **Execution notes:**
+8. **Execution notes:**
    - Use TodoWrite to track progress
    - Verify each task before marking complete
    - If verification fails: present findings, ask user, don't auto-fix
    - If task is bigger than expected: stop, re-scope, ask user
-8. **Checkpoint reminder** — "When complete, suggest /scaffold:checkpoint.
+   - If uncertain about approach or encountering unexpected complexity: stop,
+     present what you found, ask the user. Don't guess.
+   - Prefer completing and verifying each task before starting the next
+   - For agent tasks: launch a general-purpose Agent with the task description,
+     key files, project context pointers, and verification criteria. Wait for
+     completion. Review result. If verification passed, mark complete and
+     present result. If failed, present to user and ask how to proceed.
+   - For direct tasks: execute directly. Verify each step. If uncertain, stop
+     and ask.
+   - Between tasks: if the conversation is getting long (many tool calls,
+     large code blocks), suggest checkpointing completed tasks and clearing
+     context before continuing.
+   - For investigation tasks: write findings to the designated scratch file as
+     you work. This persists findings outside context.
+   - If the user changes direction: suggest checkpoint completed work →
+     /clear → /scaffold:plan for the new direction.
+9. **Checkpoint reminder** — "When complete, suggest /scaffold:checkpoint.
    Checkpoint should read this plan file for deferred items and decisions."
 
 Then call ExitPlanMode. The user will review and can edit the plan file
@@ -138,8 +177,16 @@ Wait for the user to say "go", "approved", "looks good", etc.
 After approval, proceed to execute:
 - Use TodoWrite to track tasks
 - For each task: implement → verify → mark complete
+- For agent tasks: launch a general-purpose Agent with the task description,
+  key files, and verification criteria. Review result before proceeding.
+- For direct tasks: execute directly, verify each step
 - If verification fails: present findings, ask user
 - If task is bigger than expected: stop, re-scope, ask user
+- If uncertain about approach or encountering unexpected complexity: stop,
+  present what you found, ask the user. Don't guess.
+- Between tasks: if the conversation is getting long, suggest checkpointing
+  completed work and clearing context before continuing
+- If the user changes direction: suggest checkpoint → /clear → /scaffold:plan
 - When all tasks done: suggest /scaffold:checkpoint (don't auto-invoke)
 
 ## Edge Cases
@@ -149,7 +196,9 @@ After approval, proceed to execute:
 - **User doesn't know what to work on:** Present options from roadmap and state,
   help them choose.
 - **Files are stale:** Flag in Phase 2, suggest /scaffold:checkpoint --audit first.
-- **Mid-session pivot:** Stop current task. Ask if user wants to checkpoint progress
-  before changing course.
+- **Mid-session pivot:** Stop current task. Suggest: checkpoint completed work →
+  /clear → /scaffold:plan for the new direction.
 - **Task bigger than expected:** Stop. Present what you found. Propose re-scoping.
 - **Verification fails:** Present what failed. Ask user. Don't auto-fix.
+- **Uncertainty:** If confused, finding multiple valid approaches, or hitting
+  unexpected complexity — stop, present what you found, ask the user. Don't guess.

@@ -15,6 +15,16 @@ markdown files that maintain context across sessions.
     `.scaffold/roadmap.md`, `.scaffold/decisions.md`, and `CLAUDE.md` in root)
     are **collisions** — if all five exist AND look like scaffold files, tell me and stop —
     this project is already set up.
+  - **Existing CLAUDE.md without scaffold** — if `CLAUDE.md` exists in root but
+    NO `.scaffold/` files exist, this is an existing Claude Code configuration:
+    - Read its contents — preserve all existing rules, constraints, and tech stack
+    - Archive the original to `.scaffold/archive/CLAUDE.md.pre-scaffold`
+    - When creating the scaffold CLAUDE.md, merge the existing content:
+      - Existing rules → add to "Rules" section (alongside scaffold rules)
+      - Existing tech stack → populate "Tech stack" section
+      - Existing constraints → populate "Hard constraints" section
+      - Any other sections → preserve as-is below scaffold sections
+    - Tell the user what was preserved and where it went
   - **Legacy scaffold files** (`CLAUDE-project.md`, `CLAUDE-state.md`, `CLAUDE-roadmap.md`,
     `CLAUDE-decisions.md` in project root) — archive them to `.scaffold/archive/`
     before creating fresh scaffold files. Log what was archived and why.
@@ -72,6 +82,7 @@ For new projects, use the placeholder text as-is.
 - Ask before making major architectural or structural changes
 - If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly before proceeding.
 - When I say "checkpoint" — run /scaffold:checkpoint
+- If a session is getting long, suggest /scaffold:checkpoint for completed work before continuing
 - If we made decisions, found bugs, discussed scope changes, or planned future work and I haven't said "checkpoint" — remind me before the session ends
 
 ## Hard constraints

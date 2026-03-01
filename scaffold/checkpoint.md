@@ -34,8 +34,9 @@ checkpoint. Let the user decide whether to fix now or note and move on.
 
 **Check for plan file:**
 
-Look for a recent plan file (in `~/.claude/plans/`). If one exists for this
-session, read it for additional routing sources:
+Look for a plan file in `.scaffold/plans/`. Match by project root path in the
+plan file's Project section, then take the most recent by date. If one exists
+for this project, read it for additional routing sources:
 
 - **Deferred Items section** → route each item to roadmap.md "Up next" or
   "Later" as specified in the plan file
@@ -46,6 +47,12 @@ session, read it for additional routing sources:
 
 These items were captured during planning (Phase A) and survive context clear
 via the plan file. The conversation (Phase B) may not contain them.
+
+**Check for scratch files:**
+
+If `.scaffold/scratch/` exists, read any scratch files from this session. Route
+their findings to the scaffold files specified in the plan file's "Output to"
+fields for the corresponding investigation tasks.
 
 Review everything we did and discussed this session. Then update the scaffold files.
 
@@ -68,9 +75,8 @@ Review everything we did and discussed this session. Then update the scaffold fi
 - Update "What's working well" if I expressed a preference or positive reaction
 - Review "Parking lot" — prune items that meet any of these criteria:
   - **Done:** already built or merged
-  - **Irrelevant:** no longer fits the project's direction
-  - **Superseded:** replaced by a different approach or decision
-  - **Stale:** 5+ sessions with no interest or discussion
+  - **No longer relevant:** doesn't fit the project's current direction, has been
+    superseded by a different approach, or was decided against
   Add new ideas that came up. The goal is a short, relevant list.
 - Write 2-3 specific, actionable items in "Next session" based on where we left off
 - Update the `<!-- Last updated: YYYY-MM-DD -->` comment at the top to today's date
@@ -109,6 +115,7 @@ Review everything we did and discussed this session. Then update the scaffold fi
 
 **Review before committing:**
 - Re-read all updated files. Flag any contradictions between them.
+- Run `git diff .scaffold/` to see mechanical ground truth of what changed
 - For each file updated, show the specific changes:
   - What was added
   - What was removed
@@ -119,7 +126,7 @@ Review everything we did and discussed this session. Then update the scaffold fi
 - Only commit after explicit approval
 
 **After approval:**
-- If git is initialized: `git add CLAUDE.md .scaffold/*.md && git commit -m "checkpoint: [brief summary of session]"`
+- If git is initialized: `git add CLAUDE.md .scaffold/ && git commit -m "checkpoint: [brief summary of session]"`
   If the commit fails, show the error and stop. Don't retry automatically.
 - List any open questions or loose threads heading into next session.
 
