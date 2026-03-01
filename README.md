@@ -1,10 +1,10 @@
 # Essentials Scaffold
 
-Lightweight context persistence for Claude Code. Five files, four commands, nothing else.
+Lightweight context persistence for Claude Code. Five files, five commands, nothing else.
 
 ## What this is
 
-Claude Code loses context between sessions — every `/clear` or new conversation starts from zero. Essentials Scaffold gives it memory with five markdown files and four slash commands. No dependencies, no config, no build step. Works in any project with or without git.
+Claude Code loses context between sessions — every `/clear` or new conversation starts from zero. Essentials Scaffold gives it memory with five markdown files and five slash commands. No dependencies, no config, no build step. Works in any project with or without git.
 
 ## Quick install
 
@@ -52,15 +52,21 @@ CLAUDE.md                    <- root, auto-read by Claude Code
   state.md                   <- health, bugs, open questions, parking lot
   roadmap.md                 <- progress tracking
   decisions.md               <- decision record with reasoning
+  plans/                     <- session plan files (created by /scaffold:plan)
+    session-YYYY-MM-DD-slug.md
+  scratch/                   <- investigation findings (created during execution)
+    YYYYMMDD-#-topic.md
   archive/                   <- brownfield collision storage + graduation archive
     scaffold/                <- scaffold commands after graduation
   snapshot/                  <- graduation output (created by /scaffold:graduate)
     PROJECT-CONTEXT.md
 .claude/
+  hooks.json                 <- SessionStart hook (created by /scaffold:setup)
   commands/
     scaffold/
       setup.md
       status.md
+      plan.md                <- session planning with consultation gates
       checkpoint.md
       graduate.md
 ```
@@ -69,18 +75,20 @@ CLAUDE.md                    <- root, auto-read by Claude Code
 - `archive/` = old stuff preserved but inert
 - `snapshot/` = useful context for the next framework
 - `.claude/commands/scaffold/` = slash commands (Claude Code internals)
+- `.claude/hooks.json` = auto-injects scaffold reminder on session start
 
 ## Daily workflow
 
 ```
 Start:    /scaffold:status
-Work:     [build, iterate, discuss]
+Plan:     /scaffold:plan in plan mode (for substantial work — optional for quick tasks)
+Work:     Accept plan with "Clear context" → Claude executes from plan file
 Close:    /scaffold:checkpoint
 Resume:   /scaffold:status (new session after /clear or new conversation)
 Graduate: /scaffold:graduate (when moving to a heavier framework)
 ```
 
-`/scaffold:status` reads your files and gives a briefing. `/scaffold:checkpoint` reviews the session, shows you what changed, and commits after your approval. That's the whole loop.
+`/scaffold:status` reads your files and gives a briefing. `/scaffold:plan` triages the scaffold files, asks what you're thinking, then writes a self-contained plan that survives context clear. `/scaffold:checkpoint` verifies claims with evidence, reviews the session, and commits after your approval. For quick tasks, skip the plan step — just status, work, checkpoint.
 
 ## Enhanced modes
 
@@ -89,6 +97,7 @@ Each command has an optional enhanced mode. The base commands work without argum
 | Command | What it adds |
 |---------|-------------|
 | `/scaffold:setup --deep` | Launches a codebase analysis after standard setup — maps architecture, surfaces conventions, and feeds findings into scaffold files. Best for brownfield projects. |
+| `/scaffold:plan` (plan mode) | In plan mode, writes a self-contained plan file with tasks, deferred items, and decisions. Plan file survives context clear — Claude executes from it in a fresh session with full 200K context. |
 | `/scaffold:checkpoint --audit` | After the standard checkpoint commits, verifies scaffold claims against actual code — checks that done items exist, tech stack matches manifests, decisions match reality. Reports discrepancies without modifying files. |
 | `/scaffold:graduate --thorough` | Before graduating, scans the entire codebase for references to scaffold file paths that would break after archiving. Reports findings and waits for you to resolve them. |
 
@@ -101,14 +110,14 @@ Each command has an optional enhanced mode. The base commands work without argum
 Run `/scaffold:status` — the health check flags contradictions. Tell Claude which file is correct and it will fix the other.
 
 **Everything feels stale:**
-Delete `.scaffold/state.md` and `.scaffold/roadmap.md`, then run `/scaffold:checkpoint` to regenerate them from the codebase and conversation.
+Clear the contents of `.scaffold/state.md` and `.scaffold/roadmap.md` (keep the files with empty sections), then run `/scaffold:checkpoint` to regenerate them from the codebase and conversation.
 
 **Context rot mid-session:**
 `/clear` then `/scaffold:status` to start fresh from files.
 
 ## Graduation
 
-When the project outgrows the scaffold — you need structured planning, task breakdown, or execution discipline — run `/scaffold:graduate`. It consolidates all five files into a single snapshot, archives the scaffold commands, and gets out of the way. Point your new framework at the snapshot for full project context.
+When the project outgrows the scaffold — you need parallel task execution, automated verification agents, or wave-based orchestration — run `/scaffold:graduate`. It consolidates all five files into a single snapshot, archives the scaffold commands, and gets out of the way. The scaffold's state files map directly to GSD's `.planning/` directory structure. Point your new framework at the snapshot for full project context.
 
 ## What this doesn't do
 
@@ -116,11 +125,25 @@ When the project outgrows the scaffold — you need structured planning, task br
 degrades as the conversation grows. This scaffold solves between-session memory, not
 within-session degradation. Recovery: `/clear` then `/scaffold:status` to start fresh from files.
 
-**Automated planning or task breakdown.** This tracks what you're doing, not what you
-should do. For structured planning, graduate to a heavier framework.
+**Project management or execution methodology.** The plan command does lightweight
+session planning (what to work on and in what order), but doesn't enforce how you
+work. For parallel execution, automated verification agents, or dedicated debug
+agents, graduate to GSD (get-shit-done) or a similar framework.
 
 **Code quality enforcement.** This is a memory system, not a development methodology.
 For execution discipline (testing, code review, structured implementation), add a
 dedicated tool for that.
 
 This scaffold is the foundation layer. It plays nicely underneath any tool you add later.
+
+## Known limitations
+
+**Claude compliance.** The persistence chain depends on Claude following the SessionStart hook and CLAUDE.md rules. Nothing forces `/scaffold:status` to run — the system reinforces this via hook + CLAUDE.md auto-read, but can't enforce it.
+
+**No re-setup.** Setup checks if all five files exist and stops. To re-detect tech stack or pick up new context files, delete the scaffold files and re-run setup, or update them manually.
+
+**Solo-only.** No multi-user conflict detection. Git handles merge conflicts at the file level.
+
+**No session history.** Git commits serve as the session record. There's no built-in session log beyond what checkpoint commits capture.
+
+**Graduation limbo.** After graduating, if you don't immediately set up a replacement framework, you'll have a CLAUDE.md pointer to the snapshot but no active context system. The snapshot is readable but inert.
