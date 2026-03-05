@@ -1,22 +1,26 @@
 ---
-description: Session planning — triage, consult, scope, write plan
+description: Session planning -- triage, consult, scope, write plan
 ---
 
 **Precondition:** Verify that all five scaffold files exist: CLAUDE.md,
 `.scaffold/project.md`, `.scaffold/state.md`, `.scaffold/roadmap.md`,
 `.scaffold/decisions.md`. If any are missing, stop and say:
-"Scaffold files missing — run /scaffold:setup first."
+"Scaffold files missing -- run /scaffold:setup first."
 
 ---
 
 ## Phase 1: Triage (silent)
 
-Read in this order. Do not present findings yet — just absorb context:
-1. .scaffold/state.md — Status, Current Position, Next Action, Blockers, Open Questions
-2. .scaffold/roadmap.md — phase structure, `[IN PROGRESS]` phase, task states
-3. .scaffold/project.md — scope boundaries and success criteria
-4. .scaffold/decisions.md — recent active decisions only
-5. CLAUDE.md — constraints and tech stack
+Read in this order. Do not present findings yet -- just absorb context:
+1. .scaffold/state.md -- Status, Current Position, Next Action, Blockers, Open Questions
+2. .scaffold/roadmap.md -- phase structure, `[IN PROGRESS]` phase, task states
+3. .scaffold/project.md -- scope boundaries and success criteria
+4. .scaffold/decisions.md -- recent active decisions only
+5. CLAUDE.md -- constraints and tech stack
+
+Scan `.scaffold/investigations/` -- if the directory exists and contains files,
+note them. They may contain prior research relevant to the current planning
+session. Read any that look relevant based on filename.
 
 Assess (internally, for Phase 2):
 - Which phase is `[IN PROGRESS]`? What tasks are `[x]`, `>> `, or `[ ]`?
@@ -24,23 +28,25 @@ Assess (internally, for Phase 2):
 - Are any scaffold files stale (>7 days since last update)?
 - Is there a pending execute (state.md Next Action has a plan pointer)?
 - What kind of work is likely needed? (investigate / design / build / validate / debug)
+- Are there investigation files that inform the current phase?
 
 ---
 
-## Phase 2: Consult (interactive — WAIT for user)
+## Phase 2: Consult (interactive -- WAIT for user)
 
 Present a brief structured assessment:
 
 - **Where we are:** 1-2 sentences on current state (phase, recent completions)
 - **What the docs suggest:** what roadmap/state point to as next work
 - **Flags:** blockers, stale files, contradictions, open questions, pending execute
+- **Prior research:** if investigation files exist, note them briefly
 
 Then ask:
 
 > "That's what I see in the scaffold files. What are you thinking?
 > Do you have a direction in mind, concerns, or ideas?"
 
-**CRITICAL — Do NOT skip this step. Do NOT propose tasks yet.**
+**CRITICAL -- Do NOT skip this step. Do NOT propose tasks yet.**
 
 Even if the scaffold files make the next step obvious, the user may have:
 - Context that isn't captured in the files
@@ -49,16 +55,16 @@ Even if the scaffold files make the next step obvious, the user may have:
 - Questions they need answered before deciding
 
 Rationalizations that are NOT valid reasons to skip consultation:
-- "The roadmap clearly says X is next" — the user may have changed their mind
-- "This is a continuation of previous work" — the user may want to pivot
-- "The task is simple enough to just start" — the user wants to understand first
-- "I already know what to do from the files" — the files may be stale or incomplete
+- "The roadmap clearly says X is next" -- the user may have changed their mind
+- "This is a continuation of previous work" -- the user may want to pivot
+- "The task is simple enough to just start" -- the user wants to understand first
+- "I already know what to do from the files" -- the files may be stale or incomplete
 
 STOP. Wait for the user to respond before proceeding.
 
 ---
 
-## Phase 3: Propose Roadmap Changes (interactive — user approves)
+## Phase 3: Propose Roadmap Changes (interactive -- user approves)
 
 After the user shares their direction, determine what roadmap changes are needed.
 The user's stated direction overrides whatever the scaffold files suggest. If
@@ -66,10 +72,10 @@ they conflict, follow the user.
 
 **Determine the plan path:**
 
-1. **State-only session** — brainstorming, roadmap restructuring, research that
+1. **State-only session** -- brainstorming, roadmap restructuring, research that
    doesn't produce codebase changes. No execute step needed.
-2. **Execution session** — codebase changes needed. Will produce a plan doc
-   with tactical detail for `/scaffold:execute`.
+2. **Execution session** -- codebase changes needed. Will produce a plan doc
+   for `/scaffold:execute`.
 
 **Propose roadmap changes:**
 
@@ -83,7 +89,7 @@ Show proposed changes to roadmap.md:
 Format proposals clearly so the user can review:
 ```
 Proposed roadmap changes:
-- Phase 2 — [Title]: add "Task X", add "Task Y"
+- Phase 2 -- [Title]: add "Task X", add "Task Y"
 - Backlog: move "Item Z" from Phase 3
 - [etc.]
 ```
@@ -94,11 +100,11 @@ If the user modifies the proposal, incorporate their changes. Write the
 approved changes to `.scaffold/roadmap.md`. Update the `<!-- Last updated -->`
 date.
 
-**If state-only session:** Skip to Phase 6 (produce record document, update state).
+**If state-only session:** Skip to Phase 5 (produce plan document, update state).
 
 ---
 
-## Phase 4: Scope Execute (interactive — user approves, execution sessions only)
+## Phase 4: Scope Execute (interactive -- user approves, execution sessions only)
 
 From the roadmap tasks in the `[IN PROGRESS]` phase, propose which tasks are
 in scope for the next execute. This is the "what's the contract for execute?" step.
@@ -108,11 +114,11 @@ Present the candidate tasks and ask:
 > [list tasks with brief descriptions]
 > All of them, or a subset?"
 
-The user controls ambition level — they decide how many tasks to include.
+The user controls ambition level -- they decide how many tasks to include.
 Default to fewer tasks. 3 well-scoped tasks > 7 ambitious ones.
 
 **Task sizing:**
-- If a task can't be stated in 1-2 sentences, it's too big — break it down
+- If a task can't be stated in 1-2 sentences, it's too big -- break it down
 - If you're uncertain whether a task fits this execute, defer it
 - Investigation tasks: cap at 2-3 focused questions per execute
 
@@ -120,94 +126,114 @@ Wait for the user to confirm scope before proceeding.
 
 ---
 
-## Phase 5: Tactical Detail (for scoped tasks only)
+## Phase 5: Produce Plan Document + Update State
 
-For each in-scope task, research and document:
+**Write the plan doc** to `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`
+(create the directory if needed).
 
-- **What:** one sentence describing the work
-- **Type:** build | validate | investigate | design | debug
-- **Why:** how it connects to the user's stated goal
-- **Key files:** files to read or modify (research these now so execute doesn't have to)
-- **Done when:** specific, verifiable condition
-- **Verify by:** concrete action (command to run, behavior to check, output to see)
+**Naming convention:**
+- `YYYYMMDD` -- date without dashes
+- `NN` -- zero-padded sequence counter. Scan `.scaffold/plans/` for existing
+  files starting with today's date to determine NN. First file of the day is 01.
+- `phase-N` -- primary phase number (use the primary phase when a plan spans phases)
+- `slug` -- brief descriptor
 
-For investigation tasks, additionally include:
-- **Scratch file:** `.scaffold/scratch/YYYYMMDD-#-topic.md` — write findings here
-- **Output to:** which scaffold file(s) findings route to at checkpoint
-
-**Key principle: tactical detail lives in the plan doc.** Execute reads the plan
-and follows it — it should not need to re-research file locations, API patterns,
-or implementation approaches. Do the research now, in plan mode, where the user
-can review the approach before committing to it.
-
----
-
-## Phase 6: Produce Plan Document + Update State
-
-**Write the plan doc** to `.scaffold/plans/YYYY-MM-DD-phase-N-slug.md`
-(create the directory if needed). Use the primary phase number when a plan
-spans phases. Date-first for sorting, phase number for context.
-
-The plan doc MUST be self-contained — after `/clear`, it will be the ONLY thing
+The plan doc MUST be self-contained -- after `/clear`, it will be the ONLY thing
 guiding execution. Include:
 
-1. **Project** — identifier for checkpoint matching:
-   ```
-   **Root:** [absolute path to project root]
-   **Name:** [from .scaffold/project.md]
-   ```
-2. **Session goal** — what we're doing and why (from the discussion, not just docs)
-3. **Context pointers** — which .scaffold/ files to read for project context
-4. **Key decisions from discussion** — anything the user said that affects execution.
-   Especially: concerns raised, constraints stated, direction chosen over alternatives.
-5. **Tasks** — full task list with what/type/why/key-files/done-when/verify-by.
-   For investigation tasks: include "Output to" and "Scratch file" fields.
-6. **Deferred items** — work identified but not scoped to this execute, with
-   where it should route (which phase, or Backlog). Listed visibly so execute
-   sees them. If any turn out to be blocking during execute, stop and discuss.
-   Omit section if nothing deferred.
-7. **Decisions for decisions.md** — decisions made during the planning discussion
-   that should be recorded at checkpoint. Omit if no decisions made.
-8. **Execution notes:**
-   - Verify each task before marking complete
-   - If verification fails: present findings, ask user, don't auto-fix
-   - If task is bigger than expected: stop, re-scope, ask user
-   - If uncertain about approach or encountering unexpected complexity: stop,
-     present what you found, ask the user. Don't guess.
-   - Prefer completing and verifying each task before starting the next
-   - Between tasks: if the conversation is getting long, suggest checkpointing
-   - For investigation tasks: write findings to the designated scratch file
-   - If the user changes direction: suggest checkpoint completed work →
-     /clear → /scaffold:plan for the new direction
-9. **Checkpoint reminder** — "When complete, run /scaffold:checkpoint.
-   Checkpoint reads this plan file for deferred items and decisions."
+```markdown
+**Root:** [absolute path to project root]
+**Name:** [from .scaffold/project.md]
+
+## Session Goal
+[what and why]
+
+## Context Pointers
+[which .scaffold/ files to read]
+
+## Key Decisions
+[from the planning discussion]
+
+## Tasks
+
+### Task: [title]
+- **What:** one sentence
+- **Type:** build | validate | investigate | design | debug
+- **Why:** connection to goal
+- **Done when:** specific condition
+
+### Task: [title]
+...
+
+## Deferred Items
+[if any -- route targets specified. Omit section if nothing deferred.]
+
+## Decisions for decisions.md
+[if any -- omit if no decisions made]
+
+## Execution Notes
+- Verify each task before marking complete
+- If verification fails: present findings, ask user, don't auto-fix
+- If task is bigger than expected: stop, re-scope, ask user
+- If uncertain about approach or encountering unexpected complexity: stop,
+  present what you found, ask the user. Don't guess.
+- Prefer completing and verifying each task before starting the next
+- Between tasks: if the conversation is getting long, suggest checkpointing
+- If the user changes direction: suggest checkpoint completed work ->
+  /clear -> /scaffold:plan for the new direction
+
+## Checkpoint Reminder
+When complete, run /scaffold:checkpoint.
+Checkpoint reads this plan file for deferred items and decisions.
+```
+
+**For investigation tasks**, additionally include in the task:
+```
+- **Output to:** `.scaffold/investigations/YYYYMMDD-NN-slug.md`
+```
+This tells execute where to write findings.
+
+**Tasks do NOT include key-files or verify-by fields.** Those come from
+`/scaffold:prep` if it runs. Tasks contain: what, type, why, done-when
+(and output-to for investigation tasks).
 
 **For state-only sessions:** The plan doc records what was discussed/changed
 instead of tactical execution detail. It serves as a session record.
 
 **Update state.md:**
-- Status → "planning complete" (execution session) or "idle" (state-only)
-- Current Position → reflect any roadmap changes made
-- Next Action →
-  - Execution session: summary of scoped tasks + explicit pointer to plan doc file path.
-    Example: "Execute 3 tasks: [brief list]. Plan: `.scaffold/plans/2026-03-05-phase-2-bom-rules.md`"
-  - State-only session: "No execute needed — state documents updated. Run /scaffold:plan to determine next steps."
+- Status -> "planning complete" (execution session) or "idle" (state-only)
+- Current Position -> reflect any roadmap changes made
+- Next Action ->
+  - Execution session (complex tasks): "Run `/scaffold:prep` then `/scaffold:execute`.
+    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
+  - Execution session (simple tasks): "Run `/scaffold:execute`.
+    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
+  - State-only session: "No execute needed -- state documents updated.
+    Run /scaffold:plan to determine next steps."
 - Update Blockers and Open Questions if they changed during planning
 - Update the `<!-- Last updated -->` date
+
+**Prep recommendation rule of thumb:** If tasks are `type: build` or
+`type: investigate` and touch unfamiliar code, recommend prep. If tasks are
+simple fixes, config changes, or the user knows the codebase well, skip prep.
 
 **If in plan mode:** Call ExitPlanMode after writing files. The user will review
 and can edit the plan doc directly before approving.
 
 ---
 
-## Phase 7: Summary
+## Phase 6: Summary
 
 Present what was updated and where:
 - Roadmap changes written
 - Plan doc location
 - State.md updates
 
-**If execution session:**
+**If execution session (prep recommended):**
+> "Run `/scaffold:prep` then `/clear` then `/scaffold:execute`,
+> or `/clear` then `/scaffold:execute` to skip prep."
+
+**If execution session (prep not needed):**
 > "Run `/scaffold:execute` to begin, or `/clear` then `/scaffold:execute`
 > for a fresh context window."
 

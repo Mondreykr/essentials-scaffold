@@ -22,6 +22,23 @@ Read all scaffold files and CLAUDE.md:
 
 ---
 
+## Step 1.5: Scratch Migration
+
+Check if `.scaffold/scratch/` exists:
+
+1. If it does, read each file in the directory
+2. Present each file: "Found `.scaffold/scratch/[filename]` — [one-line summary of contents]"
+3. Propose migration: move files to `.scaffold/investigations/`, rename to match
+   `YYYYMMDD-NN-slug.md` convention (date without dashes, zero-padded counter, brief slug)
+4. For each file, propose the new name based on content and creation date
+5. Wait for user approval
+6. Create `.scaffold/investigations/` if needed and move files with new names
+7. Remove the empty `.scaffold/scratch/` directory
+
+If `.scaffold/scratch/` does not exist, skip this step.
+
+---
+
 ## Step 2: Identify Format Differences
 
 Check each file against the current format:

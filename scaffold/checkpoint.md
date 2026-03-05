@@ -46,19 +46,13 @@ for this project, read it for additional routing sources:
   or Backlog as specified in the plan file
 - **Decisions for decisions.md section** → route each decision to decisions.md
   with the context captured during planning
-- **Investigation "Output to" fields** → route findings to the scaffold files
-  specified in each investigation task
+- **Investigation tasks with `Output to` fields** → verify that the output
+  files exist in `.scaffold/investigations/`. If they do, note them in the
+  checkpoint summary. Do not route or delete them — investigation files are
+  durable reference material.
 
 These items were captured during planning and survive context clear via the
 plan file. The conversation may not contain them.
-
----
-
-## Check for Scratch Files
-
-If `.scaffold/scratch/` exists, read any scratch files from this session. Route
-their findings to the scaffold files specified in the plan file's "Output to"
-fields for the corresponding investigation tasks.
 
 ---
 

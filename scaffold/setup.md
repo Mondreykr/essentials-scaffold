@@ -99,6 +99,7 @@ For new projects, use the placeholder text as-is.
 |---------|------|
 | `/scaffold:status` | Orient — read state, suggest next action |
 | `/scaffold:plan` | Plan — update roadmap, scope work, produce plan doc |
+| `/scaffold:prep` | Prep — research tactical detail for planned tasks (optional) |
 | `/scaffold:execute` | Execute — do the work from plan doc |
 | `/scaffold:checkpoint` | Close the loop — verify, mark complete, commit |
 | `/scaffold:cleanup` | Migrate existing project to current scaffold format |
@@ -115,6 +116,7 @@ Plan updates scaffold files directly — user approves roadmap changes before th
 - `.scaffold/decisions.md` — Design and architecture decisions
 - `.scaffold/project.md` — Project definition and scope
 - `.scaffold/plans/` — Plan documents (execution contracts)
+- `.scaffold/investigations/` — Investigation output (durable research findings)
 
 ## Hard constraints
 - [Things that must be true. Examples:]
@@ -168,7 +170,7 @@ e.g. "Not a social network. No sharing features yet. Single user only for now."]
 
 ## Next Action
 [What's queued for next execute — summary of scoped tasks.
-Plan: `.scaffold/plans/YYYY-MM-DD-phase-N-slug.md`
+Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`
 If nothing queued: "Run /scaffold:plan to determine next steps."]
 
 ## Blockers
@@ -182,6 +184,7 @@ If nothing queued: "Run /scaffold:plan to determine next steps."]
 - `.scaffold/decisions.md` — Design and architecture decisions
 - `.scaffold/project.md` — Project definition and scope
 - `.scaffold/plans/` — Plan documents (execution contracts)
+- `.scaffold/investigations/` — Investigation output (durable research findings)
 ```
 
 4. **`.scaffold/roadmap.md`** — The plan. Phase-grouped progress tracking.
@@ -258,7 +261,7 @@ separately. Claude has strong familiarity with the SDK.
 ```
 
 6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
-   `plan.md`, `execute.md`, `cleanup.md`, and `graduate.md` exist as sibling
+   `plan.md`, `prep.md`, `execute.md`, `cleanup.md`, and `graduate.md` exist as sibling
    files in this same folder. If any are missing, tell me — they should have
    been installed together.
 

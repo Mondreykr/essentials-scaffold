@@ -42,12 +42,14 @@ The scaffold is a state machine. Every command leaves ALL state documents accura
 ### Command Lifecycle
 
 ```
-status → plan → [/clear optional] → execute → checkpoint
+status → plan → /clear → [prep → /clear] → execute → checkpoint
 ```
 
-**Plan** updates scaffold files directly — the roadmap and state are always accurate after plan runs. User approves roadmap changes before they're written. Plan produces a **plan document** that serves as the contract for execute.
+**Plan** updates scaffold files directly — the roadmap and state are always accurate after plan runs. User approves roadmap changes before they're written. Plan produces a **plan document** with scoped tasks.
 
-**Execute** reads the plan doc (found via a pointer in state.md) and does the work. No strategic decisions, no scaffold updates.
+**Prep** (optional) researches tactical detail for planned tasks — exact file paths, verification commands, implementation approach. Appends a Prep Detail section to the plan doc. Recommended for complex or unfamiliar code; skip for simple tasks.
+
+**Execute** reads the plan doc (found via a pointer in state.md) and does the work. Uses Prep Detail if available, otherwise works from basic task descriptions. No strategic decisions, no scaffold updates.
 
 **Checkpoint** closes the loop — verifies work, marks tasks complete, handles phase sign-off, and commits.
 
@@ -62,10 +64,13 @@ status → plan → [/clear optional] → execute → checkpoint
 2. **Plan** — run `/scaffold:plan` to scope work, update roadmap, write a plan doc
    - Run in plan mode (Shift+Tab) for enhanced research
    - State-only sessions end here
-3. **Execute** — run `/scaffold:execute` to do the work from the plan doc
+3. **Prep** (optional) — run `/scaffold:prep` to research tactical detail for planned tasks
+   - Recommended for complex tasks or unfamiliar code
+   - `/clear` after prep for a fresh context window
+4. **Execute** — run `/scaffold:execute` to do the work from the plan doc
    - `/clear` first for a fresh context window (recommended for large tasks)
-4. **Checkpoint** — run `/scaffold:checkpoint` to verify, update files, and commit
-5. **Resume** — next session, start again from step 1
+5. **Checkpoint** — run `/scaffold:checkpoint` to verify, update files, and commit
+6. **Resume** — next session, start again from step 1
 
 ## Commands
 
@@ -74,7 +79,8 @@ status → plan → [/clear optional] → execute → checkpoint
 | `/scaffold:setup` | Creates context files and a SessionStart hook. Pass `--deep` to scan the codebase (best for brownfield projects). | Once per project, at the start |
 | `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks. Shows pending execute if one exists. | Every session start, or after `/clear` |
 | `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, scopes work, writes a plan doc. Run in plan mode (Shift+Tab). | Before substantial work sessions |
-| `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Does not update scaffold files. | After plan, when ready to do the work |
+| `/scaffold:prep` | Researches tactical detail for planned tasks — file paths, verification commands, approach. Appends Prep Detail to plan doc. | After plan, before execute (optional — recommended for complex tasks) |
+| `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Uses Prep Detail if available. Does not update scaffold files. | After plan (and optionally prep), when ready to do the work |
 | `/scaffold:checkpoint` | Verifies work, updates scaffold files, handles phase sign-off, commits. Pass `--audit` to verify claims against code. | End of every work session |
 | `/scaffold:cleanup` | Migrates existing scaffold files to current format. Handles old checkbox/section conventions. | After updating from an older version |
 | `/scaffold:graduate` | Consolidates into snapshot, archives commands, hands off. Pass `--thorough` to scan for breaking references. | When you outgrow the scaffold |
@@ -89,8 +95,9 @@ status → plan → [/clear optional] → execute → checkpoint
 | `.scaffold/roadmap.md` | Progress — phase-grouped tasks with completion tracking |
 | `.scaffold/decisions.md` | Record — why things are the way they are, with dates and reasoning |
 | `.scaffold/plans/` | Plan documents — execution contracts produced by `/scaffold:plan` |
+| `.scaffold/investigations/` | Investigation output — durable research findings from investigation tasks |
 
-All scaffold data lives in `.scaffold/` at project root. Plan files, scratch notes, and archives are created inside `.scaffold/` as you work.
+All scaffold data lives in `.scaffold/` at project root. Plan files, investigation output, and archives are created inside `.scaffold/` as you work.
 
 ## Roadmap Format
 

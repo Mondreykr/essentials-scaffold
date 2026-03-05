@@ -21,12 +21,17 @@ Then give me a brief orientation:
 2. **Phase** — Which phase is `[IN PROGRESS]`, how many tasks done vs remaining
 3. **State** — Current status and any blockers (from .scaffold/state.md)
 4. **Open threads** — Open questions or things being figured out
-5. **Next action** — Based on state.md's "Next Action" section:
+5. **Investigations** — If `.scaffold/investigations/` exists and contains files:
+   > **Investigations:** [N] investigation file(s) in `.scaffold/investigations/`.
+   > [list filenames with one-line descriptions]
+
+   Skip this section if the directory doesn't exist or is empty.
+6. **Next action** — Based on state.md's "Next Action" section:
    - If Next Action has a plan pointer: "Pending execute: [plan summary].
      Run `/scaffold:execute` to continue."
    - If Next Action says plan needed: "Run `/scaffold:plan` to determine next steps."
    - If state is blocked: surface the blocker and suggest addressing it
-6. **Health check** — Flag any contradictions between files. Examples:
+7. **Health check** — Flag any contradictions between files. Examples:
    - State says something is blocked but roadmap shows it as complete
    - Roadmap shows a task `>>` in progress but state's Next Action doesn't reference it
    - A decision contradicts the current tech stack in CLAUDE.md
@@ -37,7 +42,7 @@ Then give me a brief orientation:
    If something feels off, investigate the codebase rather than trusting file
    consistency alone.
 
-7. **Staleness check** — Check the `<!-- Last updated: YYYY-MM-DD -->` date at the
+8. **Staleness check** — Check the `<!-- Last updated: YYYY-MM-DD -->` date at the
    top of each scaffold file. If any file is more than 7 days old, flag it:
    "[filename] last updated [date] — may be stale."
 
