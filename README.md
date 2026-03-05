@@ -1,10 +1,10 @@
 # Essentials Scaffold
 
-Lightweight context persistence for Claude Code. Five files, five commands, nothing else.
+Lightweight context persistence for Claude Code. Markdown files, slash commands, nothing else.
 
 ## What this is
 
-Claude Code loses context between sessions — every `/clear` or new conversation starts from zero. Essentials Scaffold gives it memory with five markdown files and five slash commands. No dependencies, no config, no build step. Works in any project with or without git.
+Claude Code loses context between sessions — every `/clear` or new conversation starts from zero. Essentials Scaffold gives it memory with five markdown files and a set of slash commands. No dependencies, no config, no build step. Works in any project with or without git.
 
 ## Install
 
@@ -33,13 +33,37 @@ npx degit Mondreykr/essentials-scaffold/scaffold .claude/commands/scaffold --for
 
 This is safe — it only replaces the command files in `.claude/commands/scaffold/`. Your project data in `.scaffold/` and `CLAUDE.md` is never touched.
 
+After updating from an older version, run `/scaffold:cleanup` to migrate your scaffold files to the current format.
+
+## Architecture
+
+The scaffold is a state machine. Every command leaves ALL state documents accurate and self-consistent. Any command could be the last thing that runs before a week-long gap.
+
+### Command Lifecycle
+
+```
+status → plan → [/clear optional] → execute → checkpoint
+```
+
+**Plan** updates scaffold files directly — the roadmap and state are always accurate after plan runs. User approves roadmap changes before they're written. Plan produces a **plan document** that serves as the contract for execute.
+
+**Execute** reads the plan doc (found via a pointer in state.md) and does the work. No strategic decisions, no scaffold updates.
+
+**Checkpoint** closes the loop — verifies work, marks tasks complete, handles phase sign-off, and commits.
+
+### Two Plan Paths
+
+1. **State-only session** — Brainstorming, roadmap restructuring, no codebase changes. Plan updates files, produces a record, done.
+2. **Execution session** — Codebase changes needed. Plan produces a plan doc with tactical detail. Execute follows it.
+
 ## Workflow
 
 1. **Status** — run `/scaffold:status` to read your files and get oriented
-2. **Plan** — run `/scaffold:plan` to scope the work and write a plan file
-   - Optional for quick tasks — skip straight to working
-   - Run in plan mode (Shift+Tab) for enhanced performance
-3. **Work** — accept the plan, Claude executes from the plan file
+2. **Plan** — run `/scaffold:plan` to scope work, update roadmap, write a plan doc
+   - Run in plan mode (Shift+Tab) for enhanced research
+   - State-only sessions end here
+3. **Execute** — run `/scaffold:execute` to do the work from the plan doc
+   - `/clear` first for a fresh context window (recommended for large tasks)
 4. **Checkpoint** — run `/scaffold:checkpoint` to verify, update files, and commit
 5. **Resume** — next session, start again from step 1
 
@@ -47,11 +71,13 @@ This is safe — it only replaces the command files in `.claude/commands/scaffol
 
 | Command | What it does | When to use it |
 |---------|-------------|----------------|
-| `/scaffold:setup` | Creates the five context files and a SessionStart hook, walks you through initial content. Pass `--deep` to scan the codebase after setup (best for brownfield projects). | Once per project, at the start |
-| `/scaffold:status` | Reads all scaffold files, gives a session briefing with health checks | Every session start, or after `/clear` |
-| `/scaffold:plan` | Triages state, consults you on scope, writes a plan file that survives context clear. Run in plan mode (Shift+Tab) so Claude researches before writing — then execute the plan in a fresh session with full context window. | Before substantial work sessions |
-| `/scaffold:checkpoint` | Verifies work against claims, updates scaffold files, commits with your approval. Pass `--audit` to verify scaffold claims against actual code after committing. | End of every work session |
-| `/scaffold:graduate` | Consolidates files into a single snapshot, archives commands, hands off to your next framework. Pass `--thorough` to scan for references to scaffold paths that would break after archiving. | When you outgrow the scaffold |
+| `/scaffold:setup` | Creates context files and a SessionStart hook. Pass `--deep` to scan the codebase (best for brownfield projects). | Once per project, at the start |
+| `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks. Shows pending execute if one exists. | Every session start, or after `/clear` |
+| `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, scopes work, writes a plan doc. Run in plan mode (Shift+Tab). | Before substantial work sessions |
+| `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Does not update scaffold files. | After plan, when ready to do the work |
+| `/scaffold:checkpoint` | Verifies work, updates scaffold files, handles phase sign-off, commits. Pass `--audit` to verify claims against code. | End of every work session |
+| `/scaffold:cleanup` | Migrates existing scaffold files to current format. Handles old checkbox/section conventions. | After updating from an older version |
+| `/scaffold:graduate` | Consolidates into snapshot, archives commands, hands off. Pass `--thorough` to scan for breaking references. | When you outgrow the scaffold |
 
 ## Files
 
@@ -59,11 +85,40 @@ This is safe — it only replaces the command files in `.claude/commands/scaffol
 |------|---------|
 | `CLAUDE.md` | Hub — identity, rules, constraints, tech stack (auto-read by Claude) |
 | `.scaffold/project.md` | Vision — what you're building, for whom, success criteria |
-| `.scaffold/state.md` | Health — bugs, open questions, parking lot, next session pickup |
-| `.scaffold/roadmap.md` | Progress — current phase, done, in progress, up next |
+| `.scaffold/state.md` | Status — current position, next action pointer, blockers, open questions |
+| `.scaffold/roadmap.md` | Progress — phase-grouped tasks with completion tracking |
 | `.scaffold/decisions.md` | Record — why things are the way they are, with dates and reasoning |
+| `.scaffold/plans/` | Plan documents — execution contracts produced by `/scaffold:plan` |
 
 All scaffold data lives in `.scaffold/` at project root. Plan files, scratch notes, and archives are created inside `.scaffold/` as you work.
+
+## Roadmap Format
+
+Tasks are tracked in phase-grouped sections:
+
+```markdown
+## Phase 1 — Setup [COMPLETE]
+- [x] Project initialization (2026-03-01)
+- [x] Auth integration (2026-03-02)
+
+## Phase 2 — Core Features [IN PROGRESS]
+- [x] Data model design (2026-03-03)
+- [ ] >> API endpoints
+- [ ] Frontend components
+
+## Phase 3 — Polish [PLANNED]
+- Error handling improvements
+- Performance optimization
+
+## Backlog
+- Mobile app
+- Public API
+```
+
+- Only ONE phase `[IN PROGRESS]` at a time
+- Phase sign-off requires explicit user approval during checkpoint
+- `[PLANNED]` phases use plain bullets (no checkboxes until active)
+- `Backlog` holds unassigned ideas and future work
 
 ## Recovery
 
@@ -78,6 +133,9 @@ Clear the contents of `state.md` and `roadmap.md` (keep the files with empty sec
 
 **Context rot mid-session:**
 `/clear` then `/scaffold:status` to start fresh from files.
+
+**Old format after update:**
+Run `/scaffold:cleanup` to migrate files to the current format.
 
 ## Limitations
 

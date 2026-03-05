@@ -85,6 +85,37 @@ For new projects, use the placeholder text as-is.
 - If a session is getting long, suggest /scaffold:checkpoint for completed work before continuing
 - If we made decisions, found bugs, discussed scope changes, or planned future work and I haven't said "checkpoint" — remind me before the session ends
 
+### Session Protocol
+| User says | Action |
+|-----------|--------|
+| "pause" | Update `.scaffold/state.md` with session handoff |
+| "resume" / "let's pick up" | Read scaffold files, summarize state, propose next steps |
+| "status" | Quick readout from `.scaffold/state.md` and `.scaffold/roadmap.md` |
+| "decision: [X]" | Log in `.scaffold/decisions.md` |
+| "execute" | Run `/scaffold:execute` — do scoped work from plan doc |
+
+### Command Reference
+| Command | Role |
+|---------|------|
+| `/scaffold:status` | Orient — read state, suggest next action |
+| `/scaffold:plan` | Plan — update roadmap, scope work, produce plan doc |
+| `/scaffold:execute` | Execute — do the work from plan doc |
+| `/scaffold:checkpoint` | Close the loop — verify, mark complete, commit |
+| `/scaffold:cleanup` | Migrate existing project to current scaffold format |
+| `/scaffold:graduate` | Exit scaffold to heavier framework |
+
+### Core Principle
+Every command leaves ALL state documents accurate and self-consistent.
+Any command could be the last thing that runs before a week-long gap.
+Plan updates scaffold files directly — user approves roadmap changes before they're written.
+
+### Key Documents
+- `.scaffold/roadmap.md` — Phase plan and task tracking
+- `.scaffold/state.md` — Current status and next action pointer
+- `.scaffold/decisions.md` — Design and architecture decisions
+- `.scaffold/project.md` — Project definition and scope
+- `.scaffold/plans/` — Plan documents (execution contracts)
+
 ## Hard constraints
 - [Things that must be true. Examples:]
 - [Must work on mobile]
@@ -122,70 +153,65 @@ this feel real? e.g. "I can add stops to a map and it saves them."]
 e.g. "Not a social network. No sharing features yet. Single user only for now."]
 ```
 
-3. **`.scaffold/state.md`** — Health and context. Changes every session.
+3. **`.scaffold/state.md`** — Where we are NOW. Changes every session.
 
 ```markdown
 <!-- Last updated: [today's date] -->
-# Current State
+# State
 
-## What's not working
-- [Bugs, broken things, rough edges]
-- [e.g. "Login redirect fails after signup"]
-- [e.g. "Map component renders but doesn't save pin locations"]
+## Status
+[idle / planning / executing / blocked]
 
-## Open questions
-[Things you're actively figuring out or undecided on:]
-- [e.g. "Should routes be stored as coordinates or addresses?"]
-- [e.g. "Is a map even the right interface for this?"]
+## Current Position
+[Synopsis of the active phase, recent completions, and project health.
+1-3 sentences that orient someone picking this up cold.]
 
-## What's working well
-[Things you like and want to preserve. Brief bullets:]
-- [e.g. "The card-based layout feels right"]
-- [e.g. "Supabase auth was painless"]
+## Next Action
+[What's queued for next execute — summary of scoped tasks.
+Plan: `.scaffold/plans/YYYY-MM-DD-phase-N-slug.md`
+If nothing queued: "Run /scaffold:plan to determine next steps."]
 
-## Parking lot
-[Ideas you don't want to lose but aren't acting on now:]
-- [e.g. "Maybe add Stripe payments later"]
-- [e.g. "What if users could share routes publicly?"]
-- [e.g. "Push notifications for upcoming walks"]
+## Blockers
+- [Things preventing progress]
 
-## Next session
-[Specific pickup points. Be concrete enough that future-you can act immediately:]
-- [e.g. "Try adding drag-and-drop route ordering"]
-- [e.g. "Fix the login redirect bug"]
-- [e.g. "No idea yet — ask me what I'm thinking about"]
+## Open Questions
+- [Unknowns that need answers]
+
+## Key Documents
+- `.scaffold/roadmap.md` — Phase plan and task tracking
+- `.scaffold/decisions.md` — Design and architecture decisions
+- `.scaffold/project.md` — Project definition and scope
+- `.scaffold/plans/` — Plan documents (execution contracts)
 ```
 
-4. **`.scaffold/roadmap.md`** — The plan. All progress lives here.
+4. **`.scaffold/roadmap.md`** — The plan. Phase-grouped progress tracking.
 
 ```markdown
 <!-- Last updated: [today's date] -->
 # Roadmap
 
-## Current phase
-[What are you focused on right now? e.g. "Prototyping core features"
-or "Getting the MVP functional" or "Just exploring"]
+## Phase 1 — Exploration [IN PROGRESS]
+- [ ] [First task or deliverable]
 
-## Done
-- [Completed milestones, features, or tasks]
-- [e.g. "v Project setup and basic layout"]
-- [e.g. "v User authentication working"]
-
-## In progress
-- [What's actively being worked on]
-- [e.g. ">> Route builder with map integration"]
-
-## Up next
-- [What comes after the current work]
-- [e.g. "Schedule management interface"]
-- [e.g. "Figure out data model for recurring walks"]
-
-## Later
-- [Things you know you'll need eventually but aren't close to yet]
-- [e.g. "Payment processing"]
-- [e.g. "Mobile optimization"]
-- [e.g. "Deploy to production"]
+## Backlog
+- [Ideas not yet assigned to a phase]
 ```
+
+For existing projects with known phases, create appropriate phase structure
+instead of the default "Exploration" phase. Use information from scope analysis
+to populate phases and tasks.
+
+Phase rules:
+- Only ONE phase may be `[IN PROGRESS]` at a time
+- Completed phases are marked `[COMPLETE]` — only with explicit user sign-off (during checkpoint)
+- `[PLANNED]` phases use plain bullets (no checkboxes until phase becomes active)
+- `Backlog` absorbs future ideas and unassigned work
+
+Task conventions:
+- `- [x] Completed task (YYYY-MM-DD)` — done, with completion date
+- `- [ ] >> Active task being worked on` — in progress
+- `- [ ] Upcoming task` — planned within current phase
+- `- Plain bullet` — planned in future phases or backlog (no checkbox)
 
 5. **`.scaffold/decisions.md`** — The record. Why things are the way they are.
 
@@ -232,8 +258,9 @@ separately. Claude has strong familiarity with the SDK.
 ```
 
 6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
-   `plan.md`, and `graduate.md` exist as sibling files in this same folder. If
-   any are missing, tell me — they should have been installed together.
+   `plan.md`, `execute.md`, `cleanup.md`, and `graduate.md` exist as sibling
+   files in this same folder. If any are missing, tell me — they should have
+   been installed together.
 
 7. **Create or update `.claude/hooks.json`** — SessionStart hook for automatic
    scaffold context loading.
@@ -278,6 +305,3 @@ Feed subagent findings back into the scaffold files:
 - Architectural patterns → .scaffold/decisions.md (as discovered conventions, not decisions)
 - Module structure → .scaffold/project.md "What is this?" section
 - Known issues or TODOs found in code → .scaffold/state.md
-
-If the subagent fails or times out, the standard setup is already complete.
-Tell the user what the deep scan found and what was added to which files.
