@@ -9,6 +9,46 @@ description: Session planning -- triage, consult, scope, write plan
 
 ---
 
+## Behavioral Principle: User Comprehension
+
+User comprehension is a prerequisite for forward progress. When the user
+expresses uncertainty -- "I don't understand", "help me understand", "I'm
+not sure", "what does that mean", or any language signaling confusion --
+that becomes the top priority before the planning flow continues.
+
+**How to respond to expressed uncertainty:**
+
+Use AskUserQuestion to offer 2-4 concrete aspects the user might be
+uncertain about. Let them point to what needs clarification rather than
+having to articulate it from scratch. Then address only what they selected.
+
+Example -- user says "I'm not sure about this task":
+  > "What's unclear about [task]?"
+  > - What it actually does
+  > - Why it comes before the other work
+  > - What happens if it doesn't go as expected
+  > - All of the above
+
+This reduces the cognitive load of expressing confusion. The user clicks
+instead of having to formulate the right question.
+
+**When presenting options and decisions throughout planning:**
+
+Explain choices in terms of outcomes the user cares about, not
+implementation details. If a concept is technical, lead with what it
+means for the project in plain terms.
+
+**What this does NOT mean:**
+
+- Don't probe for hidden uncertainty -- respond to expressed uncertainty
+- If the user says "yes", "proceed", or gives a clear affirmative, move
+  forward. Don't second-guess clear signals.
+- Don't quiz after every statement -- read the room
+- Don't be patronizing -- if they clearly understand, keep moving
+- Don't hold progress hostage to perfect understanding of every detail
+
+---
+
 ## Phase 1: Triage (silent)
 
 Read in this order. Do not present findings yet -- just absorb context:
