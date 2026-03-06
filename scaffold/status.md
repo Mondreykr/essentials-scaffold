@@ -41,10 +41,24 @@ Then give me a brief orientation:
 
    Skip this section if no pending quick tasks exist.
 7. **Next action** — Based on state.md's "Next Action" section:
-   - If Next Action has a plan pointer: "Pending execute: [plan summary].
-     Run `/scaffold:execute` to continue."
+   - If Next Action has a plan pointer and mentions `/scaffold:verify`:
+     - If it also mentions `/scaffold:execute`: "Pending execute: [plan summary].
+       Run `/scaffold:execute`. User tasks follow — `/scaffold:verify` after."
+     - If verify only: "User tasks pending per plan [filename]. Complete them,
+       then run `/scaffold:verify`."
+   - If Next Action has a plan pointer (no verify mention): "Pending execute:
+     [plan summary]. Run `/scaffold:execute` to continue."
    - If Next Action says plan needed: "Run `/scaffold:plan` to determine next steps."
    - If state is blocked: surface the blocker and suggest addressing it
+
+   **User tasks in roadmap:** Scan the `[IN-PROGRESS]` phase for unchecked
+   `[USER]` tasks. If any exist, surface them:
+   > "**User tasks pending:** [N] task(s) require your action:
+   > - [task description]
+   > Run `/scaffold:verify` when complete."
+
+   This appears regardless of what state.md says — it catches USER tasks that
+   may not have a plan pointer (e.g., added to roadmap but not yet planned).
 8. **Health check** — Flag any contradictions between files. Examples:
    - State says something is blocked but roadmap shows it as complete
    - Roadmap shows a task `>>` in progress but state's Next Action doesn't reference it

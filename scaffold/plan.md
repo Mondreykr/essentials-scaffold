@@ -120,11 +120,15 @@ they conflict, follow the user.
 
 1. **State-only session** -- brainstorming, roadmap restructuring, research that
    doesn't produce codebase changes. No execute step needed.
-2. **Execution session** -- codebase changes needed. Will produce a plan doc
+2. **Execution session** -- AI tasks to execute. Will produce a plan doc
    for `/scaffold:execute`.
+3. **User-action session** -- all scoped tasks are `[USER]` tasks that the human
+   completes. No execute step. Plan doc is produced for `/scaffold:verify`.
+4. **Mixed session** -- AI tasks followed by `[USER]` tasks. Execute handles the
+   AI portion, then `/scaffold:verify` handles the USER portion.
 
 State the classification and the reason:
-> "This is a [state-only/execution] session because [reason]."
+> "This is a [state-only/execution/user-action/mixed] session because [reason]."
 
 **Propose roadmap changes:**
 
@@ -142,6 +146,14 @@ Proposed roadmap changes:
 - Backlog: move "Item Z" from Phase 3
 - [etc.]
 ```
+
+For human-owned tasks, use the `[USER]` marker:
+```
+- [ ] [USER] Task description
+```
+A `[USER]` task is work the human must do outside of Claude -- vault configuration,
+manual testing, deploying, external system changes, etc. The marker is part of the
+task text in roadmap.md.
 
 **Wait for explicit approval before writing changes to roadmap.md.**
 
@@ -172,6 +184,24 @@ Default to fewer tasks. 3 well-scoped tasks > 7 ambitious ones.
 - Investigation tasks: cap at 2-3 focused questions per execute
 
 Wait for the user to confirm scope before proceeding.
+
+**USER task boundary rule:**
+
+Execute scope stops at the first `[USER]` task. When proposing scope:
+
+- If there are AI tasks before the first `[USER]` task: scope only those AI tasks
+  for execute. The `[USER]` tasks appear in the plan doc but are marked as outside
+  execute scope.
+- If the first task(s) are `[USER]` (no AI tasks before them): no execute scope.
+  The session is user-action only.
+- AI tasks AFTER a `[USER]` task are never in scope. They belong to a future plan
+  cycle. Note them as deferred: "Subsequent AI tasks blocked on USER task completion
+  -- will be scoped in next plan cycle."
+
+State the boundary clearly to the user:
+> "Execute scope: tasks 1-N (AI). Tasks N+1 onward are [USER] -- those go in the
+> plan doc but won't be executed. After checkpoint, run `/scaffold:verify` when
+> the user tasks are done."
 
 **First-time phase activation check:**
 
@@ -227,8 +257,21 @@ guiding execution. Include:
 ### Task: [title]
 ...
 
+For `[USER]` tasks, use this format instead:
+
+### Task: [title] [USER]
+- **What:** what the user needs to do
+- **Done when:** acceptance criteria for verify to check
+- **Artifacts:** file paths the user will produce, or "none"
+
+USER tasks do NOT have Type or Why fields -- they are human instructions, not
+AI execution contracts.
+
 ## Deferred Items
 [if any -- route targets specified. Omit section if nothing deferred.]
+If AI tasks exist after a `[USER]` task in the roadmap sequence, add to Deferred Items:
+"Subsequent AI tasks blocked on USER task completion -- will be scoped in next plan cycle."
+The plan doc must NOT list AI tasks after USER tasks.
 
 ## Decisions for decisions.md
 [if any -- omit if no decisions made]
@@ -263,12 +306,18 @@ This tells execute where to write findings.
 instead of tactical execution detail. It serves as a session record.
 
 **Update state.md:**
-- Status -> "planning complete" (execution session) or "idle" (state-only)
+- Status -> "planning complete" (execution/mixed session), "user action pending"
+  (user-action session), or "idle" (state-only)
 - Current Position -> reflect any roadmap changes made
 - Next Action ->
   - Execution session (complex tasks): "Run `/scaffold:prep` then `/scaffold:execute`.
     Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
   - Execution session (simple tasks): "Run `/scaffold:execute`.
+    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
+  - Mixed session: "Run `/scaffold:execute`. After checkpoint, user tasks pending --
+    run `/scaffold:verify` when complete.
+    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
+  - User-action session: "User tasks pending. Run `/scaffold:verify` when complete.
     Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
   - State-only session: "No execute needed -- state documents updated.
     Run /scaffold:plan to determine next steps."
@@ -301,6 +350,14 @@ Present what was updated and where:
 
 **If state-only session:**
 > "State documents updated. No execution needed."
+
+**If mixed session:**
+> "Run `/scaffold:execute` for the AI tasks. After checkpoint, complete the
+> user tasks, then run `/scaffold:verify`."
+
+**If user-action session:**
+> "No AI execution needed. Complete the user tasks listed in the plan doc,
+> then run `/scaffold:verify`."
 
 ---
 

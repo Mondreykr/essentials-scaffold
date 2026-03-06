@@ -76,6 +76,24 @@ Each step is a separate command. Between commands, you can `/clear` to free up C
 
 **Prep** is optional. Recommended for complex tasks or unfamiliar code. Skip for simple changes.
 
+### User tasks
+
+Some tasks require human action — deploying, configuring hardware, manual testing.
+Mark these `[USER]` in the roadmap.
+
+**Flow patterns:**
+
+| Pattern | Flow | When |
+|---------|------|------|
+| AI only | plan → execute → checkpoint | All tasks are code changes |
+| AI then USER | plan → execute → checkpoint → *user works* → verify | AI work first, then user work |
+| USER only | plan → *user works* → verify | Only user tasks, no code changes |
+| USER then AI | plan → *user works* → verify → plan → execute → checkpoint | User tasks must complete before AI can proceed |
+
+When a plan contains `[USER]` tasks, checkpoint notes them as pending. After
+completing your work, run `/scaffold:verify` to walk through each task, confirm
+completion, and update the roadmap.
+
 **Tip:** Run plan in plan mode (`Shift+Tab` in Claude Code — a read-only research mode where Claude can explore but not edit files) for more thorough analysis.
 
 ### Interrupting and resuming
@@ -104,6 +122,7 @@ For small fixes that don't warrant the full plan/execute ceremony. Quick tasks a
 | `/scaffold:resume` | Restores context from a paused session and routes to next action. | Start of session when a pause file exists |
 | `/scaffold:quick` | Plans a quick fix. Pass `--discuss` for a clarification phase. Pass a description inline (e.g., `/scaffold:quick fix the broken login redirect`). | Urgent fixes that don't warrant full planning |
 | `/scaffold:quick-execute` | Executes a pending quick task — fix, verify, record, commit. | After `/scaffold:quick` plans a task |
+| `/scaffold:verify` | Walks through pending `[USER]` tasks one at a time, verifies completion, updates roadmap and state. | After completing user tasks from a plan |
 | `/scaffold:cleanup` | Migrates existing scaffold files to current format. Handles old checkbox/section conventions. | After updating from an older version |
 | `/scaffold:update` | Pulls latest scaffold commands to `~/.claude/commands/scaffold/`. Detects and removes legacy per-project installs. | When a new version is available |
 | `/scaffold:graduate` | Consolidates into snapshot, archives commands, hands off. Pass `--thorough` to scan for breaking references. | When you outgrow the scaffold |
@@ -138,6 +157,7 @@ Tasks are tracked in phase-grouped sections:
 - [x] Data model design (2026-03-03)
 - [ ] >> API endpoints
 - [ ] Frontend components
+- [ ] [USER] Deploy DLL to vault
 
 ## Phase 3 — Polish [PLANNED]
 - [ ] Error handling improvements
@@ -151,6 +171,7 @@ Tasks are tracked in phase-grouped sections:
 - `[IN-PROGRESS]` / `[COMPLETE]` / `[PLANNED]` — phase status. Only ONE phase `[IN-PROGRESS]` at a time.
 - `[x]` — completed task. `[ ]` — incomplete task. Plain sub-bullets are detail, not tasks.
 - `>>` — marks the current active task (what's being worked on right now).
+- `[USER]` — marks tasks that require human action (deploying, configuring, manual testing). Verified via `/scaffold:verify` rather than executed by Claude.
 - `Backlog` — unassigned ideas and future work, no checkboxes needed.
 - Phase sign-off requires explicit user approval during checkpoint.
 

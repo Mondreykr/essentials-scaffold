@@ -26,6 +26,16 @@ If prep detail is missing and state.md had recommended running prep first:
 If the user says no or wants changes, let them modify scope verbally
 or suggest they edit the plan file directly.
 
+**USER task guard:**
+
+After loading the plan, check if tasks are marked `[USER]`:
+
+- If ALL tasks in the plan doc are `[USER]`: stop and say:
+  > "This plan contains only user tasks. Nothing for execute to do.
+  > Complete the user tasks, then run `/scaffold:verify`."
+- If the plan has AI tasks followed by `[USER]` tasks: note the boundary.
+  Execute will handle only the AI tasks.
+
 ---
 
 ## Step 2: Load Context
@@ -51,6 +61,18 @@ Work through scoped tasks in order. For each task:
    - Use the task's "Done when" field as the acceptance criterion
 4. If verification fails: present findings, ask user how to proceed
 5. If task is bigger than expected: stop, explain, ask user to re-scope
+
+**USER task boundary during execution:**
+
+When advancing to the next task, check if it is marked `[USER]`. If so, do NOT
+execute it. Instead:
+
+> "AI tasks complete. Remaining tasks are user tasks:
+> - [list USER task titles]
+> Run `/scaffold:checkpoint` for AI work, then `/scaffold:verify` when the
+> user tasks are done."
+
+Stop execution. Do not proceed past the `[USER]` boundary.
 
 For investigation tasks:
 - Write findings to the path specified in the task's `**Output to:**` field

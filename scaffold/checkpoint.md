@@ -46,12 +46,35 @@ main roadmap.
 
 ---
 
+## Check for USER Tasks in Plan
+
+If a plan file exists (found in the next section's scan), check its Tasks section
+for any tasks marked `[USER]`. If `[USER]` tasks are present:
+
+**Rule 1: Checkpoint ignores USER tasks entirely.**
+Do not mark USER tasks as incomplete, do not create blockers about them, do not
+mention them as "undone" or "remaining." They do not exist from checkpoint's
+perspective. Only process AI tasks in the plan.
+
+**Rule 2: If incomplete USER tasks remain, defer routing.**
+If any `[USER]` tasks in the plan doc are not yet marked `[x]` in the roadmap:
+- Do NOT route deferred items from the plan doc's Deferred Items section
+- Do NOT route decisions from the plan doc's Decisions for decisions.md section
+- PRESERVE the plan pointer in state.md (do not clear it)
+- `/scaffold:verify` will handle routing when USER tasks are verified
+
+This check applies to all subsequent sections -- it constrains how "Check for
+Plan File" and "Update Scaffold Files" behave.
+
+---
+
 ## Check for Plan File
 
 Look for a plan file in `.scaffold/plans/`. Match by project root path in the
 plan file's Project section, then take the most recent by date. If one exists
 for this project, read it for additional routing sources:
 
+**If no incomplete `[USER]` tasks** (per the USER task check above):
 - **Deferred Items section** → route each item to the appropriate roadmap phase
   or Backlog as specified in the plan file
 - **Decisions for decisions.md section** → route each decision to decisions.md
@@ -63,6 +86,10 @@ for this project, read it for additional routing sources:
 
 These items were captured during planning and survive context clear via the
 plan file. The conversation may not contain them.
+
+**If incomplete `[USER]` tasks exist:** Skip routing entirely. Note:
+> "Plan has incomplete user tasks -- deferred items and decisions will be routed
+> when `/scaffold:verify` completes."
 
 ---
 
@@ -92,9 +119,14 @@ add more tasks to the current phase, or may not be ready to advance.
 
 - Status → "idle" (or "blocked" with reason)
 - Current Position → reflect what was accomplished this session
-- Next Action → clear the execute pointer. Set to either:
-  - "Run /scaffold:plan to determine next steps" (default)
-  - A note about remaining work if partially complete
+- Next Action →
+  - **If incomplete `[USER]` tasks exist in the plan doc:** preserve the plan
+    pointer. Set to: "User tasks pending: [list USER task titles].
+    Run `/scaffold:verify` when complete.
+    Plan: [plan file path]"
+  - **Otherwise:** clear the execute pointer. Set to either:
+    - "Run /scaffold:plan to determine next steps" (default)
+    - A note about remaining work if partially complete
 - Update Blockers — add new blockers, remove resolved ones
 - **Resolved blocker routing:** For each blocker removed, add an entry to
   `.scaffold/decisions.md` (at the top, newest first) with:
