@@ -108,8 +108,12 @@ STOP. Wait for the user to respond before proceeding.
 
 ## Phase 3: Propose Roadmap Changes (interactive -- user approves)
 
-After the user shares their direction, determine what roadmap changes are needed.
-The user's stated direction overrides whatever the scaffold files suggest. If
+After the user shares their direction, restate it before proposing changes:
+
+> "So the direction is [one-sentence restatement]. That right?"
+
+Wait for confirmation. If the user corrects you, use their correction. The
+user's stated direction overrides whatever the scaffold files suggest. If
 they conflict, follow the user.
 
 **Determine the plan path:**
@@ -118,6 +122,9 @@ they conflict, follow the user.
    doesn't produce codebase changes. No execute step needed.
 2. **Execution session** -- codebase changes needed. Will produce a plan doc
    for `/scaffold:execute`.
+
+State the classification and the reason:
+> "This is a [state-only/execution] session because [reason]."
 
 **Propose roadmap changes:**
 
