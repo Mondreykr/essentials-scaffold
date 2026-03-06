@@ -39,10 +39,12 @@ After updating from an older version, run `/scaffold:cleanup` to migrate your sc
 
 ## Migration from per-project install
 
-If you previously installed scaffold commands per-project (into `.claude/commands/scaffold/`), you can migrate to the global install:
+If you previously installed scaffold commands per-project (into `.claude/commands/scaffold/`), you need to remove them — project-level commands shadow user-level ones, so the old copies would take priority over updates.
 
-1. Run `/scaffold:update` — it detects the per-project install and offers to remove it
-2. Or manually: delete `.claude/commands/scaffold/` from your projects after installing globally
+1. Delete `.claude/commands/scaffold/` from each project that has it (delete `.claude/commands/` too if it's now empty)
+2. Install at user level if you haven't already: `npx degit Mondreykr/essentials-scaffold/scaffold $HOME/.claude/commands/scaffold`
+
+After that, `/scaffold:update` works normally — it will also detect and remove any remaining per-project installs.
 
 ## Architecture
 
