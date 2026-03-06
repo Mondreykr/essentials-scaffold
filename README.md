@@ -8,6 +8,8 @@ Claude Code loses context between sessions — every `/clear` or new conversatio
 
 ## Install
 
+**Prerequisite:** [Node.js](https://nodejs.org/) (for `npx`).
+
 One-time setup (installs commands for all projects):
 
 ```bash
@@ -46,66 +48,69 @@ If you previously installed scaffold commands per-project (into `.claude/command
 
 After that, `/scaffold:update` works normally — it will also detect and remove any remaining per-project installs.
 
-## Architecture
+## How it works
 
 The scaffold is a state machine. Every command leaves ALL state documents accurate and self-consistent. Any command could be the last thing that runs before a week-long gap.
 
-### Command Lifecycle
+There are two workflows: the **main workflow** for substantial work, and a **quick workflow** for small fixes.
+
+### Main workflow
 
 ```
-status → plan → /clear → [prep → /clear] → execute → checkpoint
-                                                  ↕
-                                           pause ↔ resume
-
-quick → quick-execute  (lightweight — runs independently of main workflow)
+status → plan → execute → checkpoint
 ```
 
-**Plan** updates scaffold files directly — the roadmap and state are always accurate after plan runs. User approves roadmap changes before they're written. Plan produces a **plan document** with scoped tasks.
+Each step is a separate command. Between commands, you can `/clear` to free up Claude's context window — the scaffold files carry all state, so nothing is lost. This is especially useful before execute on large tasks.
 
-**Prep** (optional) researches tactical detail for planned tasks — exact file paths, verification commands, implementation approach. Appends a Prep Detail section to the plan doc. Recommended for complex or unfamiliar code; skip for simple tasks.
+| Step | Command | What happens |
+|------|---------|--------------|
+| **Orient** | `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks |
+| **Plan** | `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, writes a plan doc |
+| **Prep** (optional) | `/scaffold:prep` | Researches tactical detail — file paths, verification commands, approach. Appends to the plan doc |
+| **Execute** | `/scaffold:execute` | Reads the plan doc from state.md, does the work. No strategic decisions, no scaffold updates |
+| **Checkpoint** | `/scaffold:checkpoint` | Verifies work, marks tasks complete, handles phase sign-off, commits |
 
-**Execute** reads the plan doc (found via a pointer in state.md) and does the work. Uses Prep Detail if available, otherwise works from basic task descriptions. No strategic decisions, no scaffold updates.
+**Plan** has two possible outcomes:
+1. **Execution session** — codebase changes needed. Plan produces a plan doc, you proceed to execute.
+2. **State-only session** — brainstorming, roadmap restructuring, no codebase changes. Plan updates files and you're done.
 
-**Checkpoint** closes the loop — verifies work, marks tasks complete, handles phase sign-off, and commits.
+**Prep** is optional. Recommended for complex tasks or unfamiliar code. Skip for simple changes.
 
-### Two Plan Paths
+**Tip:** Run plan in plan mode (`Shift+Tab` in Claude Code — a read-only research mode where Claude can explore but not edit files) for more thorough analysis.
 
-1. **State-only session** — Brainstorming, roadmap restructuring, no codebase changes. Plan updates files, produces a record, done.
-2. **Execution session** — Codebase changes needed. Plan produces a plan doc with tactical detail. Execute follows it.
+### Interrupting and resuming
 
-## Workflow
+Use `/scaffold:pause` when you need to stop mid-work — it captures full session context to a handoff file. Next session, `/scaffold:status` detects the pause and routes you to `/scaffold:resume`.
 
-1. **Status** — run `/scaffold:status` to read your files and get oriented
-2. **Plan** — run `/scaffold:plan` to scope work, update roadmap, write a plan doc
-   - Run in plan mode (Shift+Tab) for enhanced research
-   - State-only sessions end here
-3. **Prep** (optional) — run `/scaffold:prep` to research tactical detail for planned tasks
-   - Recommended for complex tasks or unfamiliar code
-   - `/clear` after prep for a fresh context window
-4. **Execute** — run `/scaffold:execute` to do the work from the plan doc
-   - `/clear` first for a fresh context window (recommended for large tasks)
-5. **Checkpoint** — run `/scaffold:checkpoint` to verify, update files, and commit
-6. **Resume** — next session, start again from step 1
+### Quick workflow
+
+```
+quick → quick-execute
+```
+
+For small fixes that don't warrant the full plan/execute ceremony. Quick tasks are tracked separately in `.scaffold/quick/` and don't disrupt the main workflow.
 
 ## Commands
 
 | Command | What it does | When to use it |
 |---------|-------------|----------------|
 | `/scaffold:setup` | Creates context files and a SessionStart hook. Pass `--deep` to scan the codebase (best for brownfield projects). | Once per project, at the start |
-| `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks. Shows pending execute if one exists. | Every session start, or after `/clear` |
-| `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, scopes work, writes a plan doc. Run in plan mode (Shift+Tab). | Before substantial work sessions |
-| `/scaffold:prep` | Researches tactical detail for planned tasks — file paths, verification commands, approach. Appends Prep Detail to plan doc. | After plan, before execute (optional — recommended for complex tasks) |
-| `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Uses Prep Detail if available. Does not update scaffold files. | After plan (and optionally prep), when ready to do the work |
+| `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks. Detects paused sessions and pending executes. | Every session start, or after `/clear` |
+| `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, scopes work, writes a plan doc. Run in plan mode (`Shift+Tab`). | Before substantial work sessions |
+| `/scaffold:prep` | Researches tactical detail for planned tasks — file paths, verification commands, approach. Appends to the plan doc. | After plan, before execute (optional — recommended for complex tasks) |
+| `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Uses prep detail if available. Does not update scaffold files. | After plan (and optionally prep), when ready to do the work |
 | `/scaffold:checkpoint` | Verifies work, updates scaffold files, handles phase sign-off, commits. Pass `--audit` to verify claims against code. | End of every work session |
 | `/scaffold:pause` | Captures full session context to a handoff file for seamless resumption. | When you need to stop mid-work and pick up later |
 | `/scaffold:resume` | Restores context from a paused session and routes to next action. | Start of session when a pause file exists |
-| `/scaffold:quick` | Plans a quick fix — lightweight task that skips the full plan/execute ceremony. Pass `--discuss` for a clarification phase. | Urgent issues that don't warrant full planning |
+| `/scaffold:quick` | Plans a quick fix. Pass `--discuss` for a clarification phase. Pass a description inline (e.g., `/scaffold:quick fix the broken login redirect`). | Urgent fixes that don't warrant full planning |
 | `/scaffold:quick-execute` | Executes a pending quick task — fix, verify, record, commit. | After `/scaffold:quick` plans a task |
 | `/scaffold:cleanup` | Migrates existing scaffold files to current format. Handles old checkbox/section conventions. | After updating from an older version |
 | `/scaffold:update` | Pulls latest scaffold commands to `~/.claude/commands/scaffold/`. Detects and removes legacy per-project installs. | When a new version is available |
 | `/scaffold:graduate` | Consolidates into snapshot, archives commands, hands off. Pass `--thorough` to scan for breaking references. | When you outgrow the scaffold |
 
 ## Files
+
+Five core files provide context persistence. Additional directories are created as you work.
 
 | File | Purpose |
 |------|---------|
@@ -118,9 +123,9 @@ quick → quick-execute  (lightweight — runs independently of main workflow)
 | `.scaffold/investigations/` | Investigation output — durable research findings from investigation tasks |
 | `.scaffold/quick/` | Quick task plans and summaries — lightweight fixes tracked outside the main workflow |
 
-All scaffold data lives in `.scaffold/` at project root. Plan files, investigation output, and archives are created inside `.scaffold/` as you work.
+All scaffold data lives in `.scaffold/` at project root (except `CLAUDE.md`, which lives at the root so Claude auto-reads it).
 
-## Roadmap Format
+## Roadmap format
 
 Tasks are tracked in phase-grouped sections:
 
@@ -143,12 +148,19 @@ Tasks are tracked in phase-grouped sections:
 - Public API
 ```
 
-- Only ONE phase `[IN-PROGRESS]` at a time
-- Phase sign-off requires explicit user approval during checkpoint
-- ALL phases use checkboxes for tasks; plain sub-bullets for detail only
-- `Backlog` holds unassigned ideas and future work
+- `[IN-PROGRESS]` / `[COMPLETE]` / `[PLANNED]` — phase status. Only ONE phase `[IN-PROGRESS]` at a time.
+- `[x]` — completed task. `[ ]` — incomplete task. Plain sub-bullets are detail, not tasks.
+- `>>` — marks the current active task (what's being worked on right now).
+- `Backlog` — unassigned ideas and future work, no checkboxes needed.
+- Phase sign-off requires explicit user approval during checkpoint.
 
 ## Recovery
+
+**Lost context mid-session:**
+Run `/scaffold:pause` before `/clear` to save context. If you already cleared, run `/scaffold:status` — it reads from files and gets you oriented.
+
+**Context rot mid-session:**
+`/clear` then `/scaffold:status` to start fresh from files. Long conversations degrade Claude's attention — this resets it.
 
 **Checkpoint wrote bad state:**
 `git diff .scaffold/` to see what changed. `git checkout -- .scaffold/<file>` to revert any file.
@@ -159,14 +171,11 @@ Run `/scaffold:status` — the health check flags contradictions. Tell Claude wh
 **Everything feels stale:**
 Clear the contents of `state.md` and `roadmap.md` (keep the files with empty sections), then run `/scaffold:checkpoint` to regenerate from the codebase.
 
-**Context rot mid-session:**
-`/clear` then `/scaffold:status` to start fresh from files.
-
-**Lost context mid-session:**
-Run `/scaffold:pause` before `/clear` to save context. If you already cleared, run `/scaffold:status` — it reads from files.
-
 **Old format after update:**
 Run `/scaffold:cleanup` to migrate files to the current format.
+
+**Want to re-detect tech stack or pick up new context:**
+Setup won't re-run if scaffold files already exist. Delete `.scaffold/` and re-run `/scaffold:setup`, or update the files manually.
 
 ## Limitations
 
@@ -175,7 +184,5 @@ Run `/scaffold:cleanup` to migrate files to the current format.
 **No enforcement.** The persistence chain depends on Claude following the SessionStart hook and CLAUDE.md rules. Nothing forces `/scaffold:status` to run — the hook and CLAUDE.md reinforce it, but can't enforce it.
 
 **Solo-only.** No multi-user conflict detection. Git handles merge conflicts at the file level.
-
-**No re-setup.** Setup checks if all five files exist and stops. To re-detect tech stack or pick up new context, delete the scaffold files and re-run setup, or update them manually.
 
 **No session history.** Git commits serve as the session record. There's no built-in session log beyond what checkpoint commits capture.
