@@ -54,6 +54,8 @@ The scaffold is a state machine. Every command leaves ALL state documents accura
 status → plan → /clear → [prep → /clear] → execute → checkpoint
                                                   ↕
                                            pause ↔ resume
+
+quick → quick-execute  (lightweight — runs independently of main workflow)
 ```
 
 **Plan** updates scaffold files directly — the roadmap and state are always accurate after plan runs. User approves roadmap changes before they're written. Plan produces a **plan document** with scoped tasks.
@@ -95,6 +97,8 @@ status → plan → /clear → [prep → /clear] → execute → checkpoint
 | `/scaffold:checkpoint` | Verifies work, updates scaffold files, handles phase sign-off, commits. Pass `--audit` to verify claims against code. | End of every work session |
 | `/scaffold:pause` | Captures full session context to a handoff file for seamless resumption. | When you need to stop mid-work and pick up later |
 | `/scaffold:resume` | Restores context from a paused session and routes to next action. | Start of session when a pause file exists |
+| `/scaffold:quick` | Plans a quick fix — lightweight task that skips the full plan/execute ceremony. Pass `--discuss` for a clarification phase. | Urgent issues that don't warrant full planning |
+| `/scaffold:quick-execute` | Executes a pending quick task — fix, verify, record, commit. | After `/scaffold:quick` plans a task |
 | `/scaffold:cleanup` | Migrates existing scaffold files to current format. Handles old checkbox/section conventions. | After updating from an older version |
 | `/scaffold:update` | Pulls latest scaffold commands to `~/.claude/commands/scaffold/`. Detects and removes legacy per-project installs. | When a new version is available |
 | `/scaffold:graduate` | Consolidates into snapshot, archives commands, hands off. Pass `--thorough` to scan for breaking references. | When you outgrow the scaffold |
@@ -110,6 +114,7 @@ status → plan → /clear → [prep → /clear] → execute → checkpoint
 | `.scaffold/decisions.md` | Record — decisions logged chronologically (newest first), with dates and reasoning |
 | `.scaffold/plans/` | Plan documents — execution contracts produced by `/scaffold:plan` |
 | `.scaffold/investigations/` | Investigation output — durable research findings from investigation tasks |
+| `.scaffold/quick/` | Quick task plans and summaries — lightweight fixes tracked outside the main workflow |
 
 All scaffold data lives in `.scaffold/` at project root. Plan files, investigation output, and archives are created inside `.scaffold/` as you work.
 

@@ -34,12 +34,18 @@ Then give me a brief orientation:
    > [list filenames with one-line descriptions]
 
    Skip this section if the directory doesn't exist or is empty.
-6. **Next action** — Based on state.md's "Next Action" section:
+6. **Quick tasks** — If `.scaffold/quick/` exists, scan for directories with
+   `plan.md` but no `summary.md` (pending quick tasks):
+   > "Quick task NNN has a plan but hasn't been executed yet.
+   > Run `/scaffold:quick-execute` to complete it."
+
+   Skip this section if no pending quick tasks exist.
+7. **Next action** — Based on state.md's "Next Action" section:
    - If Next Action has a plan pointer: "Pending execute: [plan summary].
      Run `/scaffold:execute` to continue."
    - If Next Action says plan needed: "Run `/scaffold:plan` to determine next steps."
    - If state is blocked: surface the blocker and suggest addressing it
-7. **Health check** — Flag any contradictions between files. Examples:
+8. **Health check** — Flag any contradictions between files. Examples:
    - State says something is blocked but roadmap shows it as complete
    - Roadmap shows a task `>>` in progress but state's Next Action doesn't reference it
    - A decision contradicts the current tech stack in CLAUDE.md
@@ -50,7 +56,7 @@ Then give me a brief orientation:
    If something feels off, investigate the codebase rather than trusting file
    consistency alone.
 
-8. **Staleness check** — Check the `<!-- Last updated: YYYY-MM-DD -->` date at the
+9. **Staleness check** — Check the `<!-- Last updated: YYYY-MM-DD -->` date at the
    top of each scaffold file. If any file is more than 7 days old, flag it:
    "[filename] last updated [date] — may be stale."
 

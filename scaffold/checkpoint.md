@@ -36,6 +36,16 @@ checkpoint. Let the user decide whether to fix now or note and move on.
 
 ---
 
+## Check for Quick Fixes
+
+If `.scaffold/state.md` has a Quick Fixes table with entries since the last
+checkpoint, check whether any completed quick fixes also completed a roadmap
+task. If so, mark that task `[x]` in `.scaffold/roadmap.md` with the
+completion date from the quick fix. This reconciles quick work with the
+main roadmap.
+
+---
+
 ## Check for Plan File
 
 Look for a plan file in `.scaffold/plans/`. Match by project root path in the

@@ -89,6 +89,7 @@ For new projects, use the placeholder text as-is.
 | "status" | Quick readout from `.scaffold/state.md` and `.scaffold/roadmap.md` |
 | "decision: [X]" | Log in `.scaffold/decisions.md` |
 | "execute" | Run `/scaffold:execute` — do scoped work from plan doc |
+| "quick fix" | Run `/scaffold:quick` — plan a lightweight quick task |
 
 ### Command Reference
 | Command | Role |
@@ -100,6 +101,8 @@ For new projects, use the placeholder text as-is.
 | `/scaffold:checkpoint` | Close the loop — verify, mark complete, commit |
 | `/scaffold:pause` | Pause — capture full context for later resumption |
 | `/scaffold:resume` | Resume — restore context from a paused session |
+| `/scaffold:quick` | Quick fix — plan a lightweight task |
+| `/scaffold:quick-execute` | Execute a pending quick task |
 | `/scaffold:cleanup` | Migrate existing project to current scaffold format |
 | `/scaffold:update` | Update scaffold commands to latest version |
 | `/scaffold:graduate` | Exit scaffold to heavier framework |
@@ -116,6 +119,7 @@ Plan updates scaffold files directly — user approves roadmap changes before th
 - `.scaffold/project.md` — Project definition and scope
 - `.scaffold/plans/` — Plan documents (execution contracts)
 - `.scaffold/investigations/` — Investigation output (durable research findings)
+- `.scaffold/quick/` — Quick task plans and summaries
 
 ## Hard constraints
 - [Things that must be true. Examples:]
@@ -254,7 +258,8 @@ for a solo builder. Good defaults, large community, easy Vercel deployment.
 ```
 
 6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
-   `plan.md`, `prep.md`, `execute.md`, `pause.md`, `resume.md`, `cleanup.md`, and `graduate.md` exist as sibling
+   `plan.md`, `prep.md`, `execute.md`, `pause.md`, `resume.md`, `cleanup.md`,
+   `graduate.md`, `quick.md`, and `quick-execute.md` exist as sibling
    files in this same folder. If any are missing, tell me — they should have
    been installed together.
 
