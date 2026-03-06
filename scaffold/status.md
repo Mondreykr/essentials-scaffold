@@ -6,6 +6,14 @@ description: Session briefing — read scaffold files and orient on current stat
 `.scaffold/state.md`, and `.scaffold/roadmap.md` exist. If any are missing,
 stop and say: "Scaffold files missing — run /scaffold:setup first."
 
+**Pause check:** Before doing anything else, check if `.scaffold/continue-here.md`
+exists. If it does:
+
+> "Paused session detected. Run `/scaffold:resume` to restore context
+> and pick up where you left off."
+
+Stop here. Do not proceed with the full status briefing.
+
 Read the following files in order:
 1. CLAUDE.md
 2. .scaffold/project.md
@@ -18,7 +26,7 @@ a decision that needs context — it's reference material, not session briefing.
 Then give me a brief orientation:
 
 1. **Project** — What this is, in one sentence (from .scaffold/project.md)
-2. **Phase** — Which phase is `[IN PROGRESS]`, how many tasks done vs remaining
+2. **Phase** — Which phase is `[IN-PROGRESS]`, how many tasks done vs remaining
 3. **State** — Current status and any blockers (from .scaffold/state.md)
 4. **Open threads** — Open questions or things being figured out
 5. **Investigations** — If `.scaffold/investigations/` exists and contains files:

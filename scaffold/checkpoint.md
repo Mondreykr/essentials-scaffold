@@ -68,10 +68,10 @@ Review everything we did and discussed this session. Then update files:
 - Route deferred items from plan file to appropriate phase or Backlog
 
 **Phase sign-off gate:**
-If ALL tasks in the `[IN PROGRESS]` phase are now `[x]`, ask the user:
+If ALL tasks in the `[IN-PROGRESS]` phase are now `[x]`, ask the user:
 
 > "All Phase N tasks complete. Mark Phase N as [COMPLETE] and promote
-> Phase N+1 to [IN PROGRESS]?"
+> Phase N+1 to [IN-PROGRESS]?"
 
 Wait for explicit approval before changing phase status. The user may want to
 add more tasks to the current phase, or may not be ready to advance.
@@ -86,19 +86,25 @@ add more tasks to the current phase, or may not be ready to advance.
   - "Run /scaffold:plan to determine next steps" (default)
   - A note about remaining work if partially complete
 - Update Blockers — add new blockers, remove resolved ones
+- **Resolved blocker routing:** For each blocker removed, add an entry to
+  `.scaffold/decisions.md` (at the top, newest first) with:
+  - Category: `Resolved Blocker`
+  - Context: what was blocked and why
+  - Decision: the resolution
+  - Why: how/why this resolved it
+  - Status: `Active`
 - Update Open Questions — add new ones, remove answered ones
 - Update the `<!-- Last updated: YYYY-MM-DD -->` comment at the top
 
 ### 3. `.scaffold/decisions.md` (update only if decisions were made)
 
-- Add an entry under the appropriate category (Tech, Architecture, Design, Scope)
-  for any decision made this session
+- Add new entries at the TOP of the file (below the header, above existing entries)
+  with today's date, category, context, decision, reasoning, and status
 - Include decisions from the plan file's "Decisions for decisions.md" section
-- Use today's date
-- Include context and reasoning even if informal
 - Skip trivial decisions (variable names, minor styling, etc.)
-- If we reversed or reconsidered a previous decision, update its status and move
-  the entry to Archived
+- **Updating existing decisions:** If a decision's status changed (Active → Revisiting
+  or Reversed), update the Status field in place. If Reversed, move the entry to
+  the `## Archived` section at the bottom.
 - If 20+ active entries: suggest archiving older stable ones
 - If updated, update the `<!-- Last updated -->` date
 

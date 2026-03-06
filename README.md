@@ -8,32 +8,41 @@ Claude Code loses context between sessions — every `/clear` or new conversatio
 
 ## Install
 
-From your project root:
+One-time setup (installs commands for all projects):
 
 ```bash
-npx degit Mondreykr/essentials-scaffold/scaffold .claude/commands/scaffold
+npx degit Mondreykr/essentials-scaffold/scaffold ~/.claude/commands/scaffold
 ```
 
-Or copy the `scaffold/` folder to `.claude/commands/scaffold/` manually if you already have the repo.
+Or copy the `scaffold/` folder to `~/.claude/commands/scaffold/` manually if you already have the repo.
 
-Then:
+Then, in any project:
 
-1. Open Claude Code in your project
+1. Open Claude Code
 2. Run `/scaffold:setup`
 
-That's it. The setup command creates your context files and walks you through filling them in.
+That's it. The setup command creates your context files and walks you through filling them in. Commands are installed once at the user level and available in every project.
 
 ## Updating
 
-To update the scaffold commands in an existing project:
+Run `/scaffold:update` to pull the latest commands. This also detects and removes legacy per-project installs.
+
+Or manually:
 
 ```bash
-npx degit Mondreykr/essentials-scaffold/scaffold .claude/commands/scaffold --force
+npx degit Mondreykr/essentials-scaffold/scaffold ~/.claude/commands/scaffold --force
 ```
 
-This is safe — it only replaces the command files in `.claude/commands/scaffold/`. Your project data in `.scaffold/` and `CLAUDE.md` is never touched.
+This is safe — it only replaces the command files in `~/.claude/commands/scaffold/`. Your project data in `.scaffold/` and `CLAUDE.md` is never touched.
 
 After updating from an older version, run `/scaffold:cleanup` to migrate your scaffold files to the current format.
+
+## Migration from per-project install
+
+If you previously installed scaffold commands per-project (into `.claude/commands/scaffold/`), you can migrate to the global install:
+
+1. Run `/scaffold:update` — it detects the per-project install and offers to remove it
+2. Or manually: delete `.claude/commands/scaffold/` from your projects after installing globally
 
 ## Architecture
 
@@ -43,6 +52,8 @@ The scaffold is a state machine. Every command leaves ALL state documents accura
 
 ```
 status → plan → /clear → [prep → /clear] → execute → checkpoint
+                                                  ↕
+                                           pause ↔ resume
 ```
 
 **Plan** updates scaffold files directly — the roadmap and state are always accurate after plan runs. User approves roadmap changes before they're written. Plan produces a **plan document** with scoped tasks.
@@ -82,7 +93,10 @@ status → plan → /clear → [prep → /clear] → execute → checkpoint
 | `/scaffold:prep` | Researches tactical detail for planned tasks — file paths, verification commands, approach. Appends Prep Detail to plan doc. | After plan, before execute (optional — recommended for complex tasks) |
 | `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Uses Prep Detail if available. Does not update scaffold files. | After plan (and optionally prep), when ready to do the work |
 | `/scaffold:checkpoint` | Verifies work, updates scaffold files, handles phase sign-off, commits. Pass `--audit` to verify claims against code. | End of every work session |
+| `/scaffold:pause` | Captures full session context to a handoff file for seamless resumption. | When you need to stop mid-work and pick up later |
+| `/scaffold:resume` | Restores context from a paused session and routes to next action. | Start of session when a pause file exists |
 | `/scaffold:cleanup` | Migrates existing scaffold files to current format. Handles old checkbox/section conventions. | After updating from an older version |
+| `/scaffold:update` | Pulls latest scaffold commands to `~/.claude/commands/scaffold/`. Detects and removes legacy per-project installs. | When a new version is available |
 | `/scaffold:graduate` | Consolidates into snapshot, archives commands, hands off. Pass `--thorough` to scan for breaking references. | When you outgrow the scaffold |
 
 ## Files
@@ -93,7 +107,7 @@ status → plan → /clear → [prep → /clear] → execute → checkpoint
 | `.scaffold/project.md` | Vision — what you're building, for whom, success criteria |
 | `.scaffold/state.md` | Status — current position, next action pointer, blockers, open questions |
 | `.scaffold/roadmap.md` | Progress — phase-grouped tasks with completion tracking |
-| `.scaffold/decisions.md` | Record — why things are the way they are, with dates and reasoning |
+| `.scaffold/decisions.md` | Record — decisions logged chronologically (newest first), with dates and reasoning |
 | `.scaffold/plans/` | Plan documents — execution contracts produced by `/scaffold:plan` |
 | `.scaffold/investigations/` | Investigation output — durable research findings from investigation tasks |
 
@@ -108,23 +122,23 @@ Tasks are tracked in phase-grouped sections:
 - [x] Project initialization (2026-03-01)
 - [x] Auth integration (2026-03-02)
 
-## Phase 2 — Core Features [IN PROGRESS]
+## Phase 2 — Core Features [IN-PROGRESS]
 - [x] Data model design (2026-03-03)
 - [ ] >> API endpoints
 - [ ] Frontend components
 
 ## Phase 3 — Polish [PLANNED]
-- Error handling improvements
-- Performance optimization
+- [ ] Error handling improvements
+- [ ] Performance optimization
 
 ## Backlog
 - Mobile app
 - Public API
 ```
 
-- Only ONE phase `[IN PROGRESS]` at a time
+- Only ONE phase `[IN-PROGRESS]` at a time
 - Phase sign-off requires explicit user approval during checkpoint
-- `[PLANNED]` phases use plain bullets (no checkboxes until active)
+- ALL phases use checkboxes for tasks; plain sub-bullets for detail only
 - `Backlog` holds unassigned ideas and future work
 
 ## Recovery
@@ -140,6 +154,9 @@ Clear the contents of `state.md` and `roadmap.md` (keep the files with empty sec
 
 **Context rot mid-session:**
 `/clear` then `/scaffold:status` to start fresh from files.
+
+**Lost context mid-session:**
+Run `/scaffold:pause` before `/clear` to save context. If you already cleared, run `/scaffold:status` — it reads from files.
 
 **Old format after update:**
 Run `/scaffold:cleanup` to migrate files to the current format.

@@ -53,7 +53,7 @@ means for the project in plain terms.
 
 Read in this order. Do not present findings yet -- just absorb context:
 1. .scaffold/state.md -- Status, Current Position, Next Action, Blockers, Open Questions
-2. .scaffold/roadmap.md -- phase structure, `[IN PROGRESS]` phase, task states
+2. .scaffold/roadmap.md -- phase structure, `[IN-PROGRESS]` phase, task states
 3. .scaffold/project.md -- scope boundaries and success criteria
 4. .scaffold/decisions.md -- recent active decisions only
 5. CLAUDE.md -- constraints and tech stack
@@ -63,8 +63,10 @@ note them. They may contain prior research relevant to the current planning
 session. Read any that look relevant based on filename.
 
 Assess (internally, for Phase 2):
-- Which phase is `[IN PROGRESS]`? What tasks are `[x]`, `>> `, or `[ ]`?
+- Which phase is `[IN-PROGRESS]`? What tasks are `[x]`, `>> `, or `[ ]`?
 - Are there blockers or open questions that need resolving first?
+- Are there blockers that are stale or already resolved? (If clearly resolved,
+  flag for removal and routing to decisions.md during Phase 3.)
 - Are any scaffold files stale (>7 days since last update)?
 - Is there a pending execute (state.md Next Action has a plan pointer)?
 - What kind of work is likely needed? (investigate / design / build / validate / debug)
@@ -78,7 +80,7 @@ Present a brief structured assessment:
 
 - **Where we are:** 1-2 sentences on current state (phase, recent completions)
 - **What the docs suggest:** what roadmap/state point to as next work
-- **Flags:** blockers, stale files, contradictions, open questions, pending execute
+- **Flags:** blockers (including stale/resolved ones), stale files, contradictions, open questions, pending execute
 - **Prior research:** if investigation files exist, note them briefly
 
 Then ask:
@@ -146,7 +148,7 @@ date.
 
 ## Phase 4: Scope Execute (interactive -- user approves, execution sessions only)
 
-From the roadmap tasks in the `[IN PROGRESS]` phase, propose which tasks are
+From the roadmap tasks in the `[IN-PROGRESS]` phase, propose which tasks are
 in scope for the next execute. This is the "what's the contract for execute?" step.
 
 Present the candidate tasks and ask:
@@ -163,6 +165,19 @@ Default to fewer tasks. 3 well-scoped tasks > 7 ambitious ones.
 - Investigation tasks: cap at 2-3 focused questions per execute
 
 Wait for the user to confirm scope before proceeding.
+
+**First-time phase activation check:**
+
+If this is the first execute targeting this phase (just promoted from `[PLANNED]`),
+review task sequence:
+
+> "This is the first execute for Phase N. Here are the tasks in order:
+> 1. [Task A]
+> 2. [Task B]
+> ...
+> Does this sequence make sense, or should any tasks be reordered?"
+
+Wait for confirmation. If reordered, update roadmap.md. Runs once per phase.
 
 ---
 

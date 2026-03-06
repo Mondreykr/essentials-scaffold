@@ -75,21 +75,17 @@ For new projects, use the placeholder text as-is.
 - Communication: [e.g. "Explain the why, skip the how unless I ask"]
 
 ## Rules
-- Run /scaffold:status at the start of every session. For substantial work, discuss direction with the user, then run /scaffold:plan in plan mode.
-- If /scaffold:status wasn't run, read .scaffold/project.md, .scaffold/state.md, and .scaffold/roadmap.md before doing any work.
-- Before checkpoint: verify claims with evidence (run tests, check output). Don't claim "done" without verification.
 - Consult .scaffold/decisions.md when making or revisiting technology/architecture/design choices
-- Ask before making major architectural or structural changes
-- If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly before proceeding.
-- When I say "checkpoint" — run /scaffold:checkpoint
-- If a session is getting long, suggest /scaffold:checkpoint for completed work before continuing
+- Ask before making architectural or structural changes
+- If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly and await my approval before proceeding.
+- If a session is getting long and available context is less than 40%, pause the work and suggest /scaffold:checkpoint for completed work before continuing
 - If we made decisions, found bugs, discussed scope changes, or planned future work and I haven't said "checkpoint" — remind me before the session ends
 
 ### Session Protocol
 | User says | Action |
 |-----------|--------|
-| "pause" | Update `.scaffold/state.md` with session handoff |
-| "resume" / "let's pick up" | Read scaffold files, summarize state, propose next steps |
+| "pause" | Run `/scaffold:pause` — capture context for later resumption |
+| "resume" / "let's pick up" | Run `/scaffold:resume` — restore context from pause |
 | "status" | Quick readout from `.scaffold/state.md` and `.scaffold/roadmap.md` |
 | "decision: [X]" | Log in `.scaffold/decisions.md` |
 | "execute" | Run `/scaffold:execute` — do scoped work from plan doc |
@@ -102,7 +98,10 @@ For new projects, use the placeholder text as-is.
 | `/scaffold:prep` | Prep — research tactical detail for planned tasks (optional) |
 | `/scaffold:execute` | Execute — do the work from plan doc |
 | `/scaffold:checkpoint` | Close the loop — verify, mark complete, commit |
+| `/scaffold:pause` | Pause — capture full context for later resumption |
+| `/scaffold:resume` | Resume — restore context from a paused session |
 | `/scaffold:cleanup` | Migrate existing project to current scaffold format |
+| `/scaffold:update` | Update scaffold commands to latest version |
 | `/scaffold:graduate` | Exit scaffold to heavier framework |
 
 ### Core Principle
@@ -179,12 +178,6 @@ If nothing queued: "Run /scaffold:plan to determine next steps."]
 ## Open Questions
 - [Unknowns that need answers]
 
-## Key Documents
-- `.scaffold/roadmap.md` — Phase plan and task tracking
-- `.scaffold/decisions.md` — Design and architecture decisions
-- `.scaffold/project.md` — Project definition and scope
-- `.scaffold/plans/` — Plan documents (execution contracts)
-- `.scaffold/investigations/` — Investigation output (durable research findings)
 ```
 
 4. **`.scaffold/roadmap.md`** — The plan. Phase-grouped progress tracking.
@@ -193,7 +186,7 @@ If nothing queued: "Run /scaffold:plan to determine next steps."]
 <!-- Last updated: [today's date] -->
 # Roadmap
 
-## Phase 1 — Exploration [IN PROGRESS]
+## Phase 1 — Exploration [IN-PROGRESS]
 - [ ] [First task or deliverable]
 
 ## Backlog
@@ -205,28 +198,28 @@ instead of the default "Exploration" phase. Use information from scope analysis
 to populate phases and tasks.
 
 Phase rules:
-- Only ONE phase may be `[IN PROGRESS]` at a time
+- Only ONE phase may be `[IN-PROGRESS]` at a time
 - Completed phases are marked `[COMPLETE]` — only with explicit user sign-off (during checkpoint)
-- `[PLANNED]` phases use plain bullets (no checkboxes until phase becomes active)
+- ALL phases use checkboxes for tasks (including `[PLANNED]` phases)
+- Plain sub-bullets are for clarification or detail, not tasks
 - `Backlog` absorbs future ideas and unassigned work
 
 Task conventions:
 - `- [x] Completed task (YYYY-MM-DD)` — done, with completion date
 - `- [ ] >> Active task being worked on` — in progress
-- `- [ ] Upcoming task` — planned within current phase
-- `- Plain bullet` — planned in future phases or backlog (no checkbox)
+- `- [ ] Upcoming task` — in any phase (including PLANNED and Backlog)
+  - Plain sub-bullet for detail or clarification
 
 5. **`.scaffold/decisions.md`** — The record. Why things are the way they are.
 
-Organize decisions under category headers. Each entry uses this format:
+Decisions are logged chronologically, newest first. Each entry carries a `Category:` field for filtering.
 
 ```markdown
 <!-- Last updated: [today's date] -->
 # Decisions
 
-## Tech
-
 ### [Date] — [What was decided]
+**Category:** Tech | Architecture | Design | Scope | Resolved Blocker
 **Context:** [What prompted this choice]
 **Decision:** [What was chosen]
 **Why:** [The reasoning — even if informal]
@@ -236,32 +229,32 @@ Organize decisions under category headers. Each entry uses this format:
 
 [Example:]
 
-### 2026-02-27 — Next.js with App Router
-**Context:** Needed to pick a framework. No strong preference.
-**Decision:** Next.js with App Router and Tailwind CSS
-**Why:** Claude recommended it as the most straightforward full-stack option
-for a solo builder. Good defaults, large community, easy Vercel deployment.
-**Status:** Active
-
-## Architecture
-
 ### 2026-02-27 — Supabase for database and auth
+**Category:** Architecture
 **Context:** Need a database and user authentication. Don't want to manage infrastructure.
 **Decision:** Supabase (PostgreSQL + built-in auth)
 **Why:** Free tier covers prototyping. Auth is built in so I don't have to wire it up
 separately. Claude has strong familiarity with the SDK.
 **Status:** Active
 
-## Design
+---
 
-## Scope
+### 2026-02-27 — Next.js with App Router
+**Category:** Tech
+**Context:** Needed to pick a framework. No strong preference.
+**Decision:** Next.js with App Router and Tailwind CSS
+**Why:** Claude recommended it as the most straightforward full-stack option
+for a solo builder. Good defaults, large community, easy Vercel deployment.
+**Status:** Active
+
+---
 
 ## Archived
 [Reversed or superseded decisions. Kept for historical context.]
 ```
 
 6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
-   `plan.md`, `prep.md`, `execute.md`, `cleanup.md`, and `graduate.md` exist as sibling
+   `plan.md`, `prep.md`, `execute.md`, `pause.md`, `resume.md`, `cleanup.md`, and `graduate.md` exist as sibling
    files in this same folder. If any are missing, tell me — they should have
    been installed together.
 

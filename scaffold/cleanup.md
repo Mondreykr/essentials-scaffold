@@ -48,13 +48,19 @@ Check each file against the current format:
 - Old checkbox convention: `- v Item` (should be `- [x] Item`)
 - Old in-progress convention: `- >> Item` (should be `- [ ] >> Item`)
 - Missing phase grouping (should be `## Phase N — Title [STATUS]`)
+- Old status format: `[IN PROGRESS]` (should be `[IN-PROGRESS]`)
+- Plain bullets in `[PLANNED]` phases (should be `- [ ]` checkboxes; plain sub-bullets for detail only)
 - Missing `Backlog` section
 
 **state.md — check for:**
 - Old sections: "What's not working", "What's working well", "Parking lot",
   "Next session"
 - Missing new sections: "Status", "Current Position", "Next Action",
-  "Blockers", "Key Documents"
+  "Blockers"
+
+**decisions.md — check for:**
+- Old category-grouped format (## Tech, ## Architecture, etc. as organizing headers)
+  - Should be flat chronological with `**Category:**` field per entry
 
 **CLAUDE.md — check for:**
 - Missing "Session Protocol" table
@@ -63,6 +69,18 @@ Check each file against the current format:
 - Missing "Key Documents" section
 - Missing `execute` and `cleanup` command references
 - Old session protocol missing "execute" row
+- Redundant rules that duplicate SessionStart hook and command logic:
+  - "Run /scaffold:status at the start of every session..." — handled by SessionStart hook
+  - "If /scaffold:status wasn't run, read ..." — handled by SessionStart hook
+  - "Before checkpoint: verify claims with evidence..." — handled by checkpoint command
+  - "When I say 'checkpoint' — run /scaffold:checkpoint" — self-evident
+  - "Ask before making major architectural..." — simplify to "Ask before making architectural..."
+  - If found, replace the full rules block with:
+    - Consult .scaffold/decisions.md when making or revisiting technology/architecture/design choices
+    - Ask before making architectural or structural changes
+    - If any scaffold file contradicts what you observe in the codebase, trust the codebase. State the contradiction to me explicitly and await my approval before proceeding.
+    - If a session is getting long and available context is less than 40%, pause the work and suggest /scaffold:checkpoint for completed work before continuing
+    - If we made decisions, found bugs, discussed scope changes, or planned future work and I haven't said "checkpoint" — remind me before the session ends
 
 ---
 
@@ -71,13 +89,13 @@ Check each file against the current format:
 For each file that needs changes, build the new content by mapping old → new:
 
 **roadmap.md migration:**
-- "Current phase" text → becomes the title of the `[IN PROGRESS]` phase
+- "Current phase" text → becomes the title of the `[IN-PROGRESS]` phase
 - "Done" items → become `[x]` tasks in completed phases or Phase 1
   - If items suggest natural phase boundaries, group into separate phases
   - Otherwise, group all into "Phase 1 — [inferred title] [COMPLETE]"
-- "In progress" items → become `[ ] >>` tasks in the `[IN PROGRESS]` phase
-- "Up next" items → become `[ ]` tasks in the `[IN PROGRESS]` or next `[PLANNED]` phase
-- "Later" items → move to `Backlog`
+- "In progress" items → become `[ ] >>` tasks in the `[IN-PROGRESS]` phase
+- "Up next" items → become `[ ]` tasks in the `[IN-PROGRESS]` or next `[PLANNED]` phase
+- "Later" items → move to `Backlog` (as `[ ]` checkbox items)
 - Old `- v Item` → `- [x] Item`
 - Old `- >> Item` → `- [ ] >> Item`
 
@@ -89,7 +107,12 @@ For each file that needs changes, build the new content by mapping old → new:
 - "Next session" → "Next Action" (rewrite as action pointer, not vague intentions)
 - Add "Status" section (infer from current state: idle / executing / blocked)
 - Add "Current Position" section (synthesize from existing content)
-- Add "Key Documents" section
+
+**decisions.md migration:**
+- Extract entries from category sections (## Tech, ## Architecture, ## Design, ## Scope)
+- Add `**Category:** [section name]` field to each entry
+- Flatten into single chronological list, newest first (sort by date in ### header)
+- Keep `## Archived` section at bottom
 
 **CLAUDE.md migration:**
 - Add Session Protocol table if missing (with "execute" row)
