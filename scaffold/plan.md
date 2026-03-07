@@ -121,7 +121,7 @@ they conflict, follow the user.
 1. **State-only session** -- brainstorming, roadmap restructuring, research that
    doesn't produce codebase changes. No execute step needed.
 2. **Execution session** -- AI tasks to execute. Will produce a plan doc
-   for `/scaffold:execute`.
+   for `/scaffold:prime`.
 3. **User-action session** -- all scoped tasks are `[USER]` tasks that the human
    completes. No execute step. Plan doc is produced for `/scaffold:verify`.
 4. **Mixed session** -- AI tasks followed by `[USER]` tasks. Execute handles the
@@ -246,7 +246,11 @@ guiding execution. Include:
 ## Key Decisions
 [from the planning discussion]
 
-## Tasks
+## AI Tasks
+
+> These tasks define the scope of work for this session. Research the
+> codebase to understand how to implement them. Confirm your approach
+> with the user before executing. Do not expand scope beyond these tasks.
 
 ### Task: [title]
 - **What:** one sentence
@@ -257,7 +261,8 @@ guiding execution. Include:
 ### Task: [title]
 ...
 
-For `[USER]` tasks, use this format instead:
+## User Tasks
+*(omit section entirely if no [USER] tasks)*
 
 ### Task: [title] [USER]
 - **What:** what the user needs to do
@@ -267,28 +272,22 @@ For `[USER]` tasks, use this format instead:
 USER tasks do NOT have Type or Why fields -- they are human instructions, not
 AI execution contracts.
 
-## Deferred Items
+---
+
+## Session Record
+
+### Deferred Items
 [if any -- route targets specified. Omit section if nothing deferred.]
 If AI tasks exist after a `[USER]` task in the roadmap sequence, add to Deferred Items:
 "Subsequent AI tasks blocked on USER task completion -- will be scoped in next plan cycle."
 The plan doc must NOT list AI tasks after USER tasks.
 
-## Decisions for decisions.md
+### Decisions for decisions.md
 [if any -- omit if no decisions made]
 
-## Execution Notes
-- Verify each task before marking complete
-- If verification fails: present findings, ask user, don't auto-fix
-- If task is bigger than expected: stop, re-scope, ask user
-- If uncertain about approach or encountering unexpected complexity: stop,
-  present what you found, ask the user. Don't guess.
-- Prefer completing and verifying each task before starting the next
-- Between tasks: if the conversation is getting long, suggest checkpointing
-- If the user changes direction: suggest checkpoint completed work ->
-  /clear -> /scaffold:plan for the new direction
-
-## Checkpoint Reminder
+### Checkpoint Reminder
 When complete, run /scaffold:checkpoint.
+[If USER tasks exist:] Then complete user tasks and run /scaffold:verify.
 Checkpoint reads this plan file for deferred items and decisions.
 ```
 
@@ -296,11 +295,10 @@ Checkpoint reads this plan file for deferred items and decisions.
 ```
 - **Output to:** `.scaffold/investigations/YYYYMMDD-NN-slug.md`
 ```
-This tells execute where to write findings.
+This tells execution where to write findings.
 
-**Tasks do NOT include key-files or verify-by fields.** Those come from
-`/scaffold:prep` if it runs. Tasks contain: what, type, why, done-when
-(and output-to for investigation tasks).
+**Tasks do NOT include key-files or verify-by fields.** Tasks contain:
+what, type, why, done-when (and output-to for investigation tasks).
 
 **For state-only sessions:** The plan doc records what was discussed/changed
 instead of tactical execution detail. It serves as a session record.
@@ -310,23 +308,17 @@ instead of tactical execution detail. It serves as a session record.
   (user-action session), or "idle" (state-only)
 - Current Position -> reflect any roadmap changes made
 - Next Action ->
-  - Execution session (complex tasks): "Run `/scaffold:prep` then `/scaffold:execute`.
+  - Execution session: "Run `/scaffold:prime` (in plan mode).
     Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
-  - Execution session (simple tasks): "Run `/scaffold:execute`.
-    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
-  - Mixed session: "Run `/scaffold:execute`. After checkpoint, user tasks pending --
-    run `/scaffold:verify` when complete.
-    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
+  - Mixed session: "Run `/scaffold:prime` (in plan mode).
+    Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`.
+    After execution: `/scaffold:checkpoint`, then `/scaffold:verify` for [N] user tasks."
   - User-action session: "User tasks pending. Run `/scaffold:verify` when complete.
     Plan: `.scaffold/plans/YYYYMMDD-NN-phase-N-slug.md`"
   - State-only session: "No execute needed -- state documents updated.
     Run /scaffold:plan to determine next steps."
 - Update Blockers and Open Questions if they changed during planning
 - Update the `<!-- Last updated -->` date
-
-**Prep recommendation rule of thumb:** If tasks are `type: build` or
-`type: investigate` and touch unfamiliar code, recommend prep. If tasks are
-simple fixes, config changes, or the user knows the codebase well, skip prep.
 
 **If in plan mode:** Call ExitPlanMode after writing files. The user will review
 and can edit the plan doc directly before approving.
@@ -340,20 +332,16 @@ Present what was updated and where:
 - Plan doc location
 - State.md updates
 
-**If execution session (prep recommended):**
-> "Run `/scaffold:prep` then `/clear` then `/scaffold:execute`,
-> or `/clear` then `/scaffold:execute` to skip prep."
-
-**If execution session (prep not needed):**
-> "Run `/scaffold:execute` to begin, or `/clear` then `/scaffold:execute`
-> for a fresh context window."
+**If execution session:**
+> "Enter plan mode (shift-tab), then run `/scaffold:prime`."
+> Or: "/clear first for a fresh context window, then plan mode + `/scaffold:prime`."
 
 **If state-only session:**
 > "State documents updated. No execution needed."
 
 **If mixed session:**
-> "Run `/scaffold:execute` for the AI tasks. After checkpoint, complete the
-> user tasks, then run `/scaffold:verify`."
+> "Enter plan mode (shift-tab), then run `/scaffold:prime` for the AI tasks.
+> After checkpoint, complete the user tasks, then run `/scaffold:verify`."
 
 **If user-action session:**
 > "No AI execution needed. Complete the user tasks listed in the plan doc,

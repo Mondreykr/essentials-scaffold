@@ -42,12 +42,12 @@ Then give me a brief orientation:
    Skip this section if no pending quick tasks exist.
 7. **Next action** — Based on state.md's "Next Action" section:
    - If Next Action has a plan pointer and mentions `/scaffold:verify`:
-     - If it also mentions `/scaffold:execute`: "Pending execute: [plan summary].
-       Run `/scaffold:execute`. User tasks follow — `/scaffold:verify` after."
+     - If it also mentions `/scaffold:prime`: "Pending: [plan summary].
+       Enter plan mode, run `/scaffold:prime`. User tasks follow — `/scaffold:verify` after."
      - If verify only: "User tasks pending per plan [filename]. Complete them,
        then run `/scaffold:verify`."
-   - If Next Action has a plan pointer (no verify mention): "Pending execute:
-     [plan summary]. Run `/scaffold:execute` to continue."
+   - If Next Action has a plan pointer (no verify mention): "Pending: [plan summary].
+     Enter plan mode, run `/scaffold:prime`."
    - If Next Action says plan needed: "Run `/scaffold:plan` to determine next steps."
    - If state is blocked: surface the blocker and suggest addressing it
 

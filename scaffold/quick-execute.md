@@ -41,7 +41,7 @@ expected — needs more than 3 steps, requires architectural decisions, or
 touches multiple subsystems — STOP and say:
 
 > "This is bigger than the quick plan anticipated. [explain what changed]
-> Suggest converting to full `/scaffold:plan` + `/scaffold:execute`."
+> Suggest converting to full `/scaffold:plan` + `/scaffold:prime`."
 
 Let the user decide how to proceed.
 

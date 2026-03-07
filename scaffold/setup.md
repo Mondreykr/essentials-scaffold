@@ -88,7 +88,7 @@ For new projects, use the placeholder text as-is.
 | "resume" / "let's pick up" | Run `/scaffold:resume` — restore context from pause |
 | "status" | Quick readout from `.scaffold/state.md` and `.scaffold/roadmap.md` |
 | "decision: [X]" | Log in `.scaffold/decisions.md` |
-| "execute" | Run `/scaffold:execute` — do scoped work from plan doc |
+| "prime" / "execute" | Enter plan mode, then run `/scaffold:prime` |
 | "quick fix" | Run `/scaffold:quick` — plan a lightweight quick task |
 
 ### Command Reference
@@ -96,8 +96,7 @@ For new projects, use the placeholder text as-is.
 |---------|------|
 | `/scaffold:status` | Orient — read state, suggest next action |
 | `/scaffold:plan` | Plan — update roadmap, scope work, produce plan doc |
-| `/scaffold:prep` | Prep — research tactical detail for planned tasks (optional) |
-| `/scaffold:execute` | Execute — do the work from plan doc |
+| `/scaffold:prime` | Prime — load plan context into Claude's plan mode |
 | `/scaffold:checkpoint` | Close the loop — verify, mark complete, commit |
 | `/scaffold:pause` | Pause — capture full context for later resumption |
 | `/scaffold:resume` | Resume — restore context from a paused session |
@@ -258,7 +257,7 @@ for a solo builder. Good defaults, large community, easy Vercel deployment.
 ```
 
 6. **Verify companion commands** — confirm that `status.md`, `checkpoint.md`,
-   `plan.md`, `prep.md`, `execute.md`, `pause.md`, `resume.md`, `cleanup.md`,
+   `plan.md`, `prime.md`, `pause.md`, `resume.md`, `cleanup.md`,
    `graduate.md`, `quick.md`, and `quick-execute.md` exist as sibling
    files in this same folder. If any are missing, tell me — they should have
    been installed together.

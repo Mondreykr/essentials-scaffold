@@ -51,8 +51,9 @@ If git is initialized:
 
 Based on the Current State field from continue-here.md:
 
-- **mid-execute:** Proceed directly to executing remaining tasks from the
-  referenced plan doc. Continue where the pause left off.
+- **mid-execution:** Enter plan mode (shift-tab), then run `/scaffold:prime`
+  to continue from the referenced plan doc. Claude's plan mode will research
+  remaining tasks.
 - **mid-plan:** Resume the planning flow. Re-read the roadmap and pick up
   from where planning stopped.
 - **idle / between commands:** Suggest the next command based on the

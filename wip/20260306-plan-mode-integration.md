@@ -1,10 +1,10 @@
 # Plan Mode Integration Design
 
 Design document for integrating Claude Code's native plan mode into the
-scaffold workflow, replacing `/scaffold:prep` and `/scaffold:execute` while
-keeping all other scaffold commands intact.
+scaffold workflow, replacing `/scaffold:prep` and `/scaffold:execute` with
+`/scaffold:prime` while keeping all other scaffold commands intact.
 
-## Current Workflow
+## Current Workflow (Before)
 
 ```
   /scaffold:status
@@ -25,166 +25,108 @@ keeping all other scaffold commands intact.
   /scaffold:checkpoint  (reads plan doc for deferred items/decisions, updates all state)
 ```
 
-Key properties:
-- Plan doc is the bridge artifact between plan and execute
-- `/clear` between plan and execute is intentional (forces self-contained doc)
-- Checkpoint reads the plan doc post-execution — never the conversation
-- Execute does NOT update scaffold files — checkpoint does
-
-## Proposed Workflow
+## New Workflow (After)
 
 ```
   /scaffold:status
         |
         v
   /scaffold:plan -----> .scaffold/plans/YYYYMMDD-NN-*.md   (contract doc)
-        |                       |
-        v                       |  (user enters plan mode manually)
-      done                      |
-                                v
-                     Claude plan mode reads contract doc
-                     Parallel subagents research codebase
-                     Writes its own execution plan file
-                                |
-                                v
-                     User approves plan
-                     "Yes, clear context and auto-accept edits"
-                                |
-                                v
-                     Claude executes from its plan file
-                     TodoWrite checklist tracks progress
-                     Auto-accept edits (pre-approved)
-                                |
-                                v
-                  /scaffold:checkpoint   (unchanged — reads scaffold plan doc)
+        |
+        v
+      done (optionally /clear for fresh context)
+        |
+        v
+  User enters plan mode (shift-tab)
+        |
+        v
+  /scaffold:prime       (reads plan doc + context files, presents scope)
+        |
+        v
+  Claude plan mode      (parallel subagent research, writes execution plan)
+        |
+        v
+  User approves plan    ("Yes, clear context and auto-accept edits")
+        |
+        v
+  Claude executes       (TodoWrite checklist tracks progress, auto-accept edits)
+        |
+        v
+  /scaffold:checkpoint  (unchanged — reads scaffold plan doc)
 ```
 
-## What Changes
+## Key Design Decisions
 
-### Retired Commands
+### Prime is entered inside plan mode
+The user enters plan mode first (shift-tab), then runs `/scaffold:prime`.
+Prime does NOT call EnterPlanMode — it assumes plan mode is already active
+and checks for it as a precondition.
 
-| Command             | Replaced By                          |
-|---------------------|--------------------------------------|
-| `/scaffold:prep`    | Plan mode's parallel subagent research |
-| `/scaffold:execute` | Plan mode's post-clear execution     |
+### Plan command sets state.md routing (not prime)
+`/scaffold:plan` sets state.md's Next Action to reference `/scaffold:prime`.
+Prime itself is read-only — it loads context and presents scope but does not
+modify any scaffold files.
+
+### Fixed preamble on AI Tasks section
+The plan doc template includes a fixed preamble in the `## AI Tasks` section:
+
+> These tasks define the scope of work for this session. Research the
+> codebase to understand how to implement them. Confirm your approach
+> with the user before executing. Do not expand scope beyond these tasks.
+
+This replaces the old `## Execution Notes` section. The preamble travels
+with the tasks into plan mode's context, providing guardrails without a
+separate section that might be ignored.
+
+### Visible section break between AI and User tasks
+The plan doc template uses `## AI Tasks` and `## User Tasks` as separate
+top-level sections, with `## User Tasks` omitted entirely when there are
+no user tasks. Below a `---` horizontal rule, `## Session Record` contains
+deferred items, decisions, and the checkpoint reminder — material that
+checkpoint reads post-execution.
+
+### Delete prep.md and execute.md (no stubs)
+Both files are deleted outright. No deprecation stubs, no redirects. The
+commands simply stop existing. Users who type `/scaffold:prep` or
+`/scaffold:execute` will see "command not found" which is clear enough.
+
+## What Changed
+
+### New Commands
+
+| Command | Role |
+|---------|------|
+| `/scaffold:prime` | Load plan context into Claude's plan mode |
+
+### Deleted Commands
+
+| Command | Replaced By |
+|---------|-------------|
+| `/scaffold:prep` | Plan mode's parallel subagent research |
+| `/scaffold:execute` | Plan mode's post-clear execution |
 
 ### Modified Commands
 
-| Command              | Change                                                |
-|----------------------|-------------------------------------------------------|
-| `/scaffold:plan`     | Plan doc template gets AI/human task separation        |
-| `/scaffold:pause`    | `continue-here.md` notes "native plan mode" context   |
-| `/scaffold:resume`   | Routes to "re-enter plan mode" not "run execute"      |
-| `/scaffold:setup`    | Command Reference table updated                       |
+| Command | Change |
+|---------|--------|
+| `/scaffold:plan` | AI Tasks/User Tasks split, fixed preamble, Session Record section, updated state.md phrasing |
+| `/scaffold:setup` | Session Protocol and Command Reference tables updated |
+| `/scaffold:pause` | `continue-here.md` template uses `mid-execution`, references prime |
+| `/scaffold:resume` | Routes mid-execution to plan mode + prime |
+| `/scaffold:status` | Next Action detection references prime instead of execute |
+| `/scaffold:quick-execute` | Escape hatch text references prime |
 
 ### Unchanged Commands
 
-| Command                   | Why It's Fine                                        |
-|---------------------------|------------------------------------------------------|
-| `/scaffold:checkpoint`    | Already designed for post-/clear; reads plan doc     |
-| `/scaffold:status`        | Reads state.md — decoupled from execution method     |
-| `/scaffold:quick`         | Independent of main plan/execute cycle               |
-| `/scaffold:quick-execute` | Independent of main plan/execute cycle               |
-| `/scaffold:graduate`      | Archives commands — mechanical update to list only   |
-| `/scaffold:cleanup`       | Format migration — unaffected                        |
-| `/scaffold:update`        | Pulls latest commands — set changes but logic same   |
-
-## Plan Doc Format Change
-
-The scaffold plan doc needs a clear boundary between what Claude's plan mode
-should execute and what is human context / post-execution routing.
-
-### Current Structure
-
-```markdown
-## Session Goal
-## Context Pointers
-## Key Decisions
-## Tasks                    <-- mix of AI and human concerns
-  ### Task: ...
-## Deferred Items           <-- routing info for checkpoint
-## Decisions for decisions.md
-## Execution Notes          <-- mix of AI instructions and human reminders
-## Checkpoint Reminder
-## Prep Detail              <-- appended by /scaffold:prep (going away)
-```
-
-### Proposed Structure
-
-```markdown
-## Session Goal
-## Context Pointers
-## Key Decisions
-
-## Tasks
-  ### Task: ...             <-- AI-executable tasks only
-  ### Task: ...
-
-## Execution Constraints    <-- rules for AI during execution
-  - Verify each task before marking complete
-  - If verification fails: stop, don't auto-fix
-  - If task is bigger than expected: stop, re-scope
-
----
-
-## Post-Execution (do not execute — checkpoint reads this)
-
-### Deferred Items
-  | Item | Route | Why deferred |
-
-### Decisions for decisions.md
-  [entries]
-
-### Human Actions Required
-  - [things the Director must do, e.g. deploy DLL]
-
-### Checkpoint Reminder
-  When complete, run /scaffold:checkpoint.
-```
-
-The `---` horizontal rule and "do not execute" label create a clear boundary.
-Plan mode reads above the line. Checkpoint reads below the line.
-
-## Why This Works (Audit Summary)
-
-### Checkpoint handoff: CLEAN
-
-Checkpoint's "Check for Plan File" step reads `.scaffold/plans/` for deferred
-items, decisions, and investigation outputs. The scaffold plan doc is written
-by `/scaffold:plan` and never modified by execution. Whether execution happens
-via `/scaffold:execute` or Claude's native mode, the plan doc is sitting there
-for checkpoint to read.
-
-Checkpoint already handles the post-/clear case: "The conversation may not
-contain them" — that's why it reads the plan doc in the first place.
-
-### State.md pointer: CLEAN
-
-`/scaffold:plan` sets state.md's Next Action to point at the plan doc.
-Checkpoint clears it. This cycle is the same regardless of execution method.
-
-The phrasing changes from:
-> "Run `/scaffold:prep` then `/scaffold:execute`. Plan: `.scaffold/plans/...`"
-
-To:
-> "Enter plan mode. Point at `.scaffold/plans/...` for task scope."
-
-### Pause/resume: MINOR FRICTION
-
-If the user pauses mid-native-execution, `continue-here.md` needs to note
-that execution was via plan mode so resume routes correctly. Resume would say
-"re-enter plan mode for remaining tasks" instead of "run /scaffold:execute."
-
-### Quick tasks: NO IMPACT
-
-Quick tasks are fully independent — own plan/summary lifecycle, don't touch
-state.md's Next Action, don't reference the main plan doc.
-
-### Investigation tasks: LIKELY FINE
-
-Claude's plan mode can produce markdown artifacts (investigation docs) — it's
-not limited to code changes. The task's `Output to:` field in the plan doc
-tells it where to write. Checkpoint verifies the file exists.
+| Command | Why |
+|---------|-----|
+| `/scaffold:checkpoint` | Reads plan doc post-execution — decoupled from execution method |
+| `/scaffold:verify` | Reads User Tasks section — compatible with new template |
+| `/scaffold:quick` | Independent of main plan/execute cycle |
+| `/scaffold:quick-execute` | Logic unchanged, only escape hatch text updated |
+| `/scaffold:graduate` | Archives commands — mechanical |
+| `/scaffold:cleanup` | Format migration — unaffected |
+| `/scaffold:update` | Pulls latest commands |
 
 ## What Plan Mode Gives Us
 
@@ -200,27 +142,21 @@ tells it where to write. Checkpoint verifies the file exists.
 4. **Auto-accept edits** — Permissions pre-approved at plan approval time.
    No pause for confirmation on every file edit during execution.
 
-## Risks
+## Compatibility Notes
 
-1. **Plan mode ignoring the boundary** — Claude might try to execute items
-   below the `---` line. Mitigated by clear labeling + horizontal rule, but
-   not guaranteed. Needs testing.
+### Checkpoint handoff: CLEAN
+Checkpoint reads `## Session Record` > `### Deferred Items` and
+`### Decisions for decisions.md` from the plan doc. These sections are
+in the new template under the `---` separator. The plan doc is written by
+`/scaffold:plan` and never modified by execution.
 
-2. **Investigation tasks** — Plan mode is tuned for code changes. Investigation
-   tasks that produce markdown docs *should* work but are untested in this flow.
+### Verify compatibility: CLEAN
+Verify looks for `[USER]` markers in the plan doc's task sections. The new
+`## User Tasks` section with `[USER]` markers is parseable by the same logic.
 
-3. **Pause mid-native-execution** — Slightly awkward resume path. Low impact
-   since pause is rarely used mid-execution.
+### State.md pointer: CLEAN
+`/scaffold:plan` sets the pointer, checkpoint clears it. Cycle is identical.
 
-4. **Loss of scaffold execute's guardrails** — Scaffold execute had explicit
-   "stop if scope creeps" and "suggest checkpoint between tasks" rules. These
-   would need to live in the plan doc's Execution Constraints section (which
-   plan mode reads) rather than in a command definition.
-
-## Branch Plan
-
-- Branch: `feat/plan-mode-integration` (on essentials-scaffold repo)
-- Changes scoped to: `scaffold/` command files
-- Testing: copy modified commands to `~/.claude/commands/scaffold/`, test
-  against pdm-validation project
-- Rollback: revert to master branch commands
+### Pause/resume: CLEAN
+`continue-here.md` uses `mid-execution` state (not `mid-execute`). Resume
+routes to plan mode + prime instead of scaffold execute.

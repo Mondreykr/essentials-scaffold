@@ -35,7 +35,7 @@ Write `.scaffold/continue-here.md` with this structure:
 <!-- Written: [today's date and time] -->
 
 ## Current State
-[idle | mid-plan | mid-execute | blocked] — [which command was running, if any]
+[idle | mid-plan | mid-execution | blocked] — [which command was running, if any]
 
 ## Completed Work
 - [Specific files changed, tasks completed, features built]
@@ -58,8 +58,8 @@ Write `.scaffold/continue-here.md` with this structure:
 Key insight, tricky bit, approach that's working, thing to watch out for.]
 
 ## Next Specific Action
-[Concrete next step — e.g., "Run /scaffold:execute to continue plan
-`.scaffold/plans/20260305-01-phase-2-api.md`, starting from Task 3."
+[Concrete next step — e.g., "Enter plan mode, run /scaffold:prime to continue
+plan `.scaffold/plans/20260305-01-phase-2-api.md`, starting from Task 3."
 Or: "Run /scaffold:checkpoint to commit completed work, then /scaffold:plan
 for the next batch."]
 ```
