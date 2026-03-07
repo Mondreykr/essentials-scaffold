@@ -57,24 +57,21 @@ There are two workflows: the **main workflow** for substantial work, and a **qui
 ### Main workflow
 
 ```
-status → plan → execute → checkpoint
+status → plan → prime (in plan mode) → checkpoint
 ```
 
-Each step is a separate command. Between commands, you can `/clear` to free up Claude's context window — the scaffold files carry all state, so nothing is lost. This is especially useful before execute on large tasks.
+Each step is a separate command. Between commands, you can `/clear` to free up Claude's context window — the scaffold files carry all state, so nothing is lost.
 
 | Step | Command | What happens |
 |------|---------|--------------|
 | **Orient** | `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks |
 | **Plan** | `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, writes a plan doc |
-| **Prep** (optional) | `/scaffold:prep` | Researches tactical detail — file paths, verification commands, approach. Appends to the plan doc |
-| **Execute** | `/scaffold:execute` | Reads the plan doc from state.md, does the work. No strategic decisions, no scaffold updates |
+| **Prime** | `/scaffold:prime` | Enter plan mode (`Shift+Tab`), then run prime. Loads plan context — Claude researches approach, gets approval, clears context, and executes |
 | **Checkpoint** | `/scaffold:checkpoint` | Verifies work, marks tasks complete, handles phase sign-off, commits |
 
 **Plan** has two possible outcomes:
-1. **Execution session** — codebase changes needed. Plan produces a plan doc, you proceed to execute.
+1. **Execution session** — codebase changes needed. Plan produces a plan doc, you enter plan mode and prime.
 2. **State-only session** — brainstorming, roadmap restructuring, no codebase changes. Plan updates files and you're done.
-
-**Prep** is optional. Recommended for complex tasks or unfamiliar code. Skip for simple changes.
 
 ### User tasks
 
@@ -85,16 +82,14 @@ Mark these `[USER]` in the roadmap.
 
 | Pattern | Flow | When |
 |---------|------|------|
-| AI only | plan → execute → checkpoint | All tasks are code changes |
-| AI then USER | plan → execute → checkpoint → *user works* → verify | AI work first, then user work |
+| AI only | plan → prime → checkpoint | All tasks are code changes |
+| AI then USER | plan → prime → checkpoint → *user works* → verify | AI work first, then user work |
 | USER only | plan → *user works* → verify | Only user tasks, no code changes |
-| USER then AI | plan → *user works* → verify → plan → execute → checkpoint | User tasks must complete before AI can proceed |
+| USER then AI | plan → *user works* → verify → plan → prime → checkpoint | User tasks must complete before AI can proceed |
 
 When a plan contains `[USER]` tasks, checkpoint notes them as pending. After
 completing your work, run `/scaffold:verify` to walk through each task, confirm
 completion, and update the roadmap.
-
-**Tip:** Run plan in plan mode (`Shift+Tab` in Claude Code — a read-only research mode where Claude can explore but not edit files) for more thorough analysis.
 
 ### Interrupting and resuming
 
@@ -114,9 +109,8 @@ For small fixes that don't warrant the full plan/execute ceremony. Quick tasks a
 |---------|-------------|----------------|
 | `/scaffold:setup` | Creates context files and a SessionStart hook. Pass `--deep` to scan the codebase (best for brownfield projects). | Once per project, at the start |
 | `/scaffold:status` | Reads scaffold files, gives a session briefing with health checks. Detects paused sessions and pending executes. | Every session start, or after `/clear` |
-| `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, scopes work, writes a plan doc. Run in plan mode (`Shift+Tab`). | Before substantial work sessions |
-| `/scaffold:prep` | Researches tactical detail for planned tasks — file paths, verification commands, approach. Appends to the plan doc. | After plan, before execute (optional — recommended for complex tasks) |
-| `/scaffold:execute` | Reads the plan doc from state.md pointer, executes scoped tasks. Uses prep detail if available. Does not update scaffold files. | After plan (and optionally prep), when ready to do the work |
+| `/scaffold:plan` | Triages state, consults you on direction, updates roadmap, scopes work, writes a plan doc. | Before substantial work sessions |
+| `/scaffold:prime` | Loads plan context into Claude's plan mode. Claude researches approach, gets approval, then executes. | After plan, in plan mode (`Shift+Tab`) |
 | `/scaffold:checkpoint` | Verifies work, updates scaffold files, handles phase sign-off, commits. Pass `--audit` to verify claims against code. | End of every work session |
 | `/scaffold:pause` | Captures full session context to a handoff file for seamless resumption. | When you need to stop mid-work and pick up later |
 | `/scaffold:resume` | Restores context from a paused session and routes to next action. | Start of session when a pause file exists |
