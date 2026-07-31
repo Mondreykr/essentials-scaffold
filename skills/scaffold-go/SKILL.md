@@ -116,8 +116,11 @@ When all scope items are done:
 Do NOT tick the `milestone.md` checklist yourself — checkpoint marks the phase complete after
 verifying. If you resolved a resume precondition that `## Next` warned about (e.g.
 re-seeded the dirty dev DB), surface it so `checkpoint` can update `## Next` — you don't
-write `state.md` yourself. Likewise surface any ground-level issue you hit but left alone,
-so `checkpoint` can log it in the milestone's `## Deferred`.
+write `state.md` yourself. Likewise surface any ground-level issue you hit but left alone —
+`checkpoint` decides its disposition, and most such issues are **fixed in place there, not
+parked**: `## Deferred` admits an item only if it needs a decision, is materially out of
+scope, or is real work that can't ride along safely. Surfacing it is not the same as filing
+it, and it is not a way to bank scope you skipped.
 
 ---
 

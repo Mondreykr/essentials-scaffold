@@ -53,6 +53,12 @@ updated: YYYY-MM-DD
   discriminator between `## Backlog` and `## Deferred`; "altitude" is not the rule. A bug
   in code this milestone built is *tied* (→ Deferred); a standalone future capability is
   *not tied* (→ Backlog).
+- **The admission bar applies here too** (stated in full in `contracts/milestone.md` →
+  `## Deferred` admission). It runs *before* the tied-ness test above, so `## Backlog`
+  cannot become the escape hatch for work that failed admission to `## Deferred`: an item
+  earns a line only by needing a decision, being materially out of scope, or being real work
+  that can't ride along safely — otherwise it's fixed in place or dropped. A genuine future
+  capability clears gate 2 by definition; a small fix noticed in passing clears nothing.
 - **One line, hard.** Each item is a single terse line — a pointer/reminder, not a
   summary. No sub-bullets, no detail-bearing parentheticals, no multi-clause paragraphs.
   If it needs more than a line, it's a phase plan or an investigation, not a backlog

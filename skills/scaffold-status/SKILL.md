@@ -88,10 +88,11 @@ State is derived from what the documents say, not from status keywords. Compute:
 - **Blocked?** `state.md`'s `## Blockers` has content other than "None."
 - **Open questions?** `state.md`'s `## Open Questions` has content other than "None."
 - **Deferred work parked?** The active milestone's `milestone.md` has a non-empty `## Deferred`
-  list — surface the count; these are known items not yet scheduled. If it has grown large
-  (rule of thumb: >~12 items), nudge: "`## Deferred` is at N items — consider
-  `/scaffold-audit` to groom it (the deep already-built/stale check), then `/scaffold-plan`
-  to act." This puts the grooming signal on the session-**entry** path too, so a resuming
+  list — surface the count; these are known items not yet scheduled. Admission is barred
+  (needs a decision / materially out of scope / can't ride along safely), so the list should
+  be short; if it has grown past **~8 items**, nudge: "`## Deferred` is at N items — longer
+  than the admission bar should allow. Consider `/scaffold-audit` to groom it (the deep
+  already-built/stale check), then `/scaffold-plan` to act." This puts the grooming signal on the session-**entry** path too, so a resuming
   user sees it even if last session ended without a checkpoint. (A precondition on resuming,
   e.g. "reseed the dev DB first," lives in `## Next` and is surfaced with it — there is no
   `## Notes` section.)

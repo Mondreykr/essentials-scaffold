@@ -231,15 +231,27 @@ A few concepts span the execution docs and don't belong to any single contract:
   deferred debt, a review residual. **The Backlog↔Deferred discriminator is one computable
   test — "is it tied to the active milestone?"** Tied → here (it's moot or owned elsewhere
   once the milestone closes); not tied, or no milestone is active → `roadmap.md`
-  `## Backlog` (it outlives any current milestone). It is groomed **continuously, not only
-  at close** (close is too rare to be the drain — milestones can run a long time): `plan`
-  promotes an item into a phase plan (and removes the line) or leaves it; `checkpoint`
-  removes items shipped that session **and, on its always-on sweep, surfaces a nudge to run
-  `/scaffold-audit` once the list grows large or hasn't been groomed in a while**; `audit`'s
-  reality pass does the expensive "already built / no longer applies" determination and
-  flags items for removal. Accumulation of one-liners is tolerable *because* the sweep
-  nudges grooming before it bloats — the discipline is one line per item plus prompted
-  grooming, not a guaranteed-empty list, and not a drain you must remember to run unprompted.
+  `## Backlog` (it outlives any current milestone).
+
+  **Admission is a bar, and it runs before routing.** Tied-ness answers *which list*; it
+  never answered *whether the thing deserves a line*, and without that gate a deferred list
+  is the one section in the system with an open membership rule — every soft observation an
+  agent doesn't want to lose lands there, and it bloats faster than any other doc. So an
+  item is admitted only if it **needs a decision**, is **materially out of scope**, or is
+  **real work that can't ride along safely**; anything else is **fixed in place or dropped**
+  (if the fix is smaller than the line describing it, the line is the more expensive
+  artifact). **Additions are Adam-gated** — a skill proposes with the gate it clears and
+  Adam approves, the same hard gate `decisions/` carries; removal stays ungated, because the
+  friction belongs on the way in. Full statement: `contracts/milestone.md`.
+
+  Grooming still runs **continuously, not only at close** (close is too rare to be the
+  drain — milestones can run a long time): `plan` promotes an item into a phase plan (and
+  removes the line) or leaves it; `checkpoint` removes items shipped that session **and, on
+  its always-on sweep, flags a list that has grown past what the bar should permit**;
+  `audit`'s reality pass does the expensive "already built / no longer applies"
+  determination and flags items for removal. The bar and the grooming are complements, not
+  substitutes: the bar keeps the list short, grooming keeps it *true*. A long list is read
+  as an admission failure first and a grooming backlog second.
 
 ## Routing — "Where Does This Go?"
 
@@ -247,8 +259,9 @@ Deterministic. Resolve by the two laws when in doubt.
 
 | The thing | Home |
 |-----------|------|
-| Future work NOT tied to the active milestone (a feature/capability that outlives it; or anything surfaced while no milestone is active) | `roadmap.md` → `## Backlog` |
-| Deferred work tied to the active milestone (a bug, cleanup, debt, residual in its scope/code) | that milestone's `milestone.md` → `## Deferred` |
+| Future work NOT tied to the active milestone (a feature/capability that outlives it; or anything surfaced while no milestone is active) — **and clearing the admission bar** | `roadmap.md` → `## Backlog` |
+| Deferred work tied to the active milestone (a bug, cleanup, debt, residual in its scope/code) — **and clearing the admission bar** (needs a decision / materially out of scope / can't ride along safely), Adam-approved | that milestone's `milestone.md` → `## Deferred` |
+| Something noticed in passing that clears no admission gate (a rename, a stale comment, a one-line guard, a duplicate) | fix it in place now, or drop it — **not** a parked line |
 | A significant, durable choice + its why | `decisions/NNNN-slug.md` (+ reference it from `architecture.md` if architectural) |
 | Research / analysis output | `investigations/YYYYMMDD-slug.md` |
 | Current technical truth (how it's built, incl. durable run/env) | `architecture.md` |

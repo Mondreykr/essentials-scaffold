@@ -297,8 +297,10 @@ The `## Phases` checklist (each phase a checkbox + a completion date when done) 
 disk-derivable "is it done?" signal — `checkpoint` ticks it. Keep annotations terse (a
 date, not prose) so it stays a bounded checklist, never an append-log. An optional
 `## Deferred` section (ground-level work surfaced inside the milestone but not yet
-scheduled — bugs, cleanups, debt) is added by `plan`/`checkpoint` when there's something to
-park; the seed omits it while empty. No `spec/` and no `phases/*.md` plan yet — those
+scheduled — bugs, cleanups, debt) is added by `plan`/`checkpoint` only when something clears
+its **admission bar** — needs a decision, materially out of scope, or real work that can't
+ride along safely, and approved by Adam; everything else is fixed in place or dropped. The
+seed omits the section while empty. No `spec/` and no `phases/*.md` plan yet — those
 appear only if the work warrants heavy scoping (via `/scaffold-integrate` or
 `/scaffold-plan`) or once `plan` authors the first plan.
 

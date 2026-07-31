@@ -187,8 +187,9 @@ updated: [today]
 [the acceptance the phases roll up to]
 
 ## Deferred
-[OPTIONAL — only if the old layout carried ground-level deferred work. One `- [ ]` line
-each. See the backlog-split note below for what routes here vs. roadmap Backlog.]
+[OPTIONAL — only if the old layout carried ground-level deferred work that clears the
+admission bar. One `- [ ]` line each. See the backlog-split note below for what routes here
+vs. roadmap Backlog, and what doesn't survive at all.]
 ```
 
 **`## Backlog` + a freshly-authored `## Milestones` index STAY in `roadmap.md`:** repurpose
@@ -197,7 +198,13 @@ it to program altitude; author a `## Milestones` index, one line per milestone w
 tied-to-the-active-milestone test** (where most legacy bloat hides): work **not tied** to
 the active milestone (a standalone future feature) stays in `## Backlog` as one terse
 `- [ ]` line; work **tied** to it (a bug, cleanup, debt, residual in its code) moves to
-that milestone's `milestone.md` `## Deferred`. Make each surviving line **one line** — compress a
+that milestone's `milestone.md` `## Deferred`. **First, though, run each item through the
+admission bar** — a legacy list is exactly where items that never deserved a line accumulate,
+and migrating them wholesale launders that debt into the new structure. An item survives
+only if it **needs a decision**, is **materially out of scope**, or is **real work that
+can't ride along safely**; the rest are **proposed for dropping** (cleanup never touches
+project code, so it cannot fix them in place — it surfaces each with what the fix would be
+and Adam decides). Make each surviving line **one line** — compress a
 multi-line paragraph to a pointer (detail stays in git). Drop `someday / never` entries.
 **Rewrite any backlog line the migration makes stale** (e.g. a "multi-user/tenancy" line
 should point at the relevant ADR + a future milestone number, not imply debt the current

@@ -155,6 +155,13 @@ invent a catch-all / "misc" / "notes" section to park something that doesn't obv
 fit.** Route it to its real home; if it genuinely seems to need a new kind of section,
 that's a system-design question to raise with Adam, not a bucket to add mid-session.
 
+- **The admission bar — run it BEFORE the routing test below.** Routing decides *which
+  list*; admission decides *whether it gets a line at all*. An item earns one only if it
+  **needs a decision**, is **materially out of scope**, or is **real work that can't ride
+  along safely.** Clears none → it is **fixed in place or dropped**, never parked (if the
+  fix is smaller than the line describing it, the line is the more expensive artifact).
+  **Additions to `## Deferred` / `## Backlog` are Adam-gated**: propose each with the gate
+  it clears and write only what he approves. Removal stays ungated.
 - **The Backlog↔Deferred test (one computable rule):** *is this tied to the active
   milestone — its scope, its code, or its goal?* **Not tied (or no milestone is active) →
   `roadmap.md` `## Backlog`** (it outlives any current milestone — typically a future
@@ -168,6 +175,9 @@ that's a system-design question to raise with Adam, not a bucket to add mid-sess
   **remove the promoted line in the same write**, or leave the item if Adam decides not to
   schedule it yet. Don't delete an item as "done" on your own judgment — shipped-removal is
   `checkpoint`'s (it has the diff) and stale-detection is `audit`'s (it checks the code).
+  **A dismissal is Adam's to make and yours to offer**: when grooming surfaces an item that
+  no longer clears the admission bar, say so and remove it on his nod — a list only stays
+  short if things leave it.
 - **A new milestone** → create `.scaffold/milestones/NN-slug/` (`NN` = milestone counter;
   slug is a sticky namespace — choose deliberately). Seed `milestone.md` (frontmatter
   `type: milestone`; `# Milestone NN — <slug>`; `## Objectives`; `## Phases`

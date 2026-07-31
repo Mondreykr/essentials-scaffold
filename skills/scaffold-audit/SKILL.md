@@ -108,6 +108,14 @@ Verify the scaffold's claims against the actual code:
   applies. Flag every item that looks shipped or stale for removal (route to
   `checkpoint`/`plan`) — audit reports, never deletes. This is the housekeeping pass that
   keeps the lists from silently accreting done work.
+- **Deferred items actually cleared the admission bar** — the same pass, one question
+  further, and only audit can answer it because it needs the code: for each item, does it
+  still **need a decision**, sit **materially out of scope**, or constitute **real work that
+  can't ride along safely**? An item whose fix you can see is a rename, a one-line guard, a
+  stale comment, or a duplicate of something `state.md` `## Next` or a phase plan already
+  carries **failed admission** — flag it as *fix-in-place* (or *drop*), not as work to
+  schedule. Report the count: a list long on fix-in-place items is an admission failure, and
+  the finding is against the skill that parked them, not just the list.
 - **In-flight / uncommitted work** — flag uncommitted changes or recent edits the docs
   don't yet reflect (a checkpoint may be overdue).
 

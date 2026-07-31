@@ -99,12 +99,29 @@ session changed. The shape each doc must keep:
 - **5a `milestones/NN-slug/milestone.md`** — tick the phase checklist for any phase completed
   this session: `- [x] NN-slug (YYYY-MM-DD)`. The checkbox + date IS the "done?" signal
   (no status enum). Keep annotations terse — a date, not prose; verbose narrative goes to
-  git, never accreting here. **Groom `## Deferred`** (add the section if the milestone
-  needs it): add a terse `- [ ]` line for any work tied to this milestone that this session
-  surfaced but deferred (a bug, cleanup, debt, residual), and **remove any `## Deferred`
-  item this session actually shipped** (you have the diff — that's your evidence). Items are removed,
-  never ticked `- [x]`. If a *plan* shifted (phases reordered/scope changed), that's
-  `scaffold-plan`'s job — note and route.
+  git, never accreting here. **Groom `## Deferred`** (add the section only if something
+  actually clears the bar below):
+
+  - **Removal is yours and is ungated** — **remove any `## Deferred` item this session
+    actually shipped** (you have the diff — that's your evidence). Items are removed, never
+    ticked `- [x]`.
+  - **Addition is a bar, and you do not write it yourself.** This is the section that rots
+    fastest, because at checkpoint time every loose end of the session is in front of you
+    and parking is the cheapest disposition for all of them. It is not the correct one. For
+    each candidate, apply the **admission bar** — it's admitted only if it **needs a
+    decision**, is **materially out of scope**, or is **real work that can't ride along
+    safely**. Clears none → **fix it in place now** (you're already in the code with the
+    diff open — a rename, a stale comment, a one-line guard, a `.gitignore` entry, a
+    duplicate line all cost less than the sentence describing them) **or drop it.** *If the
+    fix is smaller than the line describing it, the line is the more expensive artifact.*
+    "I noticed it and don't want to lose it" is not a gate.
+  - **Then propose, don't append.** Surviving candidates go to Adam as a short list, each
+    with the gate that admits it — "`## Deferred` candidates: 1. <item> (needs a decision:
+    …)" — and **only approved ones are written.** Same hard gate as an ADR, same reason.
+    Nothing is added silently.
+
+  If a *plan* shifted (phases reordered/scope changed), that's `scaffold-plan`'s job — note
+  and route.
 - **5b `state.md` (always)** — exactly four sections (Active focus / Next / Blockers /
   Open Questions), no others:
   - **Active focus** — one paragraph, rewritten to reflect this session's outcome.
@@ -141,9 +158,11 @@ session changed. The shape each doc must keep:
   checkboxes.** A verifiable invariant routes to where it's tested (a phase plan's
   `## Acceptance`, the milestone done-contract, or a `knowledge/` doc), not here.
 - **5f `roadmap.md`** — add a surfaced future-work one-liner to `## Backlog` as a terse
-  `- [ ]` **only if it's not tied to the active milestone** (work tied to the active
-  milestone — its scope/code — goes to `milestone.md` `## Deferred`, not here; the test is
-  tied-ness, not altitude). **Remove any `## Backlog` item this session shipped** (removed,
+  `- [ ]` **only if it clears the same admission bar as 5a** (needs a decision / materially
+  out of scope / can't ride along safely — so `## Backlog` can't be the escape hatch for
+  what failed admission to `## Deferred`) **and it's not tied to the active milestone**
+  (work tied to the active milestone — its scope/code — goes to `milestone.md`
+  `## Deferred`, not here; the test is tied-ness, not altitude). **Remove any `## Backlog` item this session shipped** (removed,
   never ticked `- [x]`). `## Milestones` lines use the fixed tokens `[done] | [active] | [planned]`; the
   status flip to `[done]` happens in Step 6b.
 - **5g `CLAUDE.md` (rare)** — only if orientation/working instructions genuinely changed;
@@ -242,10 +261,13 @@ re-enumerate them here; route them to audit.** Check only:
    moot?) needs the code, so it's `audit`'s job, not this sweep's — but a discretionary
    check nobody's reminded to run isn't a safety net. So the always-on sweep *surfaces the
    signal*: if the active milestone's `## Deferred` (or `roadmap.md` `## Backlog`) has grown
-   large (rule of thumb: >~12 items) or clearly hasn't been groomed in a long while, flag
-   it — "`## Deferred` is at N items; run `/scaffold-audit` to do the deep already-built/
-   stale check, then `/scaffold-plan` to act on the flags." Checkpoint nudges; audit
-   determines. This keeps a long-lived milestone's list from silently accreting.
+   past **~8 items**, or clearly hasn't been groomed in a long while, flag it — "`##
+   Deferred` is at N items; run `/scaffold-audit` to do the deep already-built/stale check,
+   then `/scaffold-plan` to act on the flags." Checkpoint nudges; audit determines. **Read a
+   long list as an admission failure first**: with the bar applied (Step 5a) a list this
+   long shouldn't exist, so the question isn't only "what's stale?" but "what was admitted
+   that should have been fixed in place?" Say that in the flag when the list is mostly small
+   fixes.
 
 Fix what's **mechanical and unambiguous** (a broken back-reference path, a stray dated
 entry folded back into truth, a shipped `## Backlog`/`## Deferred` item removed, a
