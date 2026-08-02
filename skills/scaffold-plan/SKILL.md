@@ -1,5 +1,6 @@
 ---
 name: scaffold-plan
+argument-hint: "[--draft|--final] [what to plan]"
 description: Persist an agreed direction into the scaffold docs — the single authoring skill. Routes each thing to its one home: a backlog idea to roadmap, a new chunk to a milestone + milestone.md, how-to-build-it to phase plans, a cross-cutting truth shift to architecture.md, and always updates state.md's Next cursor. Proposes ADRs (Adam-gated) and sweeps stale plans on a pivot. Use whenever the user wants to plan, scope, decide what to build next, add a milestone or phase, capture a decision or requirement, or write down a direction you've agreed on — even if they only say "plan this", "let's scope it", or "write that down". Writes scaffold docs only, never code.
 ---
 

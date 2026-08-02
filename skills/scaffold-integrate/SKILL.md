@@ -1,5 +1,6 @@
 ---
 name: scaffold-integrate
+argument-hint: "[path/to/doc-or-dir]"
 description: Absorb an external artifact (a spec or design doc) into a scaffold project and route it to its one home — a milestone's spec/ (copy or pointer) or knowledge/ — then lift operational facts into the truth docs. Pure ingest; never authors plans or ADRs, and never touches code. Use whenever the user wants to integrate, absorb, ingest, bring in, or pull in an external doc/spec — even if they only say "integrate this", "absorb that spec", or "add this doc to the scaffold". To migrate an old scaffold layout, use /scaffold-cleanup instead.
 ---
 
