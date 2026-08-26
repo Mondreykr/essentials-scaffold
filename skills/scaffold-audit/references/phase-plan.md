@@ -86,11 +86,19 @@ no conformance break.
   lands. `scaffold-plan` sweeps unexecuted plans (drafts included) on a pivot;
   `scaffold-checkpoint`'s coherence sweep also flags a *finalized* plan whose
   targets/approach conflict with a later decision.
+- **A finalized plan passes the stranger test.** Could a competent builder who has never
+  seen this project execute it from the plan alone? Each place the answer is no is a rule
+  the plan leans on without stating — name it in `## Approach` or point to where it is
+  written. Applied at finalize (`scaffold-plan`), because a plan that only works for a
+  builder who already knows the unwritten conventions is underspecified and nothing else
+  reveals where.
 - A plan is never authored on a not-yet-approved ADR (the ADR gate resolves first).
 
 ## Anti-patterns
 
 - A plan premised on an unratified decision.
+- A finalized plan whose `## Approach` only makes sense to someone who already knows the
+  project's unwritten conventions (fails the stranger test).
 - A `## Targets` section with no `as of <sha>` stamp (unauditable, no staleness backstop).
 - Renumbering interstitials on migration.
 - Silent scope expansion during `go` instead of routing out-of-scope to checkpoint.

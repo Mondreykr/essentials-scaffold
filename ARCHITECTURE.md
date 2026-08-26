@@ -358,8 +358,10 @@ update the milestone's `milestone.md`; **finalize** a plan; and set `state.md` N
 
 - **Finalize pass.** `plan` turns a draft plan into a final one: it researches the
   current code, writes `## Targets` (stamped `as of HEAD`), tightens Scope/Approach,
-  ensures `## Acceptance` is user-verifiable, and **presents the approach in plain terms
-  for the user to confirm in dialogue** (not "read the doc"). This is where the
+  ensures `## Acceptance` is user-verifiable, applies the **stranger test** (could a
+  builder with no knowledge of this project execute the plan from the plan alone? — each
+  no names an unwritten rule the plan leans on, which then gets stated), and **presents
+  the approach in plain terms for the user to confirm in dialogue** (not "read the doc"). This is where the
   code-aware, reasoning-heavy work lives — the step `go` no longer does. It reads code but
   still writes only the plan (the "never code" boundary holds). Invocation is
   ask-if-absent, `--draft`/`--final` as a shortcut.

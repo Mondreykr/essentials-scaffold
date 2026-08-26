@@ -270,12 +270,21 @@ one the user names).
    makes the plan auditable and gives `go` its staleness backstop.
 3. **Tighten Scope/Approach** against what the code actually is, and **ensure `##
    Acceptance` is user-verifiable** — an observable outcome, not "tests pass".
-4. **Present the approach in plain terms and confirm in dialogue.** The user is an
+4. **Apply the stranger test.** Ask: could a competent builder who has never seen this
+   project execute this plan from the plan alone? Not *should* they — *could* they. Every
+   place the answer is no marks a rule the plan is leaning on without stating: a
+   convention, an invariant, a constraint that lives in someone's head or three documents
+   away. Name each one in `## Approach`, or point to where it is written. This is a test
+   of the plan, not a hiring decision — a plan that only works for a builder who already
+   knows the unwritten rules is underspecified, and you cannot see where until you ask.
+   It is also cheap: the answer is usually one or two additions, and the gaps it finds are
+   a different class from what step 1's code research finds.
+5. **Present the approach in plain terms and confirm in dialogue.** The user is an
    architect who doesn't read the plan or the code — so surface the approach as a
    plain-language conversation ("here's how I'll do it: …"), not "read this doc". **Wait for
    his confirmation.** This is the approval seam; `go` executes afterward without
    re-approving.
-5. On confirmation, write the plan and set `state.md`'s Active focus + `## Next` so a
+6. On confirmation, write the plan and set `state.md`'s Active focus + `## Next` so a
    resuming session knows the plan is final & fresh.
 
 **Boundary intact:** finalize *reads* code but writes only the plan. If finalize surfaces
