@@ -9,9 +9,7 @@ Brief the session: read the living truth, locate the active milestone and phase 
 disk, surface open threads and history, and end with options — not directives. State is
 **derived from what the docs say**, never from a status keyword.
 
-**Precondition.** `CLAUDE.md` and the four `.scaffold/` truth docs (`project.md`,
-`architecture.md`, `roadmap.md`, `state.md`) exist — a scaffold project always has all
-four. If any is missing, stop: "Scaffold files missing or incomplete — run
+**Precondition.** The four `.scaffold/` truth docs (`project.md`, `architecture.md`, `roadmap.md`, `state.md`) exist — a scaffold project always has all four. If any is missing, stop: "Scaffold files missing or incomplete — run
 /scaffold-setup first (or /scaffold-cleanup if this is an older layout)."
 
 **Version guard.** If any `.scaffold/` doc carries `schema_version: 1`, a `type:
@@ -28,11 +26,11 @@ nothing, runs nothing. It tells you what's available.
 
 Read these in order — always-current truth, never a log:
 
-1. `CLAUDE.md`
-2. `.scaffold/project.md`
-3. `.scaffold/architecture.md`
-4. `.scaffold/state.md`
-5. `.scaffold/roadmap.md`
+1. `.scaffold/project.md`
+2. `.scaffold/architecture.md`
+3. `.scaffold/state.md`
+4. `.scaffold/roadmap.md`
+5. `.scaffold/glossary.md` — read in full; never report, count, or list its terms. Absent or empty is not a finding.
 
 A doc's `type` is its frontmatter `type:` (authoritative); filename/location is only a
 fallback. Do **not** read `decisions/` files unless `state.md`, `roadmap.md`, or a plan

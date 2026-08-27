@@ -23,7 +23,7 @@ rather than guesses.** It consults; it does not predict.
 **It migrates the gap, not a presumed whole.** Any part already conformant is left
 untouched — so cleanup is safe to re-run and safe on a partially-migrated repo.
 
-**Boundary.** Touches `.scaffold/` and `CLAUDE.md` only — never project code, and never
+**Boundary.** Touches `.scaffold/` only — never project code, never `CLAUDE.md` (scaffold does not own it), and never
 cracks open a grandfathered spec's internals (its own `DECISIONS.md`/`STATE.md` stay whole;
 cleanup only points at it or updates paths).
 
@@ -40,13 +40,12 @@ step serves it; when in doubt about where something goes, this plus the two Laws
 (truth≠history; a doc lives at the layer that owns its lifecycle) decide.
 
 ```
-CLAUDE.md                     Skill Reference table + Core Principle + About + Hard constraints
-                              (NO tech stack — that's architecture.md); no frontmatter
 .scaffold/
   project.md                  identity/scope          } living truth,
   architecture.md             how it's built          } conformant sections,
   roadmap.md                  ## Milestones + ## Backlog (program altitude only)
   state.md                    Active focus / Next / Blockers / Open Questions (NO ## Notes)
+  glossary.md                 anchor terms; created empty if absent — never seeded
   knowledge/*.md              durable rules (living)
   decisions/NNNN-slug.md      ADRs (history; 4-digit)
   investigations/YYYYMMDD-slug.md   research (history; date, no dashes)
@@ -58,7 +57,7 @@ CLAUDE.md                     Skill Reference table + Core Principle + About + H
 
 The invariants that define **done**:
 
-- The four living-truth docs exist and are conformant; `knowledge/` exists.
+- The four living-truth docs exist and are conformant; `knowledge/` exists; `glossary.md` exists (created empty if the scaffold predates it — **never seed it with terms mined from the old docs or the code**; it earns entries later, one collision at a time).
 - `decisions/` and `investigations/` are **folders** with conformant names.
 - Each chunk of work is a `milestones/NN-slug/` container (`milestone.md` + `phases/`, optional `spec/`).
 - **None of the legacy shapes remain:** no single `decisions.md`, no standalone `plans/`,
@@ -68,12 +67,12 @@ The invariants that define **done**:
   `type: milestone-plan` (it's `milestone`), no `type: phase-brief` (it's `phase-plan`).
 - Every `.scaffold/` doc carries `type` / `schema_version: 2` / `updated` frontmatter (a
   `schema_version: 1` doc is pre-rename and not yet migrated).
-- No pointer dangles.
+- No pointer dangles **within `.scaffold/`** (the sweep's scope — pointers held by files scaffold does not own are out of scope and are not claimed).
 
 ## Step 1: Inventory — read everything, assume nothing
 
 Read whatever exists. **Do not presume which files are present or what shape they're in** —
-scan and record what you actually find: `CLAUDE.md`, `.scaffold/project.md`, `roadmap.md`,
+scan and record what you actually find: `.scaffold/project.md`, `roadmap.md`,
 `state.md`, `decisions.md` and/or `decisions/`, `architecture.md`, everything under
 `plans/`, `knowledge/`, `investigations/`, `milestones/`, and anything else in `.scaffold/`.
 Note frontmatter presence and `schema_version` on each doc.
@@ -92,7 +91,7 @@ format label:
 > - `roadmap.md` — holds a per-phase build plan (target: program-altitude index + Backlog)
 > - `plans/` — N phase plans (incl. interstitials 06.1, 09.1)
 > - `decisions.md` — single file, N entries (target: curated `decisions/` folder)
-> - `architecture.md` — absent (target: stood up from CLAUDE.md/decisions/run-env)
+> - `architecture.md` — absent (target: stood up from decisions/run-env/the real code)
 > - no `milestones/` container; docs lack frontmatter
 > - `investigations/2026-06-11-*.md` — nonconformant name
 > - [anything unexpected, partial, or contradictory]"
@@ -138,13 +137,11 @@ until Step 6. The judgment calls to confirm (only those the inventory actually s
 
 ## Step 4: Reference sweep — BEFORE any move
 
-Map every pointer first, so nothing dangles. Grep `.scaffold/` and `CLAUDE.md` for
-references that break on move/rename:
+Map every pointer first, so nothing dangles. Grep `.scaffold/` for references that break on move/rename:
 
 - `state.md` `## Next` → the plan/plan path it points at
 - `roadmap.md` → any `plans/phase-*` references
 - phase plans → cross-links to siblings, to `decisions.md`, to investigations
-- `CLAUDE.md` → any `plans/`, `decisions.md`, or `docs/` pointer to scaffold content
 - knowledge docs → references to decisions by old path
 
 Build a **rename map** (old → new) covering every moving file. Report it; repoint all in
@@ -265,17 +262,14 @@ is the sole thing cleanup does when only the rename is behind.
   that is the safe outcome, not a bug.
 - **Bump `schema_version: 1` → `2`** on **every** `.scaffold/` doc (the format epoch;
   uniform, so a lingering `1` is the un-migrated marker).
-- **Repoint references** (Step 4 sweep): any `plan.md` path (in `state.md` `## Next`,
-  `CLAUDE.md`, cross-links) becomes `milestone.md`. Phase-plan file paths are unchanged
+- **Repoint references** (Step 4 sweep): any `plan.md` path (in `state.md` `## Next`, cross-links) becomes `milestone.md`. Phase-plan file paths are unchanged
   (they always lived at `phases/NN-slug.md`), so `## Next`'s phase pointer needs no move.
 - **Ambiguous** (e.g. both a `plan.md` and a `milestone.md` present, or a mixed
   `schema_version`) → **STOP and surface**, per cleanup's core rule — never guess.
 
 ### Stand up `architecture.md` (if absent or thin)
 
-Create it by sorting durable technical truth out of where it hides — `CLAUDE.md`'s
-tech-stack section, architectural content in `decisions.md`, and durable run/env facts in
-`state.md`/`CLAUDE.md`. **Tiebreak per fact:** changes on *re-platform* (business rule
+Create it by sorting durable technical truth out of where it hides — architectural content in `decisions.md`, durable run/env facts in `state.md`, and the real code. **Tiebreak per fact:** changes on *re-platform* (business rule
 stays) → `architecture.md`; changes only when the *business rule* changes → `knowledge/`
 (not cleanup's job to populate — flag for a later `integrate`/`plan`). Target shape (stamp
 frontmatter; current section set):
@@ -302,30 +296,6 @@ There is **no `## Decisions` section** — each truth statement references the A
 it inline (`[[NNNN-…]]`); the `decisions/` folder + these references *are* the index. Stand
 up the truth statements now; **wire the ADR references while curating decisions below**,
 once the ADRs are promoted and numbered.
-
-Then **strip the migrated content from `CLAUDE.md`** (tech stack moves out; `CLAUDE.md`
-keeps the Skill Reference + Core Principle + About-this-project pointer + Hard constraints)
-and **replace any old Command Reference with the current `## Skill Reference` table** —
-embed it verbatim (the same 9 rows `setup` writes):
-
-```markdown
-## Skill Reference
-| Skill | Role |
-|-------|------|
-| `/scaffold-setup` | Initialize — scaffold the structure for a new project |
-| `/scaffold-status` | Orient — read state, present options |
-| `/scaffold-plan` | Consult + author — discuss direction, persist into the right docs |
-| `/scaffold-go` | Execute — run the active phase plan |
-| `/scaffold-checkpoint` | Save + reconcile — verify, update files, sweep, commit |
-| `/scaffold-audit` | Audit — deep conformance + reality check (on demand) |
-| `/scaffold-integrate` | Absorb — ingest an artifact (spec, research) into scaffold |
-| `/scaffold-cleanup` | Migrate an existing project to this structure |
-| `/scaffold-update` | Update scaffold skills to the latest version |
-```
-
-Point the orientation block at `architecture.md`. Present `CLAUDE.md` changes for
-confirmation — don't silently drop a custom section; offer (a) drop, (b) move to
-`~/.claude/CLAUDE.md`, (c) keep below Hard constraints.
 
 ### Curate decisions — promote the few (Adam-gated, if a monolithic `decisions.md` exists)
 
@@ -386,11 +356,10 @@ deletions (`decisions.md`, the now-empty `plans/`):
   phases/   ← N plans moved from plans/ (interstitials preserved)
   spec/     ← pointer to [path] (if any)
 **roadmap.md** → program altitude (Milestones index + Backlog); frontmatter stamped
-**architecture.md** → NEW (from CLAUDE.md stack + decisions + run/env)
+**architecture.md** → NEW (from decisions + run/env + the real code)
 **decisions/** → N ADRs promoted (Adam-approved); M build-records retired to git
 **investigations/** → K names normalized to YYYYMMDD; frontmatter stamped
 **state.md / project.md / knowledge/** → frontmatter stamped; Next repointed; [## Notes drained → re-homed]
-**CLAUDE.md** → stack removed (→ architecture.md); Skill Reference table updated
 **Reference sweep:** N pointers repointed, 0 dangling
 **Already-conformant (left untouched):** [anything the gap-diagnosis skipped]
 **Staleness flags:** [downstream plans to re-sweep with /scaffold-plan, if any]
@@ -402,8 +371,7 @@ and re-present. On approval, apply in one pass:
 1. Create `milestones/NN-slug/{milestone.md, phases/}` and the `spec/` pointer if applicable.
 2. `git mv` the plans and renamed investigations (preserve history).
 3. Write `architecture.md`; write approved `decisions/NNNN-slug.md` ADRs.
-4. Rewrite `roadmap.md`; update `state.md`, `project.md`, `CLAUDE.md`; stamp all
-   frontmatter.
+4. Rewrite `roadmap.md`; update `state.md`, `project.md`; stamp all frontmatter.
 5. Repoint every reference from the sweep.
 6. Delete the migrated `decisions.md` and the now-empty `plans/`.
 
@@ -415,7 +383,7 @@ structural + coherence self-check `/scaffold-checkpoint` runs — over all migra
 - **Structural** — each doc well-formed at the stable, Law-level shape: required sections
   present and in order, frontmatter correct, no catch-all / no append-log, no `project.md`
   checkbox.
-- **Coherence** — cross-references resolve, **no pointer dangles**, `## Next` resolves, no
+- **Coherence** — cross-references resolve, **no pointer dangles within `.scaffold/`**, `## Next` resolves, no
   Law-1/Law-2 violation, no duplication.
 
 This is the *structural* net only — **not** deep per-rule grading, which is
@@ -423,7 +391,7 @@ This is the *structural* net only — **not** deep per-rule grading, which is
 drift the system prevents). If a check fails, fix it before committing; if the fix needs a
 judgment call, surface it.
 
-With git: `git add -A .scaffold/ CLAUDE.md && git commit -m "scaffold: migrate to milestone
+With git: `git add -A .scaffold/ && git commit -m "scaffold: migrate to milestone
 structure"`. Summarize what moved, what was promoted vs retired, what was renamed, what was
 left untouched, and any staleness flags. **Then recommend `/scaffold-audit`** for the
 independent deep conformance + reality pass — the right move after a migration this size.

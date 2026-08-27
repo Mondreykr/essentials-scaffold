@@ -15,8 +15,7 @@ the post-build coherence sweep / write-back of build results (that's
 `scaffold-checkpoint`). You only ever *propose* an ADR — never write to `decisions/`
 without Adam's explicit approval.
 
-**Precondition.** `CLAUDE.md` and the four `.scaffold/` truth docs (`project.md`,
-`architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
+**Precondition.** The four `.scaffold/` truth docs (`project.md`, `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
 files missing or incomplete — run /scaffold-setup first."
 
 **Version guard.** If any `.scaffold/` doc carries `schema_version: 1`, a `type:
@@ -26,7 +25,6 @@ name is `milestone.md`), the repo predates the current format — stop: "Old sca
 
 **Frontmatter.** Every `.scaffold/` doc you create or touch carries `type` /
 `schema_version: 2` / `updated:`; set `updated:` to today on every file you write.
-`CLAUDE.md` is exempt.
 
 ---
 
@@ -79,7 +77,7 @@ Read, absorbing context (don't present yet):
 2. `roadmap.md` — `## Milestones` index + `## Backlog`
 3. `project.md` — identity, scope boundaries
 4. `architecture.md` — current technical truth + referenced ADRs
-5. `CLAUDE.md` — orientation, constraints
+5. `glossary.md` if present — write plans in the project's own words. Read-only here; entries are `checkpoint`'s to propose and Adam's to approve.
 
 Then the **active milestone** (per `state.md` Next — *not* folder order; highest `NN` is
 only a fallback when Next is silent): its `milestone.md` (checklist, objectives,
@@ -132,9 +130,23 @@ not a routine guardrail or build-record. If it clears the bar:
 If the choice doesn't clear the bar, write no ADR — it's a guardrail, not a recorded
 decision.
 
-## Phase 4: Announce the write-set
+## Phase 4: Confirm the slicing, then announce the write-set
 
-Before writing anything, state exactly what you'll touch and how:
+**4a — the slicing.** *Only when you're authoring new phase plans.* How the work is cut into phases decides how the milestone goes, and it is a different question from which files you'll write — so it gets confirmed first, on its own. Present the proposed cut, the phases in order, one line each:
+
+> "Here's how I'd cut this:
+> - **07-slug** — [what it delivers, and what you'd see working when it lands]
+> - **08-slug** — [ditto]
+>
+> Right number of phases, cut in the right places?"
+
+Wait. Three rules govern the cut:
+
+- **Vertical slice.** Each phase cuts through every layer *the change itself touches* — no further — and ends in something observable. It need not reach the UI: a backend-only phase is a complete slice when its change can be run and checked in its own scope. The horizontal cut (all the schema, then all the queries, then the wiring) is what this rules out.
+- **One agent session per phase.** A phase needing a mid-phase `/clear` is two phases.
+- **Wide refactor — expand–contract.** Add the new form, migrate the call sites, remove the old: three phases, build green at every boundary.
+
+**4b — the write-set.** Then state exactly what you'll touch and how:
 
 > "Here's what I'll write:
 > - `roadmap.md` — [add backlog line / update milestone index entry]
@@ -189,7 +201,7 @@ that's a system-design question to raise with Adam, not a bucket to add mid-sess
 - **One or more phase plans** → `.scaffold/milestones/NN-slug/phases/NN-slug.md`, and add
   each phase to that milestone's `milestone.md` checklist. Phase numbers reset per milestone;
   the slug namespaces them. **Interstitials allowed** (`09.1` for a surgical phase
-  inserted after a frozen plan) — preserve them, never renumber siblings. Plan shape:
+  inserted after a frozen plan) — preserve them, never renumber siblings. **Each plan is a vertical slice sized to one agent session** — the cut was confirmed in Phase 4a; apply the three rules there if you reached here without it. Plan shape:
 
   ```markdown
   ---
@@ -336,5 +348,4 @@ decision proposed and its status (proposed / approved+written / declined); state
 Plan does NOT: write code or modify project files (`scaffold-go`); write to `decisions/`
 without Adam's explicit approval (propose only — the log is Adam-gated); own the coherence
 sweep / write-back of build results (`scaffold-checkpoint`); author plans premised on an
-unratified decision (resolve the gate first); or skip the write-set announcement (Adam
-sees the shape before it lands).
+unratified decision (resolve the gate first); or skip the Phase 4 confirmation — Adam sees the cut *and* the write-set before anything lands.

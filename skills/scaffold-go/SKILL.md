@@ -23,7 +23,7 @@ name is `milestone.md`), the repo predates the current format — stop: "Old sca
 **Boundary.** Writes PROJECT files only (code, config, assets) — and MAY drop an
 opportunistic research record in `.scaffold/investigations/`. It does NOT touch scaffold
 truth or execution docs: no edits to `state.md`, `roadmap.md`, `architecture.md`,
-`project.md`, `knowledge/`, `decisions/`, the milestone's `milestone.md`, or `CLAUDE.md` — and it
+`project.md`, `knowledge/`, `glossary.md`, `decisions/`, or the milestone's `milestone.md` — and it
 does NOT tick the `milestone.md` phase checklist. All scaffold write-back, including marking the
 phase complete, is `/scaffold-checkpoint`'s job.
 
@@ -44,7 +44,7 @@ current phase plan. Read these in order:
 5. The active milestone's `spec/` if present (the contract, or a pointer to one elsewhere)
    — for a predetermined milestone its `references/` are the live rulebook.
 6. `.scaffold/knowledge/` — durable domain/behavioral rules relevant to the plan.
-7. `CLAUDE.md` — constraints and working norms.
+7. `.scaffold/glossary.md` if present — name things in code the way the glossary names them.
 
 ## Step 2: Check the plan is executable (deterministic)
 
@@ -163,8 +163,8 @@ Don't start a fresh scope item late in a long session — checkpoint first.
 Go does NOT: execute a draft or stale plan (only final & fresh — refuse and route to
 finalize/re-finalize); research or propose an approach (that is `plan`'s finalize pass —
 `go` executes the already-approved approach); write scaffold truth/execution docs
-(`state.md`, `roadmap.md`, `architecture.md`, `project.md`, `knowledge/`, `decisions/`,
-the milestone's `milestone.md`, `CLAUDE.md` are all checkpoint's or plan's job); tick the
+(`state.md`, `roadmap.md`, `architecture.md`, `project.md`, `knowledge/`, `glossary.md`, `decisions/`,
+the milestone's `milestone.md` are all checkpoint's or plan's job); tick the
 `milestone.md` phase checklist (checkpoint marks completion); propose or write ADRs (Adam-gated,
 routed through plan/checkpoint); or expand scope (only the plan's scope items).
 

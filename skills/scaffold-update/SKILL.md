@@ -6,8 +6,7 @@ description: Update the scaffold skills to the latest version and clean up legac
 # scaffold-update
 
 Pull the latest scaffold **skills** and tidy up after older installs. This touches only
-the installed skills under `~/.claude/skills/` — project data in `.scaffold/` and
-`CLAUDE.md` is never modified.
+the installed skills under `~/.claude/skills/` — project data in `.scaffold/` is never modified.
 
 **Boundary.** Updates the installed skill files only. It does not read, migrate, or write
 any `.scaffold/` content (that's `cleanup`/`checkpoint`); it does not touch project code.

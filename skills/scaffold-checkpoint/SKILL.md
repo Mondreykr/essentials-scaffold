@@ -10,7 +10,7 @@ Save and reconcile a work session: verify what was actually done, update the
 Any checkpoint could be the last thing that runs before a long gap, so it leaves the
 whole tree accurate and self-consistent.
 
-**Precondition.** `CLAUDE.md` and the four `.scaffold/` truth docs (`project.md`,
+**Precondition.** The four `.scaffold/` truth docs (`project.md`,
 `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
 files missing or incomplete — run /scaffold-setup first."
 
@@ -19,8 +19,7 @@ milestone-plan` / `type: phase-brief`, or a milestone folder holds a `plan.md` (
 name is `milestone.md`), the repo predates the current format — stop: "Old scaffold format
 (pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
 
-**Boundary.** No code changes, no project files. Checkpoint updates `.scaffold/` (+
-`CLAUDE.md`) and commits. Code is `scaffold-go`'s job; strategy and authoring are
+**Boundary.** No code changes, no project files. Checkpoint updates `.scaffold/` and commits. Code is `scaffold-go`'s job; strategy and authoring are
 `scaffold-plan`'s.
 
 **Active milestone.** Resolve it from `state.md`'s `## Next` (the active-cursor
@@ -29,7 +28,7 @@ hint when Next is silent.
 
 **Frontmatter.** Every `.scaffold/` doc carries `type` / `schema_version` / `updated`
 YAML frontmatter; whenever you write a doc, set `updated:` to today and ensure `type`
-and `schema_version` are present. `CLAUDE.md` is exempt (no frontmatter).
+and `schema_version` are present.
 
 **Nothing to save?** When there's no session work to record — after hand-edits, after an
 `integrate`, or just to tidy a drifted tree — skip Steps 1–6 and run **only** the sweep
@@ -41,7 +40,7 @@ pass — there is no flag; detect the no-work case and do the right thing.)
 
 ## Step 1: Assess session state
 
-Read `state.md`, `roadmap.md`, `CLAUDE.md`, and the active milestone's `milestone.md`
+Read `state.md`, `roadmap.md`, `glossary.md` (if present — 6c needs its current contents), and the active milestone's `milestone.md`
 (resolved from `## Next`). If `## Next` references a phase plan, read it for
 verification and routing. Determine the checkpoint kind:
 
@@ -165,8 +164,6 @@ session changed. The shape each doc must keep:
   `## Deferred`, not here; the test is tied-ness, not altitude). **Remove any `## Backlog` item this session shipped** (removed,
   never ticked `- [x]`). `## Milestones` lines use the fixed tokens `[done] | [active] | [planned]`; the
   status flip to `[done]` happens in Step 6b.
-- **5g `CLAUDE.md` (rare)** — only if orientation/working instructions genuinely changed;
-  durable technical truth goes to `architecture.md`, not here.
 
 ## Step 6: Decisions + milestone close
 
@@ -216,6 +213,21 @@ confirmation:
 4. **Leave the folder in place** — no archive move; git is the history.
 5. A pointer'd/external spec is **not cracked open** — only its enduring rules graduate.
 
+### 6c. Propose a glossary term — collisions only (Adam-gated)
+
+**Do not ask about terms.** There is no "any glossary entries today?" prompt. This step stays silent unless the session produced a collision.
+
+**The trigger — a collision you observed this session:** the same concept called more than one thing (the schema says `recon_entry`, the UI says "match", the plan says "reconciliation row"), or one word carrying two meanings in different places. The bar's other two gates rarely fire at checkpoint; don't go hunting for them (`contracts/glossary.md` has the full bar).
+
+When a collision showed up:
+1. **Draft the entry** — the canonical term, a one-or-two-line definition precise enough that two readers can't take it differently, and an `**Also called:**` line retiring the rivals and naming where each appears.
+2. **Present it and STOP.** Nothing is written without Adam's explicit approval — the same hard gate `decisions/` carries.
+3. On approval, insert it **alphabetically** into `.scaffold/glossary.md` and stamp `updated:`. If it's the first term, delete the placeholder line `setup` left.
+
+**Editing a definition is gated too** — propose old and new side by side and wait. **Removal is ungated.**
+
+**Flag, don't fix:** if this session used a term in a way that contradicts its entry, say so and let Adam rule — the code may have moved past the definition, or the session may have been wrong.
+
 ## Step 7: Structural + coherence sweep (EVERY checkpoint)
 
 Runs on every checkpoint, and is the *whole* job when there's no work to save. Sweep
@@ -226,8 +238,7 @@ well-formed at the *stable, Law-level* shape. The detailed per-contract format r
 in exactly one drift-guarded place — audit's bundled contract copies — so **don't
 re-enumerate them here; route them to audit.** Check only:
 1. Required sections present, correctly named, and in order (per the shapes in Step 5).
-2. Frontmatter present and valid (`type` / `schema_version` / `updated`; `CLAUDE.md`
-   exempt).
+2. Frontmatter present and valid (`type` / `schema_version` / `updated`).
 3. No Law violations — an append-log / dated entries in a living-truth doc (Law 1); a
    `## Notes` / any catch-all / open-ended section (the one-home rule); or a checkbox in
    `project.md` (Law 2 — a truth doc never carries work-tracking). Fix these on sight. The
@@ -286,7 +297,7 @@ whole tree, docs vs. actual code, and the stranded-rules check — run `/scaffol
 ## Step 8: Review before committing
 
 - Re-read every file you changed; flag any remaining contradiction.
-- `git diff .scaffold/ CLAUDE.md` for the full change set.
+- `git diff .scaffold/` for the full change set.
 - Show, per file, what changed — and **call out separately**: any proposed ADR (and
   Adam's decision), any knowledge graduation/retire at close, any sweep fixes, and
   anything the sweep surfaced for follow-up.
@@ -295,7 +306,7 @@ whole tree, docs vs. actual code, and the stranded-rules check — run `/scaffol
 
 ## Step 9: Commit
 
-If git is initialized: `git add CLAUDE.md .scaffold/ && git commit -m "checkpoint: [plan
+If git is initialized: `git add .scaffold/ && git commit -m "checkpoint: [plan
 summary]"` (use `reconcile: [summary]` when this was a sweep-only run). If the commit
 fails, show the error and stop. List loose threads for next session, then **route to
 next** based on the resulting state:

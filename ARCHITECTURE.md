@@ -80,10 +80,10 @@ and retire with their milestone.
 
 | Layer | What it is | Home | Mutability |
 |-------|-----------|------|------------|
-| Orientation + instructions | How Claude should work here + a one-line "what this is" | `CLAUDE.md` (auto-read) | living |
 | Product identity | What this is, who for, why, scope boundaries | `.scaffold/project.md` | living |
 | **Architecture truth** | How it's built — tenancy, auth, stack, data-access, deployment, conventions | `.scaffold/architecture.md` | living |
 | Domain/behavioral truth | Durable cross-cutting invariants (each: the rule + why + a pointer to where code enforces it) | `.scaffold/knowledge/*.md` | living |
+| Anchor terms | The words that must mean one thing here — canonical form named, rivals retired | `.scaffold/glossary.md` | living |
 | Program | Milestones (done/active/planned) + backlog | `.scaffold/roadmap.md` | living |
 | Active state | Where we are now / next / blockers / open questions | `.scaffold/state.md` | living (churns) |
 | Decisions | Load-bearing *why* + rejected alternatives (ADRs) | `.scaffold/decisions/NNNN-slug.md` | frozen; **Adam-gated** |
@@ -99,14 +99,13 @@ milestone).
 ## Files & Folders
 
 ```
-CLAUDE.md                         orientation + instructions + pointer into .scaffold/
-
 .scaffold/
   # ── LIVING TRUTH (overwritten in place; never reconstructed from a log) ──
   project.md                      what this product is & why (identity/scope)
   architecture.md                 how it's built (tech truth)
   roadmap.md                      the program: milestone index + backlog
   state.md                        where we are now / next / blockers / open questions
+  glossary.md                     anchor terms — what things are called (may be empty)
   knowledge/
     *.md                          durable domain/behavioral truth (living)
 
@@ -132,7 +131,7 @@ is whatever `state.md`'s `## Next` points at — not folder order.** "Highest `N
 only a fallback hint when `state.md` is silent: a later-numbered milestone can be
 pre-created while an earlier one is still active, so folder order cannot be the
 authority. (`setup`/`cleanup` may write a `.scaffold/archive/` holding pre-scaffold
-snapshots — an overwritten `CLAUDE.md`, superseded context files. It holds only
+snapshots — superseded context files. It holds only
 superseded originals, is read by no skill, and is not part of the live model. Retired
 *milestones* never go there — they rest in place in `milestones/`.)
 
@@ -156,8 +155,7 @@ skill bundles a contract.
 **Frontmatter convention.** Every `.scaffold/` document carries minimal YAML
 frontmatter: **`type` · `schema_version` · `updated`**. `type` is authoritative for
 what a doc is — the auditor reads it, never infers. **Band is *derived* from `type`,
-never stored** (a stored band would be a driftable enum — Principle 7). `CLAUDE.md` is
-the one exception: a Claude Code special file with its own conventions, no frontmatter.
+never stored** (a stored band would be a driftable enum — Principle 7).
 
 **Identifier convention.** An ordered, zero-padded number marks things referenced as a
 sequence — milestones and phases at 2 digits (`NN`), decisions at 4 (`NNNN`,
@@ -166,12 +164,12 @@ a point-in-time capture (investigations). A new doc type picks its scheme by thi
 
 | Type | Band | Home | Contract |
 |------|------|------|----------|
-| `claude-md` | living | `CLAUDE.md` | `contracts/claude-md.md` |
 | `project` | living | `.scaffold/project.md` | `contracts/project.md` |
 | `architecture` | living | `.scaffold/architecture.md` | `contracts/architecture.md` |
 | `roadmap` | living | `.scaffold/roadmap.md` | `contracts/roadmap.md` |
 | `state` | living | `.scaffold/state.md` | `contracts/state.md` |
 | `knowledge` | living | `.scaffold/knowledge/*.md` | `contracts/knowledge.md` |
+| `glossary` | living | `.scaffold/glossary.md` | `contracts/glossary.md` |
 | `decision` | history | `.scaffold/decisions/NNNN-slug.md` | `contracts/decision.md` |
 | `investigation` | history | `.scaffold/investigations/YYYYMMDD-slug.md` | `contracts/investigation.md` |
 | `milestone` | execution | `.scaffold/milestones/NN-slug/milestone.md` | `contracts/milestone.md` |
@@ -191,6 +189,7 @@ A few concepts span the execution docs and don't belong to any single contract:
   `milestones/NN-slug/phases/NN-slug.md`, written up front (predetermined) or
   just-in-time by `plan` (emergent), executed by `go`, and persisting as the record.
   There is no standalone `plans/` folder.
+- **Phase granularity — vertical slices, one session each.** A phase cuts through every layer *the change itself touches* — no further — ends in something observable, and fits one agent session; a wide refactor is the one exception and sequences expand–contract. This is the `## Acceptance` rule stated from the other end, so a horizontal cut cannot satisfy it. Full statement: `contracts/phase-plan.md`. **When authoring new phase plans**, `plan` confirms the cut with Adam before writing them (its Phase 4a) — a separate question from the write-set, and the more consequential one.
 - **Draft vs. final — a plan has two states, derived from content + evidence (no
   enum).** A **draft** is code-blind: high-level, may be pre-written, not executable. A
   **final** plan has been validated against the code *as it is now* and carries a
@@ -266,11 +265,13 @@ Deterministic. Resolve by the two laws when in doubt.
 | Research / analysis output | `investigations/YYYYMMDD-slug.md` |
 | Current technical truth (how it's built, incl. durable run/env) | `architecture.md` |
 | A durable business/behavioral rule | `knowledge/*.md` |
+| A word that must mean exactly one thing here (esp. several words circling one concept) | `glossary.md` — **Adam-gated**, and only if it clears the admission bar |
 | How to build phase X of the active milestone | `milestones/NN-active/phases/X-slug.md` |
 | The contract that scoped a milestone | `milestones/NN-slug/spec/` (the spec, or a pointer to a shared/external one) |
 | Where we are right now | `state.md` (`## Next` is the active-cursor authority) |
 | Transient operational state (dirty DB, temp env) | resolve it; else route — a resume precondition → `state.md` `## Next`; a durable run/env condition → `architecture.md`; a blocker → `## Blockers`. **No catch-all section.** |
 | What the product is / scope boundaries | `project.md` |
+| A project-specific working constraint ("must work offline", "no paid APIs without approval") | **Not scaffold's** — it belongs in the project's own always-loaded instructions (Law 2: scaffold points outward). No `.scaffold/` doc owns it. |
 | A code-adjacent reference asset (design bundle) | repo `docs/` |
 | What happened (history) | git (no `log.md`) |
 
@@ -323,9 +324,7 @@ Creates the living-truth docs (`project`, `architecture`, `roadmap`, `state`), e
 `knowledge/`, `decisions/`, `investigations/`, and `milestones/` with an initial
 `01-<slug>/` (emergent default: `milestone.md` seeded with a single Phase 1, no spec, no
 pre-written plans). The seed slug is rename-cheap (`01-main`); because the slug is a
-sticky namespace, setup documents the rename procedure. Writes `CLAUDE.md` per the
-`claude-md` contract (orientation + pointer; nothing that belongs in `architecture.md`).
-**Stamps frontmatter** on every doc it creates. On an **existing codebase**, setup
+sticky namespace, setup documents the rename procedure. Creates `glossary.md` **empty** — a project with no anchor terms yet is the correct starting state; setup never proposes terms. **Stamps frontmatter** on every doc it creates. On an **existing codebase**, setup
 automatically gives it careful treatment — a thorough Explore pass seeds
 `architecture.md`/`project.md` from the real code (no flag). It does **not** curate
 decisions into ADRs — a legacy monolith is `cleanup`'s migration job; a stray decisions
@@ -339,7 +338,7 @@ pure-ingest and never writes decisions.
 **Role:** Orient. Read state, present options. Read-only — writes nothing.
 
 Reads the truth docs + the active milestone's `milestone.md` + the phase plan that
-`state.md` Next points at. Derives all signals from disk; **active is per `state.md`
+`state.md` Next points at. **Reads `glossary.md` in full, silently** — its audience at session start is Claude, not the user, so the terms are loaded into context and nothing about them is reported. Derives all signals from disk; **active is per `state.md`
 Next, not folder order.** Surfaces investigation filenames (cheap, no read) so a
 resuming session sees them. Ends with options, not directives.
 
@@ -368,7 +367,7 @@ update the milestone's `milestone.md`; **finalize** a plan; and set `state.md` N
 - **Ordering rule:** if a plan depends on a not-yet-approved ADR, `plan` resolves the
   ADR gate *first* — it never authors plans premised on an unratified decision.
 - May **propose** an ADR — present the draft, **stop for Adam's approval.**
-- **Announces its intended write-set before writing.**
+- **Confirms the slicing, then announces its intended write-set — both before writing.** When the write-set includes new phase plans, `plan` first presents the proposed cut (the phases in order, one line each) and confirms the granularity and the boundaries. Which files get written is the cheaper question.
 - **Boundary:** scaffold docs only, never code.
 
 ---
@@ -418,8 +417,9 @@ date) + `state.md` + `knowledge/` (when behavior changed).
   `roadmap.md` line to done, leave the folder in place.
 - **Primary owner of `architecture.md`** — it sees the diff and updates the technical
   truth when the build changed how it's built.
+- **Proposes a glossary term on a collision only** — when the session showed the same concept called more than one thing, or one word used for two. A high bar, deliberately: a "any terms today?" prompt every checkpoint trains the answer *no*. Additions **and definition changes** are Adam-gated; removal is not.
 - The inline sweep *flags*; the **deep** grading (hard conformance + docs-vs-code) is
-  `/scaffold-audit`. Git is the history; no log file. Commits `CLAUDE.md` + `.scaffold/`.
+  `/scaffold-audit`. Git is the history; no log file. Commits `.scaffold/`.
 
 ---
 
@@ -487,7 +487,7 @@ old per-phase `roadmap.md` by altitude (build plan → `milestones/NN-*/mileston
 checkbox+date checklist preserved; `## Backlog` + a fresh `## Milestones` index stay at
 program altitude; a `phase-00` "plan authored" entry folds into `milestone.md`, not a plan);
 moves `plans/phase-*` into `phases/` **preserving interstitials (`09.1`) — never renumber**;
-stands up `architecture.md` from `CLAUDE.md`/decisions + run/env (architecture-vs-knowledge
+stands up `architecture.md` from decisions + run/env + the real code (architecture-vs-knowledge
 tiebreak); **curates decisions — does not split them** (a monolithic `decisions.md` → an
 Adam-gated promote-the-few session; the rest retire to git; a grandfathered spec's internal
 decisions file is never cracked open); normalizes nonconformant names
@@ -525,10 +525,10 @@ coherent over time; that owner is marked **(primary)** below.
 
 | Artifact | setup | status | plan | go | checkpoint | audit | integrate | cleanup |
 |----------|-------|--------|------|----|------------|-------|-----------|---------|
-| `CLAUDE.md` | C | R | U (rare) | — | U (rare) | R | — | U (migrate) |
 | `project.md` | C | R | U | — | U (rare) | R | U | U |
-| `architecture.md` | C (seed) | R | U (propose) | R | **U (primary)** | R | U | C (from old CLAUDE/decisions) |
+| `architecture.md` | C (seed) | R | U (propose) | R | **U (primary)** | R | U | C (from decisions/run-env/code) |
 | `knowledge/*.md` | C (dir) | R | C/U | R | **C/U (primary)** + graduate/retire-on-close | R | C/U (absorb) | — |
+| `glossary.md` | C (empty) | R (silent) | R | R | **propose→gate (primary)** | R | — | C (if absent) |
 | `roadmap.md` | C | R | U (add/remove Backlog) | — | U (+ remove shipped) | R (flag stale) | R (classify) | U (build milestone index) |
 | `state.md` | C | R | U | R | U + sweep | R | — | U |
 | `decisions/NNNN-slug.md` | C (dir) | R (on ref) | **propose→gate** | — | **propose→gate** | R | — | migrate (Adam gates survivors) |
@@ -623,14 +623,11 @@ read off disk.
 
 ### Skills inject fresh instructions at point of need
 
-At 400k tokens deep, `CLAUDE.md` rules are far away. A skill dumps precise instructions
-into context at the moment they're needed. This is why skills exist alongside
-`CLAUDE.md` rules — not redundancy, but reliability at depth.
+At 400k tokens deep, whatever the session loaded at the start is far away. A skill dumps precise instructions into context at the moment they're needed. That is why a skill carries its own rules rather than relying on project-level instructions read hours ago — not redundancy, but reliability at depth.
 
 ### Don't tell Claude what it already knows
 
-If a behavior is already covered by Claude's defaults, by a hook, or by a skill's own
-body, `CLAUDE.md` doesn't restate it.
+If a behavior is already covered by Claude's defaults, by a hook, or by a skill's own body, no scaffold document restates it.
 
 ### Explicit boundaries prevent bleeding
 
@@ -658,7 +655,7 @@ controls what happens next.
 
 Interactive phases require explicit user response. ADR writes are the hardest gate of
 all: a skill may *propose* a decision but must **stop for Adam's approval** before
-writing, superseding, or pruning anything in `decisions/`.
+writing, superseding, or pruning anything in `decisions/`. `glossary.md` carries the same gate on **additions and definition changes** (removal is ungated), and `milestone.md`'s `## Deferred` carries it on additions.
 
 ## Edge Cases
 

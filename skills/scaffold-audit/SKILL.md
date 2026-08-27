@@ -28,7 +28,7 @@ findings here. Each agent is told it is grading, not fixing, and grades against 
 
 ## Step 1: Inventory
 
-List every doc in scope: `CLAUDE.md`, the four `.scaffold/` truth docs, all of
+List every doc in scope: the four `.scaffold/` truth docs, `glossary.md` if present, all of
 `knowledge/`, `decisions/`, `investigations/`, and every `milestones/NN-slug/`
 (`milestone.md`, `spec/`, `phases/*`). Read each doc's frontmatter `type:` — that is
 authoritative and selects which conformance rules apply (filename/location is only a
@@ -39,7 +39,7 @@ frontmatter (a pre-current-format / un-migrated layout), stop and report: "This 
 predates the current format — run /scaffold-cleanup to migrate, then re-audit," rather
 than flooding per-doc 'missing frontmatter' findings. (2) A *missing* mandatory truth doc
 (`project` / `architecture` / `roadmap` / `state`) is itself a conformance finding — the
-four are always present in a current scaffold. (3) **Unknown / pre-rename doc** — a doc
+four are always present in a current scaffold. A missing or term-less `glossary.md` is **not** a finding — it is optional by construction, like an empty `knowledge/`. (3) **Unknown / pre-rename doc** — a doc
 whose frontmatter `type` matches **no** bundled contract (e.g. `milestone-plan` /
 `phase-brief`, the pre-rename names), **or** any doc still carrying `schema_version: 1`
 (a partial-migration marker, even when its `type` is current), is an **un-migrated** doc,
@@ -51,7 +51,7 @@ type names are `milestone` and `phase-plan`.)
 
 Grade each doc **against its contract.** This skill bundles a verbatim copy of every
 format contract in `references/` — one file per `type` (`references/roadmap.md`,
-`references/state.md`, `references/claude-md.md`, …). The contract is the oracle: grade
+`references/state.md`, `references/project.md`, …). The contract is the oracle: grade
 against the file, never from memory or a remembered paraphrase. (The copies are kept
 identical to the factory masters by `scripts/sync-contracts.sh`; they are the authority
 here.)
@@ -61,13 +61,13 @@ judgment is exactly how a real violation slips through: the grader skims, the do
 clean, and a present-but-ignored rule is never checked. To prevent that, for each doc:
 
 1. **Select the contract** from the doc's frontmatter `type:` (authoritative;
-   filename/location is only a fallback). `CLAUDE.md` → `references/claude-md.md`.
+   filename/location is only a fallback).
 2. **Walk the contract line by line** — every item in its **Required structure**, every
    bullet in **Rules**, and every entry in **Anti-patterns**. For *each* one, emit an
    explicit verdict — **pass / fail / n-a** — with the evidence (the doc line or section
    that satisfies or violates it). Every anti-pattern is checked **by name**; you may not
    drop one because the doc "seems clean." This per-rule table is the deliverable.
-3. **Also check** frontmatter (`type` / `schema_version` / `updated`; `CLAUDE.md` exempt)
+3. **Also check** frontmatter (`type` / `schema_version` / `updated`)
    and brevity (no bloat that signals a Law-1 append-log). For `knowledge/` specifically,
    flag **form-drift**: an entry that restates code (a value/constant with a single code
    home) or has grown past a concise *invariant + why + pointer*.

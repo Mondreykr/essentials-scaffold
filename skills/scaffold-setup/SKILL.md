@@ -1,12 +1,11 @@
 ---
 name: scaffold-setup
-description: Initialize Scaffold in a project — create CLAUDE.md plus the .scaffold/ truth docs (project, architecture, roadmap, state), the empty knowledge/decisions/investigations folders, and a seed milestone, all with conformant frontmatter. Handles fresh projects, existing codebases (auto-explores to seed architecture from real code), and adopting a hand-written CLAUDE.md. Use whenever the user wants to set up scaffold, initialize it, start using it here, or bootstrap context persistence — even if they only say "set up scaffold" or "init scaffold". For an older scaffold layout, route to /scaffold-cleanup instead.
+description: Initialize Scaffold in a project — create the .scaffold/ truth docs (project, architecture, roadmap, state), the empty knowledge/decisions/investigations folders, and a seed milestone, all with conformant frontmatter. Handles fresh projects and existing codebases (auto-explores to seed architecture from real code). Use whenever the user wants to set up scaffold, initialize it, start using it here, or bootstrap context persistence — even if they only say "set up scaffold" or "init scaffold". For an older scaffold layout, route to /scaffold-cleanup instead.
 ---
 
 # scaffold-setup
 
-Initialize Scaffold: a small set of living markdown docs in `.scaffold/` plus a
-`CLAUDE.md` hub, so a session can resume after a long gap with full context. This skill
+Initialize Scaffold: a small set of living markdown docs in `.scaffold/`, so a session can resume after a long gap with full context. This skill
 *creates the structure*; the other skills maintain it. Every doc it writes is conformant
 from birth — correct sections, correct frontmatter.
 
@@ -28,26 +27,13 @@ into ADRs (`scaffold-integrate`/`scaffold-cleanup` own the ADR-promotion gate).
     `type`/`schema_version` frontmatter) → stop: "Already set up — run /scaffold-status."
   - **Anything else** — an older layout *or* a partial/hand-edited/ambiguous state (signs:
     a single-file `.scaffold/decisions.md`, a `.scaffold/plans/` folder, a per-phase
-    `roadmap.md`, `CLAUDE-*.md` files in root, docs lacking frontmatter, or any mix that
+    `roadmap.md`, docs lacking frontmatter, or any mix that
     isn't cleanly current) → stop and route: "Found an existing scaffold that isn't fully
     current. Run /scaffold-cleanup — it inventories whatever's there and migrates any prior
     or partial state (and no-ops if it turns out current). Setup is for fresh projects
     only." Don't try to judge which legacy shape it is — that's cleanup's job.
 
-  A root `CLAUDE.md` on its own (no `.scaffold/`) is **not** a collision — that's the adopt
-  case below.
-- **Adopt an existing `CLAUDE.md`** (exists in root, no `.scaffold/`): read it, archive
-  the original to `.scaffold/archive/CLAUDE.md.pre-scaffold`, then sort its content:
-  - product / what-it-is → the new `CLAUDE.md` "About this project" + `project.md`
-  - tech stack, data access, deployment, conventions → `architecture.md` (NOT
-    `CLAUDE.md` — that's architecture truth now)
-  - hard constraints that govern how Claude works here → `CLAUDE.md` `## Hard constraints`
-  - **anything else** (preferences, "who I am", communication notes) does not map
-    cleanly — do NOT silently merge. Present each section and ask: "(a) drop — Claude
-    defaults cover it, (b) move to `~/.claude/CLAUDE.md` (user-level — read it first and
-    *append*, never overwrite; it's shared across every project), (c) keep as a custom
-    section here." Wait for the choice per section.
-  Then report what was preserved, where it landed, and what was dropped or relocated.
+  A root `CLAUDE.md` is not scaffold's concern either way — scaffold neither reads, writes, nor grades it.
 - **Other context-bearing files** (`README.md`, `TODO.md`, `ARCHITECTURE.md`,
   `NOTES.md`, …) are context sources — read in Step 2.
 
@@ -77,9 +63,9 @@ If the project has existing code, do these before creating files:
 Create the directories (add a `.gitkeep` to each empty one so git tracks it):
 
 ```
-CLAUDE.md
 .scaffold/
   project.md        architecture.md        roadmap.md        state.md
+  glossary.md       (empty — heading only)
   knowledge/        (empty)
   decisions/        (empty)
   investigations/   (empty)
@@ -95,50 +81,8 @@ rename-cheap now; if the user already knows the first chunk, ask for a slug and 
 `01-<that>`. Rename procedure is in Step 5.
 
 **Frontmatter (every `.scaffold/` doc).** YAML frontmatter `type` / `schema_version: 2`
-/ `updated: <today>` on every doc below. `CLAUDE.md` is the one exception — a Claude Code
-special file, no frontmatter. For existing projects, fill templates from Step 2 findings
+/ `updated: <today>` on every doc below; there is no exempt doc. For existing projects, fill templates from Step 2 findings
 (after confirmation); for new projects, use the placeholder prose as-is.
-
-### CLAUDE.md (the hub — no frontmatter; lives in project root)
-
-```markdown
-# [Project Name]
-
-## Skill Reference
-| Skill | Role |
-|-------|------|
-| `/scaffold-setup` | Initialize — scaffold the structure for a new project |
-| `/scaffold-status` | Orient — read state, present options |
-| `/scaffold-plan` | Consult + author — discuss direction, persist into the right docs |
-| `/scaffold-go` | Execute — run the active phase plan |
-| `/scaffold-checkpoint` | Save + reconcile — verify, update files, sweep, commit |
-| `/scaffold-audit` | Audit — deep conformance + reality check (on demand) |
-| `/scaffold-integrate` | Absorb — ingest an artifact (spec, research) into scaffold |
-| `/scaffold-cleanup` | Migrate an existing project to this structure |
-| `/scaffold-update` | Update scaffold skills to the latest version |
-
-## Core Principle
-Every skill leaves ALL state documents accurate and self-consistent.
-Any skill could be the last thing that runs before a week-long gap.
-Skills are optional tools — the minimum ceremony is status → work → checkpoint.
-Scaffold works like a state machine: every piece of information has exactly one home a
-skill can compute — so never add a catch-all / open-ended / "misc" section to any doc;
-that's where dumping and drift start. New information routes to its existing home.
-
-## About this project
-[3–5 line product orientation: what this is, who it's for, and the one thing to know
-before touching the code. Plain language — this is the fast read. For detail: see
-`.scaffold/project.md` (what & why), `.scaffold/architecture.md` (how it's built),
-`.scaffold/roadmap.md` (the program), `.scaffold/state.md` (where we are). Run
-`/scaffold-status` at the start of every session.]
-
-## Hard constraints
-[Project-specific constraints no scaffold file owns — e.g. "must work offline", "no paid
-APIs without approval". Optional; remove this section if none. Generic preferences like
-"ask before code changes" belong in `~/.claude/CLAUDE.md`, not here.]
-```
-
-Tech stack, data access, and run/env do **not** go here — that's `architecture.md`.
 
 ### .scaffold/project.md — product identity (living)
 
@@ -269,6 +213,22 @@ state routes to its real home: a precondition on resuming (reseed the DB first) 
 `## Next`; a durable run/env condition goes to `architecture.md`; a blocker to
 `## Blockers`.
 
+### .scaffold/glossary.md — anchor terms (living)
+
+```markdown
+---
+type: glossary
+schema_version: 2
+updated: [today]
+---
+
+# Glossary
+
+[No terms yet. A word earns a line only when it must mean exactly one thing here. Delete this line when the first term lands.]
+```
+
+**Always created, always empty.** Setup never proposes terms, even on an existing codebase with obvious domain vocabulary — a glossary seeded from code is a dictionary of everything. Terms arrive later, one at a time, via `/scaffold-checkpoint` on a naming collision or from Adam directly.
+
 ### .scaffold/milestones/01-<slug>/milestone.md — the first milestone's phase plan (temporal)
 
 Seed it with a single Phase 1 (the **emergent default** — no spec, no pre-written plans;
@@ -329,7 +289,7 @@ plans. To rename `01-main` → `01-<newslug>` (do it early, before plans accrue)
 ## Step 6: Commit + summary
 
 - With git: stage new files and any archive moves, then commit:
-  `git add CLAUDE.md .scaffold/ && git add -u && git commit -m "init: scaffold"`.
+  `git add .scaffold/ && git add -u && git commit -m "init: scaffold"`.
 - Summarize what was set up, what content was incorporated (and from where), what was
   archived, and what the user should fill in or verify — especially the seed milestone
   slug (rename it now if the work has a real name). Then route forward: "Run

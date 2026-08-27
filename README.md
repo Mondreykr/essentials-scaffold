@@ -43,7 +43,7 @@ Or manually:
 npx degit mondreykr/scaffold/skills $HOME/.claude/skills --force
 ```
 
-This is safe — it only replaces the `scaffold-*` skill folders in `~/.claude/skills/`. Your project data in `.scaffold/` and `CLAUDE.md` is never touched.
+This is safe — it only replaces the `scaffold-*` skill folders in `~/.claude/skills/`. Your project data in `.scaffold/` is never touched.
 
 After updating from an older version, run `/scaffold-cleanup` to migrate your scaffold files to the current format.
 
@@ -130,17 +130,17 @@ Two boundaries hold across the set: **`go` writes code, never scaffold docs** (a
 
 | Path | Band | Purpose |
 |------|------|---------|
-| `CLAUDE.md` | — | Hub — orientation, working rules, a pointer into `.scaffold/` (auto-read by Claude) |
 | `.scaffold/project.md` | living truth | What you're building, for whom, why, scope boundaries |
 | `.scaffold/architecture.md` | living truth | How it's built — stack, data-access, auth, deployment, conventions |
 | `.scaffold/roadmap.md` | living truth | The program — milestone index (`## Milestones`) + `## Backlog` |
 | `.scaffold/state.md` | living truth | Where you are now — active focus, next, blockers, open questions |
+| `.scaffold/glossary.md` | living truth | Anchor terms — what things are called here (optional; starts empty) |
 | `.scaffold/knowledge/*.md` | living truth | Durable domain/behavioral rules (the residue of retired specs) |
 | `.scaffold/decisions/NNNN-slug.md` | history | ADRs — load-bearing decisions + why (frozen, you gate every one) |
 | `.scaffold/investigations/YYYYMMDD-slug.md` | history | Research and analysis records (frozen) |
 | `.scaffold/milestones/NN-slug/` | execution | A chunk of work: `milestone.md`, optional `spec/`, `phases/NN-slug.md` plans |
 
-Every `.scaffold/` document carries minimal frontmatter — `type`, `schema_version`, `updated` — so the skills always know what a doc is and when it last changed. (`CLAUDE.md` is the one exception: a Claude Code special file with its own conventions.) All scaffold data lives in `.scaffold/` at project root (except `CLAUDE.md`, which lives at the root so Claude auto-reads it). Repo-level `docs/` holds only code-adjacent reference assets (e.g. a design-system bundle) — never project documentation.
+Every `.scaffold/` document carries minimal frontmatter — `type`, `schema_version`, `updated` — so the skills always know what a doc is and when it last changed; there is no exempt type. All scaffold data lives in `.scaffold/` at project root. Repo-level `docs/` holds only code-adjacent reference assets (e.g. a design-system bundle) — never project documentation.
 
 ## Milestone plans and the roadmap
 
@@ -222,7 +222,7 @@ Run `/scaffold-cleanup` to migrate files to the current format.
 
 **Context rot within a session.** Long conversations degrade Claude's attention. This scaffold solves between-session memory, not within-session degradation. Use `/clear` and status to reset.
 
-**No enforcement.** The persistence chain depends on you running `/scaffold-status` at the start of each session and Claude following CLAUDE.md rules. Nothing forces status to run — it's a manual first step, reinforced by CLAUDE.md but not enforced.
+**No enforcement.** The persistence chain depends on you running `/scaffold-status` at the start of each session. Nothing forces it to run — it's a manual first step, not an enforced one. Scaffold writes no always-loaded project instructions of its own, so nothing outside the skills reminds you.
 
 **Solo-only.** No multi-user conflict detection. Git handles merge conflicts at the file level.
 

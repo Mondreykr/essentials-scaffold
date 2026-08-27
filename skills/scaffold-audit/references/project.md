@@ -48,9 +48,6 @@ updated: YYYY-MM-DD
 ## Rules
 
 - Identity + scope only. Durable product constraints are stated as plain truth.
-- **`CLAUDE.md`⇄`project.md` boundary:** `CLAUDE.md` = how to work here + a one-line
-  "what this is"; `project.md` = the full what/who/why/scope. No duplicated
-  orientation.
 - Verifiable invariants are NOT kept here — they live where they're tested (a spec,
   phase acceptance, or a `knowledge/` invariants doc).
 - **Mandatory:** one of the four living-truth docs every scaffold project always carries
@@ -62,4 +59,3 @@ updated: YYYY-MM-DD
 - Requirements/acceptance **checkboxes** — task-tracking in a truth doc; removed by
   design.
 - Restating *how it's built* (that's `architecture.md`).
-- Duplicating `CLAUDE.md`'s orientation.
