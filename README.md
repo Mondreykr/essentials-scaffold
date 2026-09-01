@@ -66,7 +66,7 @@ That's the whole system. The other skills are tools you reach for when you need 
 | Skill | What it's for | When to use it |
 |-------|--------------|----------------|
 | `/scaffold-plan` | "Help me figure out what's next, and write it down." Discuss direction, then persist it — update the roadmap, author phase plans, set the active cursor. Also **finalizes** a plan (`--final`): validates it against current code and confirms the approach with you. | When you need to recalibrate, scope new work, author the next chunk, or finalize a plan before executing it. |
-| `/scaffold-go` | "Execute the active phase." Builds the phase plan that `state.md` Next points at. Runs only a **finalized, still-fresh** plan; refuses a draft or a stale one and routes you to finalize. | When a finalized plan is ready and you want scope-controlled execution. |
+| `/scaffold-go` | "Execute the active phase." Builds the phase plan that `state.md` Next points at. Runs only a **finalized, still-fresh** plan; refuses a draft or a stale one and routes you to finalize. Ends with a scope check by a fresh agent, and can report a plan unsatisfiable rather than forcing a pass. | When a finalized plan is ready and you want scope-controlled execution. |
 | `/scaffold-integrate` | "Absorb this artifact." Ingest a spec or doc into the scaffold. | After producing a spec, or to bring an external/shared spec under a milestone. |
 | `/scaffold-audit` | "Check everything, hard." A deep, independent conformance + reality review. | Before a release, after a long gap, or after heavy hand-editing. |
 
@@ -115,7 +115,7 @@ Mark deliverables that require human action with `[USER]` in a phase plan or the
 | `/scaffold-setup` | Scaffolds the structure for a new project; on an existing codebase it automatically analyzes the code to seed the architecture doc. | Once per project |
 | `/scaffold-status` | Reads scaffold files, gives a session briefing with health checks. Read-only. | Every session start, or after `/clear` |
 | `/scaffold-plan` | Discusses direction and persists it — roadmap, phase plans, milestone creation, active cursor. Finalizes a plan against current code (`--final`). Proposes ADRs (you approve). | When you need to recalibrate, author the next chunk, or finalize a plan |
-| `/scaffold-go` | Executes the active phase plan (finalized & fresh only — refuses a draft or stale plan). Writes code (and optional research records); never scaffold docs. | When a finalized plan is ready and Next points at it |
+| `/scaffold-go` | Executes the active phase plan (finalized & fresh only — refuses a draft or stale plan). Writes code (and optional research records); never scaffold docs. Ends with a **scope check by a fresh agent** — what's missing, what's different, what nobody asked for — and can report a plan **unsatisfiable as written** instead of forcing a pass. | When a finalized plan is ready and Next points at it |
 | `/scaffold-checkpoint` | Verifies work, updates scaffold docs, runs a light structural + coherence sweep, commits. Auto-detects a no-work run and just sweeps. | End of every session, or whenever you want to save |
 | `/scaffold-audit` | Deep, independent review — grades every doc against its format and checks the docs against the real code. Read-only; reports drift, changes nothing. | Before a release, after a long gap, or after heavy hand-editing |
 | `/scaffold-integrate` | Absorbs an artifact (spec, doc) into the scaffold — to a milestone's `spec/` (copy or pointer) or `knowledge/`. Pure ingest. | After producing a spec or major artifact |
@@ -124,7 +124,7 @@ Mark deliverables that require human action with `[USER]` in a phase plan or the
 
 Two boundaries hold across the set: **`go` writes code, never scaffold docs** (all scaffold write-back is `plan`/`checkpoint`'s job), and **`decisions/` is propose-only** — a skill may draft an ADR but stops for your approval before writing it.
 
-**Two tiers of checking.** `checkpoint` runs a light structural + coherence sweep on every save, automatically — no flag. `audit` is the deep, independent version you run on demand: it is the sole grader of every doc hard against its format *and* verifies the docs against the actual code. You never have to remember a flag; the depth is chosen by which skill you run.
+**Two tiers of *document* checking.** (Code is checked separately — `go` runs a scope check on every phase.) `checkpoint` runs a light structural + coherence sweep on every save, automatically — no flag. `audit` is the deep, independent version you run on demand: it is the sole grader of every doc hard against its format *and* verifies the docs against the actual code. You never have to remember a flag; the depth is chosen by which skill you run.
 
 ## Files
 

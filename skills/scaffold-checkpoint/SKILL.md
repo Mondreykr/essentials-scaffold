@@ -70,6 +70,12 @@ Wait for the response.
 - **Abandon:** do NOT tick the phase. Clear the plan reference in Next, replace with a
   pointer to the new direction (or "Run /scaffold-plan"). Update Active focus with what
   was abandoned and why. Go to Step 5.
+  **This is also the home for a plan `scaffold-go` reported NOT SATISFIABLE** (a stated
+  contradiction, nothing further built). Don't ask the three-way question in that case —
+  the phase can't be resumed as written, so abandon is the only answer; record the
+  contradiction as the "why," and clearing Next is what stops a resuming session
+  re-deriving it. If the contradiction leaves a real obstacle or an undecided call behind,
+  that goes to `## Blockers` or `## Open Questions` in Step 5b as normal.
 
 ## Step 3: USER task check
 
@@ -85,9 +91,18 @@ follow-up, route accordingly), **Not done** (leave it; phase can't be ticked).
 *Skip if no code changed.* Before updating any scaffold doc, verify claims:
 1. **Run build/lint/tests** if they exist. On failure, report — do NOT tick a phase
    complete on failing verification; the user decides fix-now vs checkpoint-with-issues.
-2. **Evidence-based updates.** A `[x]`, or removing a blocker, requires evidence (test
-   output, observed behavior, user confirmation). "It should work" is not evidence.
-3. **If verification isn't possible**, say so: "Completed X — not yet verified (no
+2. **Evidence-based updates, and the evidence must be FRESH.** A `[x]`, or removing a
+   blocker, requires evidence produced **in this exchange** — a run you just made, output
+   you just read, behaviour just observed, or the user's confirmation just given. A green
+   result from earlier in the session is not evidence: the run was real and the code has
+   moved since, and re-running is the only thing that closes that gap. "It should work" is
+   not evidence.
+3. **Tests passing is not evidence the scope was built** — it is evidence the tests pass.
+   A phase can be green and short. If a plan was active, whether its `## Scope` was
+   delivered is answered by reading the scope against the diff; that is
+   `scaffold-go`'s scope check, and if `go` did not run, **dispatch a fresh read-only
+   subagent to do it** rather than answering from this session's memory of the work.
+4. **If verification isn't possible**, say so: "Completed X — not yet verified (no
    tests)."
 
 ## Step 5: Update truth + execution docs
@@ -104,6 +119,9 @@ session changed. The shape each doc must keep:
   - **Removal is yours and is ungated** — **remove any `## Deferred` item this session
     actually shipped** (you have the diff — that's your evidence). Items are removed, never
     ticked `- [x]`.
+  - **`scaffold-go`'s scope check is acted on there, not here** — the findings are code
+    work and this skill writes no code. What reaches you is the outcome: if a *missing*
+    item is still missing, the phase isn't done, so don't tick it.
   - **Addition is a bar, and you do not write it yourself.** This is the section that rots
     fastest, because at checkpoint time every loose end of the session is in front of you
     and parking is the cheapest disposition for all of them. It is not the correct one. For

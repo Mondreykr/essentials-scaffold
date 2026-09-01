@@ -74,6 +74,10 @@ no conformance break.
 
 - `## Scope` is load-bearing: `scaffold-go` executes exactly what it names. Keep it
   crisp.
+- **Scope deliverables are NUMBERED.** Not a style preference: `scaffold-go` executes them
+  one at a time and its end-of-phase scope check reports per item ("which scope items are not
+  built?"), so an unnumbered prose scope makes both unanswerable and the check silently
+  weaker. One numbered line per deliverable.
 - **A phase is a vertical slice.** It cuts through every layer *the change itself touches* — no further — and ends in something observable: a number that comes out right, a command that produces the expected output, an API response, a generated file, a visible state. **It does not have to reach the UI.** A backend-only phase is a complete slice when its change can be exercised and checked end-to-end within its own scope. This is the `## Acceptance` rule seen from the other end. What it forbids is the *horizontal* cut — all the schema, then all the queries, then all the logic, then the wiring — where nothing works and nothing can be checked until the final phase lands.
 - **A phase fits one agent session.** Size it so a single execution run finishes it without exhausting context. A phase that would need a mid-phase `/clear` is two phases.
 - **A wide refactor is the exception, and sequences expand–contract.** Add the new form, migrate the call sites to it, then remove the old form — three phases, with the build green at every boundary. A wide refactor cut as one vertical slice breaks everything in between.
@@ -109,4 +113,5 @@ no conformance break.
   project's unwritten conventions (fails the stranger test).
 - A `## Targets` section with no `as of <sha>` stamp (unauditable, no staleness backstop).
 - Renumbering interstitials on migration.
+- An unnumbered / prose `## Scope` (nothing can report per deliverable against it).
 - Silent scope expansion during `go` instead of routing out-of-scope to checkpoint.

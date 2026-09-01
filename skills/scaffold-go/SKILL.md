@@ -97,8 +97,8 @@ Execute scope items one at a time. For each:
 2. Confirm: "Item [N] done: [what was done]. Moving to [N+1]."
 3. Move to the next.
 
-For single-item plans, combine completion and routing: "Done: [what was done]. Run
-/scaffold-checkpoint."
+For single-item plans, combine the item confirmations: "Done: [what was done]." Then go to
+Step 5 — the scope check runs on every phase, single-item included.
 
 If the work produces a research/analysis output worth keeping (a spike, a gap map, a
 security investigation), write it to `.scaffold/investigations/YYYYMMDD-slug.md` (date as
@@ -108,9 +108,33 @@ born conformant. Opportunistic — nothing obligates you to create one. If that
 research yields a candidate ruling, leave the analysis here and let `/scaffold-checkpoint`
 *propose* the ADR (decisions are Adam-gated; `go` never writes one).
 
-## Step 5: Complete
+## Step 5: Scope check (always — a fresh agent, not you)
 
-When all scope items are done:
+When the scope items are done, **dispatch one fresh read-only subagent** (Explore, or general-purpose with no write tools) and give it two things: the plan's `## Scope` verbatim, and the phase's full diff. Ask it exactly three questions:
+
+1. **Missing** — which scope items are not built?
+2. **Different** — which were built differently from what the plan named?
+3. **Unasked** — what is in this diff that **no scope item called for**?
+
+**Get the diff right — the check is worthless against the wrong one.** Diff against the sha the plan was validated at, from `## Targets`' `_as of <sha>_`: `git diff <sha>` plus any untracked files the phase added. **Not bare `git diff`** — it shows only unstaged work, so a phase that staged or committed mid-run would hand the agent nothing. **Tell the agent to refuse rather than report clean if the diff it receives is empty**; a check that passes on empty input is worse than no check. No git: pass the working tree's current state of the `## Targets` files plus anything new the phase created, and say in the report that the basis was files, not a diff.
+
+**Dispatch it; never answer these yourself.** The value is entirely in the reader being cold — a model reviewing its own work finds nothing. So the agent gets the scope and the diff and nothing else: not this conversation, not the reasoning behind any choice. One agent, not several: two reads of the same diff converge on a compromise and cost double.
+
+Question 3 is the one no other check in scaffold performs — every other pass hunts for work that is *missing*. Brief the agent explicitly that a plausible, well-built, unrequested change is a finding, not a bonus, and that a rationale in the code or a comment does not excuse it.
+
+Report what came back:
+> "Scope check (fresh agent): [N] missing, [N] different, [N] unasked. [Each, one line.]"
+
+**Then act on it — these are code findings, and this is the skill that writes code.** A *missing* scope item: build it, it was always in scope. An *unasked* change: revert it (removing work no scope item called for is not scope expansion). A *different* finding: report it and let the user rule — building it a second way is a decision, not a fix. If you changed anything, re-run the check. Then report what's left.
+
+Then offer, don't run:
+> "Run a deeper review on this diff (`/code-review` if you have it), or go straight to `/scaffold-checkpoint`?"
+
+A deeper review is a separate decision with its own cost. **Never run one automatically**, and don't block on one existing — `/code-review` is a Claude Code native command, not part of scaffold, so it may not be available.
+
+## Step 6: Complete
+
+When all scope items are done and the scope check has been reported:
 > "Phase scope complete. Run /scaffold-checkpoint."
 
 Do NOT tick the `milestone.md` checklist yourself — checkpoint marks the phase complete after
@@ -136,16 +160,29 @@ The plan's `## Scope` is your scope. Do not expand beyond it.
 - Do NOT add features, refactor surrounding code, or make "while I'm here" improvements
   unless the user explicitly asks.
 
-## Escape hatch
+## Escape hatch — two exits
 
-If a scope item is significantly bigger than expected — needs an architectural decision,
-touches unexpected systems, or the approach won't work — STOP:
+If a scope item is significantly bigger than expected, needs an architectural decision,
+touches unexpected systems, or the approach won't work — STOP. Which exit depends on
+whether the plan can still be satisfied at all:
+
+**Still buildable, just not as scoped** → offer the choice:
 > "This is more complex than the plan anticipated: [explain]. Re-scope with /scaffold-plan,
 > or continue?"
 
-A scope item that turns out to hinge on an unmade architectural decision is a hard stop:
-ADRs are Adam-gated and routed through `/scaffold-plan`, not invented mid-execution. Let
-the user decide.
+**Not satisfiable as written** — the scope contradicts what the code is, two scope items
+can't both hold, or the plan needs a fact that doesn't exist → **don't offer to continue:**
+> "This plan is not satisfiable as written. The contradiction: [what the plan requires, what
+> is actually true, why both cannot hold]. Nothing further built."
+
+That second one is a **legitimate finished outcome, not a failed phase.** State it once and
+stop. Do not propose a fix, and do not pick a reading of the scope that happens to work and
+build that — choosing a reading *is* deciding the contradiction, which is not `go`'s to
+decide. Reporting it is the deliverable; `/scaffold-checkpoint` records it (it abandons the
+phase, which clears the cursor so a resuming session doesn't re-derive the same wall).
+
+A scope item that hinges on an unmade architectural decision always stops here: ADRs are
+Adam-gated and routed through `/scaffold-plan`, never invented mid-execution.
 
 ## Context window awareness
 
@@ -168,6 +205,8 @@ the milestone's `milestone.md` are all checkpoint's or plan's job); tick the
 `milestone.md` phase checklist (checkpoint marks completion); propose or write ADRs (Adam-gated,
 routed through plan/checkpoint); or expand scope (only the plan's scope items).
 
-Go MAY: write project files; write an opportunistic `investigations/YYYYMMDD-slug.md`.
+Go also does NOT: answer the Step 5 scope check itself (dispatch a fresh agent — self-review is worth nothing); build a *different* finding a second way without the user's ruling; or run `/code-review` or any deeper review automatically (offer it).
+
+Go MAY: write project files; write an opportunistic `investigations/YYYYMMDD-slug.md`; dispatch a fresh read-only subagent for the Step 5 scope check.
 
 **Never write into `.scaffold/milestones/archived/`.** A closed milestone is a record of what was built, not a statement of what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`; the archive is not amended, and its specs are not cited as current behaviour.

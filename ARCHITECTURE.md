@@ -316,6 +316,8 @@ Two structural boundaries hold across the set:
 
 ### The two-tier audit model (no flags)
 
+*Scope: grading the **docs**. Code is checked separately, by `go`'s scope check.*
+
 A safety check you must remember to invoke isn't a safety net, so there are no audit
 flags. Instead, two tiers:
 
@@ -413,6 +415,10 @@ scaffold truth or execution docs** — that is `checkpoint`'s job. Reads its pla
   start and works item-by-item — it does not re-propose. Out-of-scope discoveries route
   to checkpoint rather than expanding silently.
 
+**The scope check — always, at the end, by a fresh agent.** When the scope items are done, `go` dispatches **one fresh subagent** and hands it the plan's `## Scope` and the diff. It answers three questions: what scope items are **not built**, what was built **differently** from what the plan named, and what was built that **no scope item asked for**. The third is the one nothing else in the system looks for — every other check hunts for missing work, and surplus code on a path nobody asked to review is the same risk from the other side. *Fresh* is the mechanism, not a preference: a model reviewing its own work finds nothing, so `go` cannot run this check itself. The agent reports; it does not fix. A deeper review (`/code-review`) is **offered, never automatic**.
+
+**The unsatisfiable exit.** `go`'s escape hatch has two exits, chosen by one question: *can the scope be satisfied at all?* **Yes, just not as scoped** → offer to re-scope or continue. **No** — the scope contradicts the code, two items can't both hold, a required fact doesn't exist → `go` states the contradiction and stops, and **continuing is not offered.** That is a legitimate terminal result, not a failed phase; the exit has to exist because a plan with no door marked *this cannot be done* is a plan the executor forces a pass on instead. `go` writes nothing; `checkpoint` records it through **abandon** — phase unticked, cursor cleared off the plan, the contradiction as the reason.
+
 ---
 
 ### `/scaffold-checkpoint`
@@ -422,6 +428,8 @@ scaffold truth or execution docs** — that is `checkpoint`'s job. Reads its pla
 Updates the truth docs + the active milestone's `milestone.md` (tick the phase checklist +
 date) + `state.md` + `knowledge/` (when behavior changed).
 
+- **Evidence must be FRESH** — produced *in this exchange*, not a green run remembered from earlier in the session (the run was real; the code has moved since). And tests passing is evidence the tests pass, **not** evidence the scope was built: that needs the scope read against the diff (`go`'s scope check, or a pass here).
+- **A phase `go` reported unsatisfiable is recorded through abandon** — phase unticked, the plan reference cleared from `## Next`, the contradiction as the reason.
 - **Always runs a light, inline structural + coherence sweep** over *all* living docs
   (not just the touched ones), no flag:
   - *Structural* — each living doc well-formed at the stable, Law-level shape: required
