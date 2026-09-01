@@ -194,9 +194,14 @@ signal. For an **emergent** milestone, all-phases-ticked is the normal steady st
 a close signal — close only when Adam explicitly says the chunk is done. When the
 condition holds, confirm: "Milestone `NN-slug` — done-contract met. Close it?" On
 confirmation:
-1. **Graduate durable rules into `knowledge/`** — lift enduring *cross-cutting invariants*
-   from the retiring milestone's spec `references/` (or accrued emergent rules) and write
-   each in the contract's form: invariant + why + a pointer to where the code enforces it.
+1. **Graduate durable rules into `knowledge/` — and this is the LAST time the question can
+   ever be asked.** Once step 4 moves the folder, nothing reads it for rules again: audit
+   does not walk `archived/`, and no skill may edit it. So this is not "lift what you
+   notice" — **read the retiring milestone's spec `references/` (and any accrued emergent
+   rules) in full and account for EVERY rule in them**, one of three ways: it graduates, it
+   has a code home that enforces it (name the file), or it died with the milestone. Write
+   each graduating rule in the contract's form: invariant + why + a pointer to where the
+   code enforces it. A rule nobody accounts for here is a rule that has just been sealed.
    First triage each candidate: a single-code-home value (constant/enum) → leave it in
    code, graduate nothing; an invariant a single test/constraint could enforce → prefer
    writing that, graduate nothing; only a genuinely homeless cross-cutting invariant
@@ -209,9 +214,55 @@ confirmation:
    `scaffold-plan` to re-home into the next milestone's `milestone.md` `## Deferred` or
    `roadmap.md` `## Backlog`), or drop it with Adam's nod. The list retires with the
    folder — it must not graveyard.
-3. **Flip the roadmap line** to `[done]` in `roadmap.md`'s `## Milestones`.
-4. **Leave the folder in place** — no archive move; git is the history.
-5. A pointer'd/external spec is **not cracked open** — only its enduring rules graduate.
+3. **Archive the folder FIRST — move it whole, rename nothing.** Before the roadmap
+   flip, not after: a flip that lands without its move leaves a `[done]` line pointing at
+   a path that does not exist and a folder that still looks live, and a checkpoint can be
+   interrupted between two steps.
+   `git mv .scaffold/milestones/NN-slug .scaffold/milestones/archived/NN-slug` (create
+   `archived/` if absent). **Verify the destination does not already exist first** — a
+   plain `mv` onto an existing directory does not error, it nests (`archived/NN-slug/NN-slug/`);
+   `git mv` errors, which is why it is the default. Use plain `mv` only if the repo is not
+   under git, and then check first.
+   The move IS the marker: every path inside then reads `…/milestones/archived/NN-slug/…`,
+   so a grep hit, a listing and a read all carry the word. Nothing is renamed — `NN-slug`
+   is the same folder it always was.
+   Then stamp **`milestone.md` only**, adding one frontmatter key below `updated:`:
+   `archived: YYYY-MM-DD`. The spec and the phase plans move untouched — the path
+   already says what they are, and stamping each buys nothing.
+   **Everything under `archived/` is now read-only.** It records what was built; it does
+   not state what the code does now. A rule still live at close has already graduated to
+   `knowledge/` (step 1) or belongs in `architecture.md` — it is never maintained in the
+   archive.
+4. **Flip the roadmap line** to `[done]` in `roadmap.md`'s `## Milestones`, and repoint
+   its path at `milestones/archived/NN-slug/`.
+5. **Repoint `state.md`'s `## Next` — it points into the folder you just moved.** Step 5b
+   wrote the active cursor as a milestone + phase-plan path, and that path is now inside
+   `archived/`. **`## Next` must never resolve inside `archived/`**: it is the authority
+   for what is *active*, and a cursor aimed at a closed milestone makes `scaffold-status`
+   report it as active and `scaffold-go` execute a phase plan out of the archive. Repoint
+   it at the next milestone, or — the normal case at a close — write that no phase is
+   active and `/scaffold-plan` is the next move. Do this HERE, not in Step 7: the sweep's
+   mechanical repair for a dangling back-reference is to follow the file to its new path,
+   which is exactly the wrong answer for this one.
+6. **Report the move: name the old path and the new one**, in the close output and again
+   in the Step 8 review. Anything outside `.scaffold/` that referenced the old path — a
+   project `CLAUDE.md`, a code comment, a README link — has just broken, and scaffold
+   neither owns nor sweeps those files. Printing both paths is what lets the one human
+   present grep his own repo for them.
+7. A pointer'd/external spec is **not cracked open** — only its enduring rules graduate.
+   The pointer file moves with the folder and goes read-only; **the external document it
+   points at does not** — it lives outside `.scaffold/`, keeps its own lifecycle, and is
+   governed by whoever owns it.
+
+**Reopening a closed milestone (Adam's call, never a skill's).** A close can turn out to
+have been premature — work resumes on a chunk already marked done. There is a reverse
+gear and it is these steps run backwards: `git mv` the folder back to
+`.scaffold/milestones/NN-slug/`, delete the `archived:` key from its `milestone.md`, flip
+the roadmap line from `[done]` to `[active]` and repoint its path, and set `## Next`.
+Offer it whenever the alternative is a duplicate milestone with a copied spec — two specs
+for one feature is the drift the archive exists to prevent, not a way around it. **Never
+reopen on your own judgment, and never edit in place instead** — an edit inside
+`archived/` is invisible to every check the system has.
 
 ### 6c. Propose a glossary term — collisions only (Adam-gated)
 
@@ -292,7 +343,7 @@ content) and route — do not guess. Moving durable content between truth docs i
 (`scaffold-plan`/`scaffold-integrate`), not a sweep fix.
 
 The inline sweep *samples*; for the deep, independent grading — hard conformance over the
-whole tree, docs vs. actual code, and the stranded-rules check — run `/scaffold-audit`.
+whole tree and docs vs. actual code — run `/scaffold-audit`.
 
 ## Step 8: Review before committing
 
@@ -314,7 +365,7 @@ next** based on the resulting state:
   resume now."
 - Phase done, more remain: "Next phase: [plan path]. `/scaffold-status` then
   `/scaffold-go`, or `/scaffold-plan` to recalibrate."
-- Milestone closed: "Milestone `NN-slug` done. `/scaffold-plan` for the next."
+- Milestone closed: "Milestone `NN-slug` done — moved to `.scaffold/milestones/archived/NN-slug/`. Anything outside `.scaffold/` pointing at the old path needs repointing by hand. `/scaffold-plan` for the next."
 - USER tasks pending: "Complete your tasks, then checkpoint again."
 - Blockers present: "Resolve [blocker], then `/scaffold-plan`."
 - Otherwise: "Run `/scaffold-plan`, start working, or done for now."
@@ -324,5 +375,7 @@ next** based on the resulting state:
 Checkpoint does NOT: make code changes (`scaffold-go` builds); make strategic decisions
 or rewrite plans (`scaffold-plan` does — checkpoint *surfaces* plan staleness); write an
 ADR without approval (propose, present, STOP); graduate/retire knowledge silently
-(surface the set, wait); archive a closed milestone (it rests in place); or guess at
-outcomes (evidence or user confirmation required).
+(surface the set, wait); **write into `milestones/archived/` — a closed milestone is a
+record and nothing edits it, so a rule found there that is still live gets restated in
+`architecture.md` or `knowledge/`, never amended in place**; or guess at outcomes
+(evidence or user confirmation required).

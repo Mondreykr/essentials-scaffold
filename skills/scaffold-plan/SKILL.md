@@ -349,3 +349,5 @@ Plan does NOT: write code or modify project files (`scaffold-go`); write to `dec
 without Adam's explicit approval (propose only — the log is Adam-gated); own the coherence
 sweep / write-back of build results (`scaffold-checkpoint`); author plans premised on an
 unratified decision (resolve the gate first); or skip the Phase 4 confirmation — Adam sees the cut *and* the write-set before anything lands.
+
+**Never write into `.scaffold/milestones/archived/`.** A closed milestone is a record of what was built, not a statement of what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`; the archive is not amended, and its specs are not cited as current behaviour.

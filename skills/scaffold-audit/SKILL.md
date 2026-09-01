@@ -1,14 +1,19 @@
 ---
 name: scaffold-audit
-description: Deep, independent, read-only review of a scaffold project — grade every .scaffold/ doc hard against its format, verify the docs against the actual code, and check no durable rule is stranded in a retired milestone. Spins up fresh agents; always does all three (conformance gates the rest); changes nothing. Use whenever the user wants a thorough audit, a deep check, a conformance or reality review, or to validate the scaffold before a release, after a long gap, or after heavy hand-editing — even if they only say "audit", "check the scaffold", or "is everything consistent". The light always-on version is built into /scaffold-checkpoint.
+description: Deep, independent, read-only review of a scaffold project — grade every LIVE .scaffold/ doc hard against its format and verify the docs against the actual code. Closed milestones under milestones/archived/ are never graded. Spins up fresh agents; always does both passes (conformance gates reality); changes nothing. Use whenever the user wants a thorough audit, a deep check, a conformance or reality review, or to validate the scaffold before a release, after a long gap, or after heavy hand-editing — even if they only say "audit", "check the scaffold", or "is everything consistent". The light always-on version is built into /scaffold-checkpoint.
 ---
 
 # scaffold-audit
 
 The deep, independent review. Where `checkpoint`'s inline sweep *samples*, audit grades
 the whole tree hard and checks it against reality. It is **read-only** — it reports drift
-and never edits. Depth is already chosen by invoking audit at all, so it **always does all
-three passes, no asking**: conformance, then reality, then stranded-rules.
+and never edits. Depth is already chosen by invoking audit at all, so it **always does both
+passes, no asking**: conformance, then reality.
+
+**`.scaffold/milestones/archived/` is out of scope, entirely and always.** A closed
+milestone is a frozen record of what was built, not a claim about the code — grading it
+can only produce findings nobody may act on, since nothing edits the archive. Do not
+inventory it, do not grade it, do not read it looking for drift.
 
 **Boundary.** Read-only. Audit grades and reports; it writes nothing. Every fix routes
 back through the skill that owns the doc (`plan`/`checkpoint`/`integrate`/`cleanup`) —
@@ -29,8 +34,11 @@ findings here. Each agent is told it is grading, not fixing, and grades against 
 ## Step 1: Inventory
 
 List every doc in scope: the four `.scaffold/` truth docs, `glossary.md` if present, all of
-`knowledge/`, `decisions/`, `investigations/`, and every `milestones/NN-slug/`
-(`milestone.md`, `spec/`, `phases/*`). Read each doc's frontmatter `type:` — that is
+`knowledge/`, `decisions/`, `investigations/`, and every **live** `milestones/NN-slug/`
+(`milestone.md`, `spec/`, `phases/*`). **Skip `milestones/archived/` and everything under
+it** — closed milestones are records, not graded docs. The one thing worth checking about
+the archive costs no reading: every `roadmap.md` `[done]` line should point into
+`milestones/archived/`, and no `[active]`/`[planned]` line should. Read each doc's frontmatter `type:` — that is
 authoritative and selects which conformance rules apply (filename/location is only a
 fallback). Ignore `.gitkeep` placeholders.
 
@@ -124,15 +132,7 @@ Verify the scaffold's claims against the actual code:
 of that area as **unreliable — fix conformance first**, rather than guessing. Don't infer
 through a broken doc.
 
-## Step 4: Stranded-rules check
-
-Confirm no retired milestone holds an **un-graduated durable rule** — a rule that should
-have graduated to `knowledge/` at close but still lives only in a retired milestone's
-`spec/references/`. The invariant: a durable rule always has a *living* home
-(`knowledge/`), never only a retired spec. Flag any orphan for a `checkpoint`
-graduation pass.
-
-## Step 5: Report
+## Step 4: Report
 
 Return findings **prioritized** (malformed/blocking first, then reality contradictions,
 then minor conformance). Conformance findings come straight from the Step 2 per-rule
@@ -143,7 +143,6 @@ and **which skill owns the fix**:
 - format / section / frontmatter drift → `scaffold-checkpoint` (sweep) or
   `scaffold-cleanup` (structural)
 - a truth/identity/plan change → `scaffold-plan`
-- a stranded rule / milestone-close graduation → `scaffold-checkpoint`
 - an absorbed-artifact issue → `scaffold-integrate`
 - an ADR that should change → propose via `scaffold-plan`/`scaffold-checkpoint`
   (Adam-gated)
@@ -153,5 +152,6 @@ End by stating audit changed nothing, and what to run next.
 ## Boundaries
 
 Audit does NOT: write or edit any doc (read-only — it routes fixes to the owning skill);
-propose or write ADRs (it flags; the gated proposal is plan/checkpoint's); touch code; or
-skip a pass (all three always run — conformance first, gating reality).
+propose or write ADRs (it flags; the gated proposal is plan/checkpoint's); touch code;
+**read or grade anything under `milestones/archived/`**; or skip a pass (both always run —
+conformance first, gating reality).

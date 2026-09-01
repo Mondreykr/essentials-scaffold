@@ -8,7 +8,10 @@ schema_version: 2
 "is it done?" signal), the objectives, the done-contract, and the deferred-work list
 (ground-level work surfaced inside this milestone but not scheduled into a phase).
 
-**Band.** Execution — temporal; retires in place with its milestone.
+**Band.** Execution — temporal; retires with its milestone. At close the whole
+milestone folder moves to `milestones/archived/NN-slug/` and this file is stamped
+`archived: YYYY-MM-DD`. **It is the only file in the folder that gets stamped** — the
+path already marks the spec and the phase plans, and stamping each of them buys nothing.
 
 **Owner(s).** Seeded by `scaffold-setup`, authored/updated by `scaffold-plan` (incl.
 grooming `## Deferred` — promote an item into a phase or leave it), ticked by
@@ -27,6 +30,16 @@ schema_version: 2
 updated: YYYY-MM-DD
 ---
 ```
+
+**On close, and only on close, one more key is added:**
+
+```yaml
+archived: YYYY-MM-DD
+```
+
+Written by `scaffold-checkpoint` in the same act that moves the folder and flips the
+`roadmap.md` line. It is a record of when the chunk closed, nothing more: no skill gates
+on it, no skill grades it, and `scaffold-audit` does not walk `archived/` looking for it.
 
 ## Required structure
 
@@ -101,6 +114,10 @@ Adam-gated.]
   promoted into a phase (by `scaffold-plan`), shipped (by `scaffold-checkpoint`), or
   **dismissed** (Adam's call, any time) — never checked `- [x]`. Detail lives in git / the
   eventual plan, not in the line.
+- **Closed means read-only.** Once this file sits under `milestones/archived/`, nothing
+  edits it — not `plan`, not `checkpoint`, not `go`. It records what was built, not what
+  the code does now. A rule that is still live at close graduates to `knowledge/` or is
+  restated in `architecture.md`; it is never maintained here.
 - **Retires with the milestone.** At close, every remaining `## Deferred` item is
   resolved, promoted, or dropped — it never graveyards in a retired milestone. A
   bar-cleared list is short by construction: a long one means the **bar isn't being
@@ -111,7 +128,9 @@ Adam-gated.]
 
 - Per-phase narrative accreting in the file (append-log; Law 1).
 - A status enum substituting for the checkbox + date signal.
-- Renumbering interstitial phases on migration.
+- Renumbering interstitial phases on migration, or renaming the folder on archive —
+  `NN-slug` is unchanged by the move to `archived/`.
+- Editing this file, its spec, or its phase plans after the move to `archived/`.
 - A program-altitude feature in `## Deferred` (belongs in `roadmap.md` `## Backlog`).
 - A multi-line / paragraph `## Deferred` item, or a `- [x]` checked deferred item.
 - **A parked item the parking session could have fixed in place** — a rename, a stale

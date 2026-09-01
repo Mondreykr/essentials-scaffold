@@ -169,3 +169,5 @@ the milestone's `milestone.md` are all checkpoint's or plan's job); tick the
 routed through plan/checkpoint); or expand scope (only the plan's scope items).
 
 Go MAY: write project files; write an opportunistic `investigations/YYYYMMDD-slug.md`.
+
+**Never write into `.scaffold/milestones/archived/`.** A closed milestone is a record of what was built, not a statement of what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`; the archive is not amended, and its specs are not cited as current behaviour.

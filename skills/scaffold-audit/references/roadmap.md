@@ -30,8 +30,9 @@ updated: YYYY-MM-DD
 # Roadmap
 
 ## Milestones
-- [active] 01-<slug> — one-liner → milestones/01-<slug>/
-- [planned] 02-<slug> — one-liner → milestones/02-<slug>/
+- [done] 01-<slug> — one-liner → milestones/archived/01-<slug>/
+- [active] 02-<slug> — one-liner → milestones/02-<slug>/
+- [planned] 03-<slug> — one-liner → milestones/03-<slug>/
 
 ## Backlog
 - [ ] <future feature, one line>
@@ -43,6 +44,10 @@ updated: YYYY-MM-DD
 - The milestone status token is exactly one of `[done] | [active] | [planned]` — the
   literal set is fixed so `scaffold-status` (reads) and `scaffold-checkpoint` (writes
   `[done]`) always agree.
+- **A `[done]` line's path points into `milestones/archived/`.** The folder moves at
+  close and the link moves with it, in the same act that writes `[done]` — so a `[done]`
+  line pointing at a live `milestones/NN-slug/` path, or an `[active]`/`[planned]` line
+  pointing into `archived/`, is a broken close.
 - Program altitude only: the phases *inside* a milestone live in that milestone's
   `milestone.md`, never here.
 - **Backlog membership — the one computable test.** Ask: *is this item tied to the

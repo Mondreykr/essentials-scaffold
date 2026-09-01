@@ -52,6 +52,12 @@ None.
 
 - `## Next` is the single authority for what's active (milestone + phase plan) —
   never folder order, never a status enum.
+- **`## Next` never resolves inside `milestones/archived/`.** A closed milestone is not
+  active by definition, and because Next *is* the authority, a cursor left pointing into
+  the archive makes `scaffold-status` report closed work as active and `scaffold-go`
+  execute a phase plan out of a frozen record. At a milestone close `scaffold-checkpoint`
+  repoints it — at the next milestone, or at "no active phase; run `/scaffold-plan`."
+  Following the moved folder into `archived/` is the wrong repair.
 - `Blockers` and `Open Questions` are always present; literal `None.` when empty
   (confirms the writer checked).
 - When a Blocker/Open Question resolves, remove the line and route the resolution

@@ -13,7 +13,7 @@ other skills.
 **Boundary.** Integrate does NOT: author plans or phase plans (`scaffold-plan`); run a
 coherence sweep or write back build results (`scaffold-checkpoint`); migrate an old-format
 repo (`scaffold-cleanup`); create/supersede/prune a decision (`decisions/` is Adam-gated —
-surface a ruling and hand to `plan`/`checkpoint`, never write one here); or change code.
+surface a ruling and hand to `plan`/`checkpoint`, never write one here); **place an artifact into `.scaffold/milestones/archived/` — a closed milestone takes no new content, so an artifact that belongs to closed work routes to `knowledge/` or to the active milestone instead**; or change code.
 
 **Precondition.** The four `.scaffold/` truth docs (`project.md`, `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
 files missing or incomplete — run /scaffold-setup first."

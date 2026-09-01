@@ -49,10 +49,11 @@ step serves it; when in doubt about where something goes, this plus the two Laws
   knowledge/*.md              durable rules (living)
   decisions/NNNN-slug.md      ADRs (history; 4-digit)
   investigations/YYYYMMDD-slug.md   research (history; date, no dashes)
-  milestones/NN-slug/
+  milestones/NN-slug/         an ACTIVE or PLANNED milestone
     milestone.md                   ## Objectives / ## Phases (checkbox+date) / ## Done-contract / optional ## Deferred
     spec/                     OPTIONAL — copy or pointer
     phases/NN-slug.md         one phase each (interstitials like 09.1 preserved)
+  milestones/archived/NN-slug/   a CLOSED milestone, moved here whole — read-only history
 ```
 
 The invariants that define **done**:
@@ -60,6 +61,9 @@ The invariants that define **done**:
 - The four living-truth docs exist and are conformant; `knowledge/` exists; `glossary.md` exists (created empty if the scaffold predates it — **never seed it with terms mined from the old docs or the code**; it earns entries later, one collision at a time).
 - `decisions/` and `investigations/` are **folders** with conformant names.
 - Each chunk of work is a `milestones/NN-slug/` container (`milestone.md` + `phases/`, optional `spec/`).
+- **Every milestone the roadmap marks `[done]` sits under `milestones/archived/NN-slug/`**, its
+  `milestone.md` carries an `archived: YYYY-MM-DD` key, and the roadmap line's path points there.
+  No `[active]` or `[planned]` milestone is under `archived/`.
 - **None of the legacy shapes remain:** no single `decisions.md`, no standalone `plans/`,
   no per-phase build plan inside `roadmap.md`, no `## Notes` in `state.md`, no catch-all
   section anywhere, no `project.md` checkbox.
@@ -67,7 +71,7 @@ The invariants that define **done**:
   `type: milestone-plan` (it's `milestone`), no `type: phase-brief` (it's `phase-plan`).
 - Every `.scaffold/` doc carries `type` / `schema_version: 2` / `updated` frontmatter (a
   `schema_version: 1` doc is pre-rename and not yet migrated).
-- No pointer dangles **within `.scaffold/`** (the sweep's scope — pointers held by files scaffold does not own are out of scope and are not claimed).
+- No pointer dangles **within the LIVE `.scaffold/` docs** (the sweep's scope — pointers held by files scaffold does not own are out of scope and are not claimed). **`milestones/archived/` is excluded:** its files are frozen, so a pointer that dangles because its target later moved cannot be repaired without editing a closed record — which is forbidden. A dangling pointer there is reported, never fixed.
 
 ## Step 1: Inventory — read everything, assume nothing
 
@@ -333,6 +337,34 @@ each as a one-line "retired" note rather than losing it). Wire architectural ADR
   (2-digit) — preserve interstitials.
 - `git mv` to preserve history; repoint every reference from the Step 4 sweep. Report each
   rename (mechanical, but list them so the sweep is auditable).
+
+### Archive the closed milestones (if any sit outside `archived/`)
+
+A scaffold created before the archive rule leaves every closed milestone in
+`milestones/`, where its folder is indistinguishable from a live one and its spec reads
+as a current contract. For each milestone `roadmap.md` marks `[done]`:
+
+- `git mv .scaffold/milestones/NN-slug .scaffold/milestones/archived/NN-slug` — whole,
+  and **renamed not at all**; create `archived/` on the first one.
+- Stamp `archived: YYYY-MM-DD` into that folder's `milestone.md` frontmatter, below
+  `updated:`. Use the date the roadmap line flipped to `[done]` if git can show it
+  (`git log -S"[done] NN-slug" -- .scaffold/roadmap.md`), else the file's last commit
+  date. **`milestone.md` only** — the spec and phase plans move untouched.
+- Repoint that roadmap line's path at `milestones/archived/NN-slug/`, and repoint any
+  other `.scaffold/` reference the Step 4 sweep found.
+
+**Before each move, run the graduation pass that close should have run.** This is the
+last moment the spec is legal to read for rules — after the move nothing walks it again.
+So for each milestone about to be archived, read its `spec/references/` (or its accrued
+rules) and account for every rule: it graduates to `knowledge/`, it has a code home that
+enforces it (name the file), or it died with the milestone. **Surface the set for Adam
+before writing any of it** — graduation is gated, exactly as it is at close. A repo
+migrating to this layout has never had that pass run, so skipping it seals every closed
+milestone's rules in one command.
+
+Report each move, naming the old path and the new one — references from outside
+`.scaffold/` break on it and scaffold does not sweep those. **Contents are never edited**
+once moved.
 
 ### Repoint `state.md` and drain `## Notes` (if present)
 

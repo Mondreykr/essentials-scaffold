@@ -10,8 +10,11 @@ either the spec itself or a pointer to one that lives elsewhere.
 **Band.** Execution — *live* (maintained in place) until the milestone closes, when
 its enduring rules graduate to `knowledge/`.
 
+**After the milestone closes it is FROZEN.** `scaffold-checkpoint` moves the whole milestone folder to `milestones/archived/NN-slug/`; this file travels with it, unrenamed and unstamped — only the milestone's `milestone.md` carries the `archived:` date, because the path already marks everything beneath it. Nothing edits it afterwards, and nothing cites it as a statement of current behaviour: it records what was built. A rule still live at close lives in `knowledge/` or `architecture.md` instead.
+
 **Owner(s).** Created by `scaffold-integrate` (absorb or pointer); moved/pointed by
-`scaffold-cleanup`. Read by `scaffold-go`.
+`scaffold-cleanup`; moved into `milestones/archived/` at close by `scaffold-checkpoint`.
+Read by `scaffold-go`. **Written by nothing once archived.**
 
 ## Frontmatter
 

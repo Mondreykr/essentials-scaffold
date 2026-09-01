@@ -10,7 +10,7 @@ The documents are organized in three bands, governed by two laws:
 
 - **Living truth** — always current, overwritten in place: `project.md` (what it is), `architecture.md` (how it's built), `roadmap.md` (the program), `state.md` (where you are now), `knowledge/` (durable rules).
 - **History** — frozen, written once, never the source of current truth: `decisions/` (ADRs) and `investigations/` (research records).
-- **Execution** — temporal, retires when its chunk of work is done: `milestones/NN-slug/` holding a `milestone.md`, optional `spec/`, and `phases/` plans.
+- **Execution** — temporal, retires when its chunk of work is done: `milestones/NN-slug/` holding a `milestone.md`, optional `spec/`, and `phases/` plans. At close the whole folder moves to `milestones/archived/NN-slug/` and becomes a read-only record.
 
 **Law 1 — truth and history never share a document.** **Law 2 — a document lives at the layer that owns its lifecycle and audience.** Everything routes from those two rules. The full model is in [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
@@ -139,6 +139,7 @@ Two boundaries hold across the set: **`go` writes code, never scaffold docs** (a
 | `.scaffold/decisions/NNNN-slug.md` | history | ADRs — load-bearing decisions + why (frozen, you gate every one) |
 | `.scaffold/investigations/YYYYMMDD-slug.md` | history | Research and analysis records (frozen) |
 | `.scaffold/milestones/NN-slug/` | execution | A chunk of work: `milestone.md`, optional `spec/`, `phases/NN-slug.md` plans |
+| `.scaffold/milestones/archived/NN-slug/` | execution (closed) | A milestone that has closed — moved here whole, renamed not at all. Read it freely; nothing edits it, and nothing in it states what the code does now |
 
 Every `.scaffold/` document carries minimal frontmatter — `type`, `schema_version`, `updated` — so the skills always know what a doc is and when it last changed; there is no exempt type. All scaffold data lives in `.scaffold/` at project root. Repo-level `docs/` holds only code-adjacent reference assets (e.g. a design-system bundle) — never project documentation.
 
@@ -160,7 +161,7 @@ Two altitudes, two documents:
 
 The milestone status token is exactly one of `[done] | [active] | [planned]`.
 
-- **`milestones/NN-slug/milestone.md`** is the plan for *one* milestone — the phases inside it, plus its objectives and done-contract. It retires when the milestone closes.
+- **`milestones/NN-slug/milestone.md`** is the plan for *one* milestone — the phases inside it, plus its objectives and done-contract. It retires when the milestone closes: `checkpoint` moves the whole folder to `milestones/archived/NN-slug/`, stamps `archived: YYYY-MM-DD` into this file, and repoints the roadmap line at the new path. The move is the point — the word then sits in every path inside the folder, so a closed spec cannot be mistaken for a live contract by anyone (or anything) that finds it by searching.
 
 ```markdown
 # Milestone 01 — rebuild
@@ -196,7 +197,7 @@ It routes the artifact by what it is:
 
 It also extracts operational facts into the truth docs (run/env → `architecture.md`). Integrate is pure ingest — it does not author plans, run coherence sweeps, or migrate old layouts.
 
-While a milestone runs, its spec's `references/` are the *live* rulebook; at milestone close, the enduring rules graduate into `knowledge/` (via `checkpoint`).
+While a milestone runs, its spec's `references/` are the *live* rulebook; at milestone close, the enduring rules graduate into `knowledge/` (via `checkpoint`) and the folder itself moves to `milestones/archived/`. A rule that did not graduate did not survive the close — the archived spec is a record of what was built, never a statement of current behaviour.
 
 ## Recovery
 

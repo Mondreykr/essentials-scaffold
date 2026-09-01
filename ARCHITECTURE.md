@@ -92,6 +92,8 @@ and retire with their milestone.
 | Milestone contract | The spec, if the chunk needed heavy scoping | `.scaffold/milestones/NN-slug/spec/` | temporal |
 | Phase plan | Atomic execution unit: one phase's scope/approach/acceptance | `.scaffold/milestones/NN-slug/phases/NN-slug.md` | temporal |
 
+Each of the three execution rows above moves to `.scaffold/milestones/archived/NN-slug/…` when its milestone closes.
+
 The model has three bands: **living truth** (overwritten in place, always current),
 **history** (frozen, written once), and **execution** (temporal, retires with its
 milestone).
@@ -117,23 +119,42 @@ milestone).
 
   # ── EXECUTION (temporal; retires with its milestone) ──
   milestones/
-    NN-slug/
+    NN-slug/                      an ACTIVE or PLANNED milestone
       milestone.md                     this milestone's phases + objectives + acceptance + deferred work
       spec/                       OPTIONAL — the contract, if heavy scoping was needed
       phases/
         NN-slug.md                phase plans
+    archived/
+      NN-slug/                    a CLOSED milestone, moved here whole at close — read-only history
 
 docs/                             code-adjacent reference assets ONLY (e.g. design-system bundle)
 ```
 
-**No `archive/`.** Retired milestones rest in place in `milestones/`. **What's active
-is whatever `state.md`'s `## Next` points at — not folder order.** "Highest `NN`" is
+**A closed milestone moves to `milestones/archived/NN-slug/`, whole and unrenamed.**
+The move is the marker: every path inside it then reads
+`…/milestones/archived/NN-slug/…`, so the word travels with the file into every grep
+hit, listing and read — which is how a file is actually encountered, and the only place
+a marker survives all three. A banner inside a file does not, because a search hit shows
+a line in the middle of a file and never its first line.
+
+**Everything under `archived/` is a closed record: read freely, never edit, never cite
+as current.** It states what was built and why, at the time it was built. It does not
+state what the code does now — `architecture.md` and `knowledge/` do, and a rule still
+live at close belongs in one of them. A closed spec left standing in present tense will
+otherwise read as a live contract; three sessions in one corpus repo did exactly that,
+editing a spec ten days after its milestone closed.
+
+**This does not make folder location the active-cursor authority. What's active is
+whatever `state.md`'s `## Next` points at — not folder order.** "Highest `NN`" is
 only a fallback hint when `state.md` is silent: a later-numbered milestone can be
 pre-created while an earlier one is still active, so folder order cannot be the
-authority. (`setup`/`cleanup` may write a `.scaffold/archive/` holding pre-scaffold
-snapshots — superseded context files. It holds only
-superseded originals, is read by no skill, and is not part of the live model. Retired
-*milestones* never go there — they rest in place in `milestones/`.)
+authority. `archived/` answers a different question — *is this closed?* — and it is
+derived from the `roadmap.md` `[done]` flip in the same act, never independently.
+
+(`setup`/`cleanup` may also write a `.scaffold/archive/` — singular, a flexible bucket
+for pre-scaffold snapshots and superseded originals with no other home. It is read by no
+skill and is not part of the live model. Distinct from `milestones/archived/`, which is
+structured and holds closed milestones only.)
 
 **What happened (history)** lives in git. There is no `log.md`.
 
@@ -221,7 +242,8 @@ A few concepts span the execution docs and don't belong to any single contract:
     `checkpoint`'s coherence sweep flagging a *finalized* plan vs a later decision.
   Persistence buys durability at this cost, accepted explicitly.
 - **Milestone lifecycle.** Active = wherever `state.md` Next points (not folder
-  order). On close, the folder rests in place (no archive move); durable rules graduate
+  order). On close, the folder moves whole to `milestones/archived/NN-slug/` and its
+  `milestone.md` is stamped `archived: YYYY-MM-DD`; durable rules graduate
   to `knowledge/` (reconciled, surfaced for Adam); `roadmap.md`'s milestone line flips
   to `[done]`. Any remaining `## Deferred` items are resolved, promoted, or dropped at
   close — they retire with the milestone, never silently graveyarded.
@@ -267,7 +289,7 @@ Deterministic. Resolve by the two laws when in doubt.
 | A durable business/behavioral rule | `knowledge/*.md` |
 | A word that must mean exactly one thing here (esp. several words circling one concept) | `glossary.md` — **Adam-gated**, and only if it clears the admission bar |
 | How to build phase X of the active milestone | `milestones/NN-active/phases/X-slug.md` |
-| The contract that scoped a milestone | `milestones/NN-slug/spec/` (the spec, or a pointer to a shared/external one) |
+| The contract that scoped a milestone | `milestones/NN-slug/spec/` (the spec, or a pointer to a shared/external one). Once closed: `milestones/archived/NN-slug/spec/` — a record of what was built, never a statement of current behaviour |
 | Where we are right now | `state.md` (`## Next` is the active-cursor authority) |
 | Transient operational state (dirty DB, temp env) | resolve it; else route — a resume precondition → `state.md` `## Next`; a durable run/env condition → `architecture.md`; a blocker → `## Blockers`. **No catch-all section.** |
 | What the product is / scope boundaries | `project.md` |
@@ -304,9 +326,9 @@ flags. Instead, two tiers:
   Fast enough to run at every session end.
 - **`audit` is the deep, independent review** — on demand, spins up fresh agents. It is
   the **sole grader of per-contract format rules** (it owns the bundled contract copies in
-  its `references/` — the one drift-guarded place those rules live), checks docs against
-  actual code, and verifies no durable rule is stranded. It always does all three (see
-  below).
+  its `references/` — the one drift-guarded place those rules live) and checks docs against
+  actual code. It always does both (see below), and it never reads
+  `milestones/archived/`.
 
   *Why the split:* the detailed per-contract format rules change as contracts evolve, so
   keeping them in exactly one drift-guarded place (audit's bundled copies) is what stops
@@ -414,7 +436,8 @@ date) + `state.md` + `knowledge/` (when behavior changed).
 - May **propose** an ADR (gated).
 - **Milestone-close motion:** graduate durable rules to `knowledge/` (reconciling +
   retiring contradicted docs, **surfaced for Adam's confirmation**), flip the
-  `roadmap.md` line to done, leave the folder in place.
+  `roadmap.md` line to done, move the folder to `milestones/archived/NN-slug/` and stamp
+  its `milestone.md`.
 - **Primary owner of `architecture.md`** — it sees the diff and updates the technical
   truth when the build changed how it's built.
 - **Proposes a glossary term on a collision only** — when the session showed the same concept called more than one thing, or one word used for two. A high bar, deliberately: a "any terms today?" prompt every checkpoint trains the answer *no*. Additions **and definition changes** are Adam-gated; removal is not.
@@ -429,8 +452,9 @@ date) + `state.md` + `knowledge/` (when behavior changed).
 nothing.
 
 Spins up fresh read-only agents to do thoroughly what `checkpoint`'s inline sweep only
-samples. **It always does all three, no asking** — depth is already chosen by invoking
-`audit` at all:
+samples. **It always does both, no asking** — depth is already chosen by invoking
+`audit` at all. **`milestones/archived/` is out of scope in both passes:** a closed
+milestone is a frozen record, so grading it can only produce findings nobody may act on.
 
 - **Conformance (runs first, gates the rest):** grade every `.scaffold/` doc against its
   contract — the audit skill bundles a verbatim copy of each in `references/` — and grade
@@ -440,7 +464,17 @@ samples. **It always does all three, no asking** — depth is already chosen by 
   rule passed). Frontmatter `type` selects the contract.
 - **Reality:** verify scaffold claims against actual code — ticked phases really built,
   `architecture.md` matches the real stack, ADRs match reality.
-- **Stranded-rules check:** no retired milestone holds an un-graduated durable rule.
+
+  *Where the stranded-rule check went:* it used to be a third pass re-reading retired
+  specs for rules that should have graduated. It is now enforced at the close instead —
+  and the trade is deliberate, not free. Immutability of the record says nothing about the
+  correctness of the judgment: a rule the closing session failed to notice is now
+  permanently unexamined, where the old pass would have had another look at it. What buys
+  that back is that the close is no longer "lift what you notice" — `checkpoint` must
+  account for **every** rule in the retiring spec (graduated / code-homed / dead) because
+  it is the last moment the question can be asked at all. One thorough pass at the one
+  moment it can still change something, rather than a permanent re-read of files nobody
+  may act on.
 
 **Conformance gates reality:** if a doc is malformed enough that its state can't be
 read reliably (e.g. `## Next` doesn't resolve), the reality pass for that area is
@@ -533,7 +567,7 @@ coherent over time; that owner is marked **(primary)** below.
 | `state.md` | C | R | U | R | U + sweep | R | — | U |
 | `decisions/NNNN-slug.md` | C (dir) | R (on ref) | **propose→gate** | — | **propose→gate** | R | — | migrate (Adam gates survivors) |
 | `investigations/YYYYMMDD-slug.md` | C (dir) | R (lists) | R | C (opportunistic) | R | R | — | U (rename + stamp) |
-| `milestones/NN-slug/` (container) | C (first) | R | **C** (new chunk) | — | × (close-in-place) | R | — | C (wrap existing roadmap) |
+| `milestones/NN-slug/` (container) | C (first) | R | **C** (new chunk) | — | **move → `archived/` on close** | R | — | C (wrap existing roadmap) |
 | `…/milestone.md` | C (seed) | R | **U** (+ groom/promote Deferred) | R | U (tick + groom Deferred) | R (flag stale Deferred) | — | C (from old roadmap body) |
 | `…/spec/` | — | R | — | R | — | R | **C** (absorb/pointer) | move or pointer |
 | `…/phases/NN-slug.md` | — | R (state) | **C/U** + finalize + stale-sweep | **execute (final&fresh only)** | × (done; tick lands in `milestone.md`) | R (grade `## Targets`) | — | C (move old `plans/`, keep `09.1`) |
@@ -683,8 +717,23 @@ milestone off Next, not off the highest `NN`.
 
 **A milestone closes:**
 `checkpoint` graduates the spec's enduring rules into `knowledge/` (reconciling and
-retiring contradicted docs, surfaced for Adam), flips the `roadmap.md` line to done, and
-leaves the folder in place. No archive move.
+retiring contradicted docs, surfaced for Adam), flips the `roadmap.md` line to done,
+`git mv`s the folder to `milestones/archived/NN-slug/`, stamps `archived: YYYY-MM-DD`
+into that folder's `milestone.md` frontmatter, and repoints the roadmap link at the new
+path. Only `milestone.md` is stamped — the spec and the phase plans are moved untouched,
+because the path already says what they are and a stamp on each buys nothing. It repoints
+`state.md`'s `## Next` in the same act — the cursor was pointing into the folder that just
+moved, and Next is the authority for what is *active*. And it prints the old and new paths,
+because references from **outside** `.scaffold/` (a project `CLAUDE.md`, a code comment, a
+README link) break on the move and scaffold neither owns nor sweeps those files.
+
+**A closed milestone turns out not to be done:**
+There is a reverse gear, and it is Adam's call rather than a skill's: `git mv` the folder
+back, drop the `archived:` key, flip the roadmap line to `[active]` and repoint it, set
+`## Next`. It exists because the alternative a session reaches for otherwise is a duplicate
+milestone with a copied spec — two specs for one feature, which is the drift the archive was
+built to prevent. **Editing in place inside `archived/` is never the answer**: no check in
+the system can see it.
 
 **A spec lives outside `.scaffold/` (shared or grandfathered):**
 The milestone's `spec/` is a pointer, not a copy. The external spec stays whole and is

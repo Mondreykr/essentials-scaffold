@@ -71,6 +71,11 @@ So, before writing an entry, route it:
   accrue rules here directly.
 - **Invariant:** a rule always has a *living* home — the active spec's `references/` during
   a milestone, `knowledge/` once it retires — never only a retired spec.
+  **Enforced at exactly one moment: the milestone close.** `scaffold-checkpoint`'s close
+  accounts for every rule in the retiring spec — graduated, code-homed, or dead — because
+  once the folder moves to `milestones/archived/` nothing reads it for rules again
+  (`scaffold-audit` does not walk the archive). There is no later sweep that catches a
+  rule missed here.
 
 ## Anti-patterns
 
@@ -78,6 +83,8 @@ So, before writing an entry, route it:
   prose here (e.g. "tolerance is ±0.01") — it belongs in code; the copy will drift.
 - **A bloated or re-deriving entry** — one that restates code behavior step-by-step or has
   grown past a concise invariant + why + pointer (form-drift).
-- A durable rule left **stranded** in a retired milestone's spec, never graduated.
+- A durable rule left **stranded** in a retired milestone's spec, never graduated —
+  unrecoverable in practice once that spec is archived, which is why the close accounts
+  for every rule rather than lifting the ones that catch the eye.
 - A fact that belongs in `architecture.md` (one that changes on re-platform).
 - Dated log entries (Law 1).

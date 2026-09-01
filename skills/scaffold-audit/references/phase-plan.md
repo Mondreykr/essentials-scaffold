@@ -9,10 +9,13 @@ Authored by `scaffold-plan`, executed by `scaffold-go`, persists as the record.
 
 **Band.** Execution — temporal; persists in place (may go stale; see Rules).
 
+**After the milestone closes it is FROZEN.** `scaffold-checkpoint` moves the whole milestone folder to `milestones/archived/NN-slug/`; this file travels with it, unrenamed and unstamped — only the milestone's `milestone.md` carries the `archived:` date, because the path already marks everything beneath it. Nothing edits it afterwards, and nothing cites it as a statement of current behaviour: it records what was built. A rule still live at close lives in `knowledge/` or `architecture.md` instead.
+
 **Owner(s).** Created/updated by `scaffold-plan` (+ stale-sweep on pivot), executed by
 `scaffold-go`; on completion `scaffold-checkpoint` ticks the milestone's `## Phases`
 checklist (this file itself isn't modified); moved by `scaffold-cleanup` (preserving
-interstitials).
+interstitials); moved into `milestones/archived/` at milestone close by
+`scaffold-checkpoint`. **Written by nothing once archived.**
 
 ## Required frontmatter
 
