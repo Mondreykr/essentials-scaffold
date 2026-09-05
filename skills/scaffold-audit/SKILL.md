@@ -10,14 +10,12 @@ the whole tree hard and checks it against reality. It is **read-only** — it re
 and never edits. Depth is already chosen by invoking audit at all, so it **always does both
 passes, no asking**: conformance, then reality.
 
-**`.scaffold/milestones/archived/` is out of scope, entirely and always.** A closed
+`.scaffold/milestones/archived/` is out of scope, entirely and always. A closed
 milestone is a frozen record of what was built, not a claim about the code — grading it
 can only produce findings nobody may act on, since nothing edits the archive. Do not
 inventory it, do not grade it, do not read it looking for drift.
 
-**Boundary.** Read-only. Audit grades and reports; it writes nothing. Every fix routes
-back through the skill that owns the doc (`plan`/`checkpoint`/`integrate`/`cleanup`) —
-audit never edits, proposes ADRs, or touches code.
+**Boundary.** Read-only. Audit grades and reports; it writes nothing. Every fix routes back through the skill that owns the doc (`plan`/`checkpoint`/`integrate`/`cleanup`) — audit never edits, proposes ADRs, or touches code. It also never **reads or grades anything under `milestones/archived/`**, and never skips a pass: both always run, conformance first, gating reality.
 
 **Run it independently.** To grade without the bias of the working session's context,
 dispatch **fresh read-only subagents** (Explore / general-purpose) rather than judging
@@ -157,9 +155,6 @@ and **which skill owns the fix**:
 
 End by stating audit changed nothing, and what to run next.
 
-## Boundaries
+**Say where the findings live until they're acted on.** Audit is read-only by design — that independence is the point of the tier — but read-only must not mean *lost*. These findings exist only in this transcript. Each already names its owning skill above; `scaffold-checkpoint` disposes of the rest (it fixes, gets a ruling and applies it, or routes each to a section on disk). Close by saying so plainly and **naming the owners you actually assigned**, e.g.: *"Audit wrote nothing. Two findings are `/scaffold-cleanup`'s, one is `/scaffold-plan`'s, the rest `/scaffold-checkpoint` can dispose of. They live only in this conversation — nothing on disk records that this audit ran, so anything you don't act on now goes with the session."*
 
-Audit does NOT: write or edit any doc (read-only — it routes fixes to the owning skill);
-propose or write ADRs (it flags; the gated proposal is plan/checkpoint's); touch code;
-**read or grade anything under `milestones/archived/`**; or skip a pass (both always run —
-conformance first, gating reality).
+**Run the owning skill first when one is named.** A structural-migration finding sent to `/scaffold-checkpoint` hits its version guard and bounces straight back to `/scaffold-cleanup` — and under its repair licence it might instead attempt a cleanup-class fix it isn't scoped for.

@@ -83,7 +83,7 @@ gets rubber-stamped. **Target files** already move under `go` item-by-item withi
 session with no re-check (the code moving is what executing *is*), so letting them move
 across a session boundary is exactly as safe. **`.scaffold/` files** belong to the other
 staleness defense — `scaffold-plan`'s pivot sweep and `scaffold-checkpoint`'s coherence
-sweep — never to this check. Untracked files never trip the gate.
+sweep — never to this check. **A project file a `checkpoint` commit touched since the stamp** is exempt on the same reasoning: `checkpoint`'s repair licence commits session residue under `checkpoint:` / `reconcile:` subjects, and a resume must not be refused for the tidy-up the last save performed. Identify them with `git log --format=%H%x09%s <sha>..HEAD` and exempt the paths of commits whose subject starts `checkpoint:` or `reconcile:`. Untracked files never trip the gate.
 
 `## Targets` lists the files/interfaces the phase touches; `scaffold-plan` writes it
 during a **finalize** pass (`as of HEAD`) and `scaffold-go`'s deterministic freshness
@@ -118,10 +118,8 @@ no conformance break.
 - **Uncommitted edits count.** The freshness check reads the working tree, not just the
   committed span, so an uncommitted change to a file outside `## Targets` and `.scaffold/`
   makes the plan **stale** exactly as a commit would.
-- **Staleness:** a pre-written downstream plan can go stale when a later decision/plan
-  lands. `scaffold-plan` sweeps unexecuted plans (drafts included) on a pivot;
-  `scaffold-checkpoint`'s coherence sweep also flags a *finalized* plan whose
-  targets/approach conflict with a later decision.
+- **Staleness:** a pre-written downstream plan can go stale when a later decision/plan lands. `scaffold-plan` sweeps unexecuted plans (drafts included) on a pivot; `scaffold-checkpoint`'s coherence sweep also flags a *finalized* plan whose targets/approach conflict with a later decision.
+- **Rewriting a finalized plan DEMOTES it to draft — delete `## Targets` in the same edit.** The freshness test exempts everything under `.scaffold/`, so a rewritten plan that keeps its old stamp reads as **final & fresh** to `scaffold-go`: it would execute a scope that was never validated against the code and never passed the finalize approval seam, against a target list that no longer describes the files it touches. Whoever rewrites the scope, approach or acceptance of a plan carrying `## Targets` removes that section and routes the plan back through `/scaffold-plan --final`. This binds `scaffold-plan`'s pivot sweep and `scaffold-cleanup`'s migration alike.
 - **A finalized plan passes the stranger test.** Could a competent builder who has never
   seen this project execute it from the plan alone? Each place the answer is no is a rule
   the plan leans on without stating — name it in `## Approach` or point to where it is

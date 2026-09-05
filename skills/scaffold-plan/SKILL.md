@@ -10,10 +10,9 @@ The single scaffold-**authoring** skill. The conversation that precedes you need
 skill — discussion is just discussion. Your job is to **persist** the direction you and
 Adam agreed on into the right docs, routing each thing to its one home.
 
-**Boundary.** You write scaffold docs only. Never code (that's `scaffold-go`) and never
-the post-build coherence sweep / write-back of build results (that's
-`scaffold-checkpoint`). You only ever *propose* an ADR — never write to `decisions/`
-without Adam's explicit approval.
+**Boundary.** You write scaffold docs only, and this is the one place this skill states it. Never code or project files (`scaffold-go`); never the post-build coherence sweep or write-back of build results (`scaffold-checkpoint`); never a plan premised on an unratified decision (resolve the gate first); never skip the Phase 4 confirmation — Adam sees the cut *and* the write-set before anything lands. You only ever *propose* an ADR — never write to `decisions/` without his explicit approval. The finalize pass *reads* code and still writes only the plan.
+
+**Never write into `.scaffold/milestones/archived/`.** A closed milestone records what was built, not what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`.
 
 **Precondition.** The four `.scaffold/` truth docs (`project.md`, `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
 files missing or incomplete — run /scaffold-setup first."
@@ -44,8 +43,7 @@ Read `state.md` and `roadmap.md` first.
 ## Inline description
 
 If the user invoked with a description (e.g. "plan add an export endpoint"), treat it as
-the agreed direction: run Phase 1 (triage) silently, then assess weight. A one-line
-backlog idea → do the minimum (route to `roadmap.md` Backlog) and confirm, no full flow.
+the agreed direction: run Phase 1 (triage) silently, then assess weight. A one-line backlog idea → do the minimum: run the admission bar, **propose the line and wait** (`## Backlog` additions are Adam-gated exactly as `## Deferred` ones are), then write it. Propose-then-write, never write-then-confirm — no full flow otherwise.
 Anything that creates a milestone, authors plans, shifts architecture truth, or touches a
 decision → proceed to Phase 2.
 
@@ -73,7 +71,7 @@ fresh draft plan) runs the normal Phases 1–7.
 
 Read, absorbing context (don't present yet):
 
-1. `state.md` — Active focus, Next, Blockers, Open Questions
+1. `state.md` — Active focus, Next, Blockers, Open Questions. `## Next` may already carry a concrete instruction `checkpoint` wrote there (e.g. "re-finalize `…/phases/04-y.md` — its `## Targets` predate [[0007-…]]"). That is a disposed finding handed to you on disk, not a stale note: treat it as the agreed direction, confirm it in Phase 2, and act on it rather than re-deriving it
 2. `roadmap.md` — `## Milestones` index + `## Backlog`
 3. `project.md` — identity, scope boundaries
 4. `architecture.md` — current technical truth + referenced ADRs
@@ -87,9 +85,7 @@ pointer to an external/shared spec; don't crack open its internals); and any
 filename; read any directly relevant.
 
 Assess internally: where does the direction land (backlog idea / new milestone /
-new-or-changed plans / a requirement / an architecture-truth shift / a decision)? **Is
-it a pivot** (reverses a prior decision, or reorders/replaces phases in the active
-milestone)? — if so, downstream unexecuted plans may now be stale. **Does any intended
+new-or-changed plans / a requirement / an architecture-truth shift / a decision)? **Is it a pivot** (reverses a prior decision, or reorders/replaces/**inserts** phases in the active milestone — insertion counts, and an interstitial like `09.1` is the canonical case that stales everything downstream)? — if so, downstream unexecuted plans may now be stale. **Does any intended
 plan depend on a not-yet-approved decision?** — if so, the ADR gate resolves first.
 
 ## Phase 2: Confirm direction (interactive — WAIT)
@@ -168,7 +164,7 @@ invent a catch-all / "misc" / "notes" section to park something that doesn't obv
 fit.** Route it to its real home; if it genuinely seems to need a new kind of section,
 that's a system-design question to raise with Adam, not a bucket to add mid-session.
 
-- **The admission bar — run it BEFORE the routing test below.** Routing decides *which
+- The admission bar — run it BEFORE the routing test below. Routing decides *which
   list*; admission decides *whether it gets a line at all*. An item earns one only if it
   **needs a decision**, is **materially out of scope**, or is **real work that can't ride
   along safely.** Clears none → it is **fixed in place or dropped**, never parked (if the
@@ -176,14 +172,14 @@ that's a system-design question to raise with Adam, not a bucket to add mid-sess
   **Additions to `## Deferred` / `## Backlog` are Adam-gated**: propose each with the gate
   it clears and write only what he approves. Removal stays ungated.
 - **The Backlog↔Deferred test (one computable rule):** *is this tied to the active
-  milestone — its scope, its code, or its goal?* **Not tied (or no milestone is active) →
-  `roadmap.md` `## Backlog`** (it outlives any current milestone — typically a future
-  feature/capability). **Tied → the active milestone's `milestone.md` `## Deferred`** (it's moot
+  milestone — its scope, its code, or its goal?* Not tied (or no milestone is active) →
+  `roadmap.md` `## Backlog` (it outlives any current milestone — typically a future
+  feature/capability). Tied → the active milestone's `milestone.md` `## Deferred` (it's moot
   or owned elsewhere once the milestone closes — typically a bug, cleanup, debt, residual,
   or doc/spec-reconciliation surfaced inside the work). "Altitude" is not the rule; tied-ness
   is. Either way: one terse `- [ ]` line, never ticked — an item leaves by removal when
   promoted or shipped.
-- **Grooming Deferred + Backlog (when the direction touches them).** You own *promotion*:
+- Grooming Deferred + Backlog (when the direction touches them). You own *promotion*:
   pull a `## Deferred` or `## Backlog` item into a phase plan (authoring it per below) and
   **remove the promoted line in the same write**, or leave the item if Adam decides not to
   schedule it yet. Don't delete an item as "done" on your own judgment — shipped-removal is
@@ -191,7 +187,7 @@ that's a system-design question to raise with Adam, not a bucket to add mid-sess
   **A dismissal is Adam's to make and yours to offer**: when grooming surfaces an item that
   no longer clears the admission bar, say so and remove it on his nod — a list only stays
   short if things leave it.
-- **A new milestone** → create `.scaffold/milestones/NN-slug/` (`NN` = milestone counter;
+- **A new milestone** → create `.scaffold/milestones/NN-slug/` (`NN` = one above the highest `NN` across BOTH `milestones/*/` and `milestones/archived/*/` — the archive holds the closed ones, and numbering off the live folders alone re-issues `01` the moment every earlier milestone has been archived, colliding in the roadmap index and breaking every "highest `NN`" fallback;
   slug is a sticky namespace — choose deliberately). Seed `milestone.md` (frontmatter
   `type: milestone`; `# Milestone NN — <slug>`; `## Objectives`; `## Phases`
   checklist with checkbox + completion-date slot; `## Done-contract`). Add the milestone
@@ -201,7 +197,7 @@ that's a system-design question to raise with Adam, not a bucket to add mid-sess
 - **One or more phase plans** → `.scaffold/milestones/NN-slug/phases/NN-slug.md`, and add
   each phase to that milestone's `milestone.md` checklist. Phase numbers reset per milestone;
   the slug namespaces them. **Interstitials allowed** (`09.1` for a surgical phase
-  inserted after a frozen plan) — preserve them, never renumber siblings. **Each plan is a vertical slice sized to one agent session** — the cut was confirmed in Phase 4a; apply the three rules there if you reached here without it. Plan shape:
+  inserted after a frozen plan) — preserve them, never renumber siblings. Each plan is a vertical slice sized to one agent session — the cut was confirmed in Phase 4a; apply the three rules there if you reached here without it. Plan shape:
 
   ```markdown
   ---
@@ -279,9 +275,9 @@ one the user names).
 2. **Write `## Targets`.** Add the section to the plan, one entry per file/interface the
    phase touches, and stamp it with the current commit — get it with `git rev-parse --short
    HEAD` and write `_as of <sha>_` under the heading. This is the grounding evidence that
-   makes the plan auditable and gives `go` its staleness backstop.
+   makes the plan auditable and gives `go` its staleness backstop. **Place it last, after `## Acceptance`** (the contract fixes the section order, and checkpoint's sweep checks order); on a *re*-finalize, **replace** the existing `## Targets` — never append a second one.
 
-   **Every entry that names a file must be a repo-relative path** (a trailing `/` covers
+   Every entry that names a file must be a repo-relative path (a trailing `/` covers
    everything beneath it) — `go`'s freshness check matches changed paths against this
    list, so a file named only in prose is invisible to it and the phase's own edits will
    read as undeclared drift. An entry naming an *interface or surface* rather than a file
@@ -306,7 +302,7 @@ one the user names).
    knows the unwritten rules is underspecified, and you cannot see where until you ask.
    It is also cheap: the answer is usually one or two additions, and the gaps it finds are
    a different class from what step 1's code research finds.
-5. **Present the approach in plain terms and confirm in dialogue.** The user is an
+5. Present the approach in plain terms and confirm in dialogue. The user is an
    architect who doesn't read the plan or the code — so surface the approach as a
    plain-language conversation ("here's how I'll do it: …"), not "read this doc". **Wait for
    his confirmation.** This is the approval seam; `go` executes afterward without
@@ -314,8 +310,7 @@ one the user names).
 6. On confirmation, write the plan and set `state.md`'s Active focus + `## Next` so a
    resuming session knows the plan is final & fresh.
 
-**Boundary intact:** finalize *reads* code but writes only the plan. If finalize surfaces
-that the plan rests on an unratified decision, resolve the ADR gate (Phase 3) first.
+If finalize surfaces that the plan rests on an unratified decision, resolve the ADR gate (Phase 3) first.
 
 ## Phase 6: Pivot — stale-plan sweep
 
@@ -327,9 +322,8 @@ For **every unexecuted plan** in the active milestone — **drafts included** (a
 premised on a since-superseded ADR still breaks the ADR gate); executed ones are history,
 leave them:
 1. Re-read it against the change just made.
-2. If its scope/approach/acceptance now conflicts, **flag and rewrite it in place** to
-   match — or, if it no longer belongs, propose removing it and updating the `milestone.md`
-   checklist.
+2. If its scope/approach/acceptance now conflicts, **flag and rewrite it in place** to match — or, if it no longer belongs, propose removing it and updating the `milestone.md` checklist.
+   Rewriting a FINALIZED plan demotes it to draft: delete its `## Targets` in the same edit. The freshness test exempts everything under `.scaffold/`, so a rewritten plan that keeps its stamp still reads as *final & fresh* to `go` — which would then execute a scope nobody validated, against a target list that no longer describes the files it touches, skipping the approval seam entirely. Report it as `rewritten → draft` and say it needs `--final` before `go`.
 3. Report each plan as `OK / rewritten / removed` in the summary.
 
 This is `plan`'s half of the staleness obligation; `checkpoint`'s coherence sweep is the
@@ -355,14 +349,5 @@ decision proposed and its status (proposed / approved+written / declined); state
 - **Direction depends on an unratified decision:** resolve the ADR gate (Phase 3) first.
 - **Mid-discussion pivot:** drop stale proposals, re-confirm (Phase 2), author, then run
   the Phase 6 sweep.
-- **Files are stale (>7 days):** flag it; offer to refresh now or note it for the next
+- **Files look stale** (an `updated:` well behind the work — `checkpoint`'s sweep owns the actual threshold): flag it; offer to refresh now or note it for the next
   `/scaffold-checkpoint` (which sweeps).
-
-## Boundaries
-
-Plan does NOT: write code or modify project files (`scaffold-go`); write to `decisions/`
-without Adam's explicit approval (propose only — the log is Adam-gated); own the coherence
-sweep / write-back of build results (`scaffold-checkpoint`); author plans premised on an
-unratified decision (resolve the gate first); or skip the Phase 4 confirmation — Adam sees the cut *and* the write-set before anything lands.
-
-**Never write into `.scaffold/milestones/archived/`.** A closed milestone is a record of what was built, not a statement of what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`; the archive is not amended, and its specs are not cited as current behaviour.

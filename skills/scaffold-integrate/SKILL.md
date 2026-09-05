@@ -13,7 +13,7 @@ other skills.
 **Boundary.** Integrate does NOT: author plans or phase plans (`scaffold-plan`); run a
 coherence sweep or write back build results (`scaffold-checkpoint`); migrate an old-format
 repo (`scaffold-cleanup`); create/supersede/prune a decision (`decisions/` is Adam-gated —
-surface a ruling and hand to `plan`/`checkpoint`, never write one here); **place an artifact into `.scaffold/milestones/archived/` — a closed milestone takes no new content, so an artifact that belongs to closed work routes to `knowledge/` or to the active milestone instead**; or change code.
+surface a ruling and hand to `plan`/`checkpoint`, never write one here); place an artifact into `.scaffold/milestones/archived/` — a closed milestone takes no new content, so an artifact that belongs to closed work routes to `knowledge/` or to the active milestone instead; or change code.
 
 **Precondition.** The four `.scaffold/` truth docs (`project.md`, `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
 files missing or incomplete — run /scaffold-setup first."
@@ -49,8 +49,7 @@ Don't read all of `knowledge/` or every milestone — only what you need to plac
 
 Exactly one primary home:
 
-- **Scopes a milestone** (a spec/contract/design doc defining a chunk of work — done,
-  active, or about to start) → that milestone's **`spec/`** (Step 4a).
+- **Scopes a milestone** (a spec/contract/design doc defining a chunk of work — active, or about to start) → that milestone's **`spec/`** (Step 4a). **Never a closed one:** a milestone under `milestones/archived/` takes no new content, so a spec arriving late for finished work routes by what it actually is — enduring rules → `knowledge/`; anything else → say it describes closed work and place nothing.
 - **Cross-cutting durable knowledge** (a domain/behavioral rulebook that outlives any one
   milestone — "how the ledger replays", "reconciliation tolerances") → **`knowledge/`**
   (Step 4b).
@@ -153,7 +152,7 @@ Set `updated:` on every truth doc you touch.
 > "## Integration summary
 > **Artifact:** [path]
 > **Routed to:** [`milestones/NN-slug/spec/` (copy | pointer)] or [`knowledge/<slug>.md`]
-> **Truth docs touched:** [architecture.md / state.md / project.md — or none]
+> **Truth docs touched:** [architecture.md / project.md — or none]
 > **Handed off (not done here):** [ADR → plan/checkpoint; milestone → plan — or none]"
 
 Run `git diff .scaffold/` to show exact changes (the original artifact is

@@ -9,9 +9,9 @@ Initialize Scaffold: a small set of living markdown docs in `.scaffold/`, so a s
 *creates the structure*; the other skills maintain it. Every doc it writes is conformant
 from birth — correct sections, correct frontmatter.
 
-**Boundary.** Setup creates the scaffold structure and commits it. It does not author
-phase plans (that's `scaffold-plan`), execute work (`scaffold-go`), or curate decisions
-into ADRs (`scaffold-integrate`/`scaffold-cleanup` own the ADR-promotion gate).
+**Boundary.** Setup creates the scaffold structure and commits it. It does NOT: author phase plans or a full milestone plan beyond the seed (`scaffold-plan`); execute work or write project code (`scaffold-go`); curate decisions into ADRs (`scaffold-cleanup` migrates a legacy decisions file; otherwise a ruling is surfaced via `scaffold-plan`/`scaffold-checkpoint`, Adam-gated — `scaffold-integrate` is pure ingest and never writes decisions); or overwrite an existing scaffold (fully conformant → stop; anything else → route to `scaffold-cleanup`).
+
+**Version guard.** If any `.scaffold/` doc carries `schema_version: 1`, a `type: milestone-plan` / `type: phase-brief`, or a milestone folder holds a `plan.md` (the current name is `milestone.md`), the repo predates the current format — stop: "Old scaffold format (pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
 
 ---
 
@@ -22,9 +22,7 @@ into ADRs (`scaffold-integrate`/`scaffold-cleanup` own the ADR-promotion gate).
 - **Already present → conformant, or route to cleanup.** If any `.scaffold/` *truth doc*
   exists (`project.md`, `architecture.md`, `roadmap.md`, `state.md`), this is **not** a
   fresh project — decide by conformance, and **never overwrite:**
-  - **Fully conformant** (all four truth docs present, `decisions/`/`investigations/` as
-    folders, a `milestones/` container, no `plans/`, and every doc stamped with
-    `type`/`schema_version` frontmatter) → stop: "Already set up — run /scaffold-status."
+  - **Fully conformant** (all four truth docs present, `decisions/`/`investigations/` as folders, a `milestones/` container, no `plans/`, no `plan.md` inside a milestone, no `type: milestone-plan`/`phase-brief`, and every doc stamped `schema_version: 2` — **the value, not merely the key**; a pre-rename repo *is* stamped, with `1`) → stop: "Already set up — run /scaffold-status." If `glossary.md` is absent, add: "…and run /scaffold-cleanup — `glossary.md` is missing."
   - **Anything else** — an older layout *or* a partial/hand-edited/ambiguous state (signs:
     a single-file `.scaffold/decisions.md`, a `.scaffold/plans/` folder, a per-phase
     `roadmap.md`, docs lacking frontmatter, or any mix that
@@ -148,8 +146,7 @@ updated: [today]
 [How to run the app locally + durable run/env facts.]
 ```
 
-Cover the sections that apply; small projects keep them plan until architecture exceeds
-a screen. As architectural ADRs get approved later, each truth statement references the
+Cover the sections that apply; small projects may keep these as sections until architecture exceeds a screen. As architectural ADRs get approved later, each truth statement references the
 ADR that established it (`[[NNNN-…]]`) — those inline references *are* the decision index;
 there is no separate index file. **Tiebreak vs `knowledge/`:** a fact that changes when
 you *re-platform* (business rule unchanged) → here; a fact that changes only when the
@@ -274,7 +271,7 @@ tools, CI assumptions, env requirements). Feed findings back:
 
 - stack, patterns, conventions, data access → `architecture.md`
 - module structure / what-it-is → `project.md` "What it is"
-- known issues or code TODOs → `state.md`
+- known issues or code TODOs → **not `state.md`** (it has four sections and no home for a to-do list; parking one in `## Active focus` is a named anti-pattern). Run the admission bar: one that **needs a decision**, is **materially out of scope**, or is **real work that can't ride along safely**, and isn't tied to the seed milestone → one terse line in `roadmap.md` `## Backlog`, Adam-gated. Everything else → dropped.
 
 ## Step 5: Renaming the seed milestone (the slug is a sticky namespace)
 
@@ -296,11 +293,3 @@ plans. To rename `01-main` → `01-<newslug>` (do it early, before plans accrue)
   /scaffold-status to orient, or /scaffold-plan to scope the first milestone."
 
 ---
-
-## Boundaries
-
-Setup does NOT: author phase plans or set up a full milestone plan beyond the seed
-(`scaffold-plan`); execute any work or write project code (`scaffold-go`); curate a
-legacy `DECISIONS.md` into ADRs (that's `cleanup`'s migration job, or surface via `plan`
-for an Adam-gated proposal); or overwrite an existing scaffold (fully
-conformant → stop; anything else already present → route to `scaffold-cleanup`).

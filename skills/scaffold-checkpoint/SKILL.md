@@ -1,14 +1,13 @@
 ---
 name: scaffold-checkpoint
-description: Save session progress in a scaffold project — verify work, update the .scaffold/ truth and execution docs, run the light structural + coherence sweep, and commit. Use whenever the user wants to checkpoint, save progress, wrap up or pause a session, record what was done, reconcile or tidy the scaffold docs after hand-edits, or close out a milestone — even if they only say "save", "commit my work", "let's stop here", or "wrap up". Runs the light always-on sweep; for the deep independent review use /scaffold-audit.
+description: Close out a work session in a scaffold project — verify what was done, update the .scaffold/ truth and execution docs, run the light structural + coherence sweep, fix what it finds, and commit. Leaves no known-wrong state: every finding is fixed, ruled on and applied, or routed to a section on disk — never just mentioned. Use whenever the user wants to checkpoint, save progress, wrap up or pause a session, record what was done, reconcile or tidy the scaffold docs after hand-edits, or close out a milestone — even if they only say "save", "commit my work", "let's stop here", or "wrap up". Runs the light always-on sweep; for the deep independent review use /scaffold-audit.
 ---
 
 # scaffold-checkpoint
 
-Save and reconcile a work session: verify what was actually done, update the
-`.scaffold/` truth + execution docs, run the light structural + coherence sweep, and commit.
-Any checkpoint could be the last thing that runs before a long gap, so it leaves the
-whole tree accurate and self-consistent.
+Close a work session cleanly: verify what was actually done, update the `.scaffold/` truth + execution docs, run the light structural + coherence sweep, **repair what you find**, and commit.
+
+**Your actual job — hold this over every step below.** You are the only moment in this system where the diff, the docs and the human are present at the same time. After the commit all three disperse: the diff goes to git, the human leaves, and the next session starts cold and pays full price to re-derive what is sitting in front of you for free right now. So your job is **not recording** — recording is the means. Your job is to **leave no known-wrong state in the tree.** The rule that follows: **anything you can dispose of, dispose of now**, because it will never be cheaper. Reporting a problem and committing anyway is the one outcome this skill does not permit.
 
 **Precondition.** The four `.scaffold/` truth docs (`project.md`,
 `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
@@ -19,8 +18,19 @@ milestone-plan` / `type: phase-brief`, or a milestone folder holds a `plan.md` (
 name is `milestone.md`), the repo predates the current format — stop: "Old scaffold format
 (pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
 
-**Boundary.** No code changes, no project files. Checkpoint updates `.scaffold/` and commits. Code is `scaffold-go`'s job; strategy and authoring are
-`scaffold-plan`'s.
+**Boundary — the one place this skill states it.** You write `.scaffold/` and commit. You do NOT: **build** — implement a scope item, add capability, or touch a surface this session didn't already touch (`scaffold-go` builds); make strategic decisions or rewrite plans (`scaffold-plan` does — you write the concrete re-plan instruction into `## Next`); write an ADR without approval (propose, present, STOP); graduate or retire knowledge silently (surface the set, wait); write into `milestones/archived/` — a closed milestone is a record and nothing edits it, so a live rule found there is restated in `architecture.md` or `knowledge/`, never amended in place; or guess at an outcome (evidence or the user's confirmation, always).
+
+**The repair licence.** Within that, **you may repair project code**, bounded by exactly one test:
+
+> **Does this need a plan?** If yes it is `plan`/`go` work — route it, don't fix it. If no, fix it now.
+
+That covers the residue of the session whose diff you are already holding: a rename, a stale comment, a duplicate line, a `.gitignore` entry, a one-line guard, a leftover debug print, a dead import. (That is the one example list — everywhere else in this skill points here.) There is **no line-count limit** — the judgment is yours. Three hard edges:
+
+1. A repair is **never new capability.**
+2. It **never touches a surface this session did not already touch** — that is unreviewed code you are not scoped to. On a sweep-only run there is no session diff, so the licence is void: a code fix you'd like to make routes instead.
+3. **Any repair re-runs verification** (Step 4's build/lint/tests) before Step 8, even when Step 4 was skipped because no code had changed. A repair made after a phase was ticked **invalidates the tick** until that re-run is green — you removed a "dead" import, and the rule that an earlier green result is not evidence applies hardest to your own edits.
+
+Every repair lands in the Step 8 diff Adam approves before the commit — that review is the brake, which is what lets the licence be judgment-based rather than a line count. If he rejects one, revert it in the working tree before committing and say so in the ledger.
 
 **Active milestone.** Resolve it from `state.md`'s `## Next` (the active-cursor
 authority) before doing anything else. Folder order ("highest `NN`") is only a fallback
@@ -33,8 +43,7 @@ and `schema_version` are present.
 **Nothing to save?** When there's no session work to record — after hand-edits, after an
 `integrate`, or just to tidy a drifted tree — skip Steps 1–6 and run **only** the sweep
 (Step 7), then review (Step 8) and commit (Step 9) whatever it changed. If the sweep
-finds nothing, say so and do not commit an empty change. (This absorbs the old reconcile
-pass — there is no flag; detect the no-work case and do the right thing.)
+finds nothing, say so and do not commit an empty change. There is no flag — detect the no-work case.
 
 ---
 
@@ -67,10 +76,9 @@ Wait for the response.
   goes to `architecture.md` — there is no `## Notes` section. Skip Steps 3–6; go to Step 7.
 - **Partial save:** do NOT tick the phase. Update Active focus to reflect progress;
   preserve milestone + plan in Next. Skip Step 3; go to Step 5.
-- **Abandon:** do NOT tick the phase. Clear the plan reference in Next, replace with a
-  pointer to the new direction (or "Run /scaffold-plan"). Update Active focus with what
+- **Abandon:** do NOT tick the phase. Clear the plan reference in Next and replace it with the new direction stated concretely — the same standard route 3 sets: a cold session must be able to act on the line. Bare `"Run /scaffold-plan"` is acceptable only when there genuinely is no direction yet, and then say that is why. Update Active focus with what
   was abandoned and why. Go to Step 5.
-  **This is also the home for a plan `scaffold-go` reported NOT SATISFIABLE** (a stated
+  This is also the home for a plan `scaffold-go` reported NOT SATISFIABLE (a stated
   contradiction, nothing further built). Don't ask the three-way question in that case —
   the phase can't be resumed as written, so abandon is the only answer; record the
   contradiction as the "why," and clearing Next is what stops a resuming session
@@ -82,15 +90,13 @@ Wait for the response.
 *Skip on pause/partial.* Scan the active plan's `## Scope` and the milestone's `## Phases`
 for unchecked human-owned (`[USER]`) items. For each, one at a time: present what was expected; if
 criteria name file paths, report Found/Missing; ask "Did you complete this? What
-happened?"; then route — **Pass** (note for the tick), **Issue** (ask blocker vs
-follow-up, route accordingly), **Not done** (leave it; phase can't be ticked).
+happened?"; then route — **Pass** (note for the tick), **Issue** (ask blocker vs follow-up: a blocker → `## Blockers`; a follow-up → `## Deferred` through 5a's gate, or fixed now — never a transcript note), **Not done** (leave the item unticked, the phase can't be ticked, and put what is outstanding into `## Next` or `## Blockers` so a cold session knows).
 **GATE: resolve each USER task before the next.**
 
 ## Step 4: Verify AI work
 
 *Skip if no code changed.* Before updating any scaffold doc, verify claims:
-1. **Run build/lint/tests** if they exist. On failure, report — do NOT tick a phase
-   complete on failing verification; the user decides fix-now vs checkpoint-with-issues.
+1. **Run build/lint/tests** if they exist. On failure, report — do NOT tick a phase complete on failing verification. The user decides fix-now or save-as-is; if it's save-as-is, the failure goes to `## Blockers` with what failed, because a broken build recorded only in the transcript is the exact loss this skill exists to prevent.
 2. **Evidence-based updates, and the evidence must be FRESH.** A `[x]`, or removing a
    blocker, requires evidence produced **in this exchange** — a run you just made, output
    you just read, behaviour just observed, or the user's confirmation just given. A green
@@ -116,22 +122,11 @@ session changed. The shape each doc must keep:
   git, never accreting here. **Groom `## Deferred`** (add the section only if something
   actually clears the bar below):
 
-  - **Removal is yours and is ungated** — **remove any `## Deferred` item this session
-    actually shipped** (you have the diff — that's your evidence). Items are removed, never
+  - **Removal is yours and is ungated** — remove any `## Deferred` item this session
+    actually shipped (you have the diff — that's your evidence). Items are removed, never
     ticked `- [x]`.
-  - **`scaffold-go`'s scope check is acted on there, not here** — the findings are code
-    work and this skill writes no code. What reaches you is the outcome: if a *missing*
-    item is still missing, the phase isn't done, so don't tick it.
-  - **Addition is a bar, and you do not write it yourself.** This is the section that rots
-    fastest, because at checkpoint time every loose end of the session is in front of you
-    and parking is the cheapest disposition for all of them. It is not the correct one. For
-    each candidate, apply the **admission bar** — it's admitted only if it **needs a
-    decision**, is **materially out of scope**, or is **real work that can't ride along
-    safely**. Clears none → **fix it in place now** (you're already in the code with the
-    diff open — a rename, a stale comment, a one-line guard, a `.gitignore` entry, a
-    duplicate line all cost less than the sentence describing them) **or drop it.** *If the
-    fix is smaller than the line describing it, the line is the more expensive artifact.*
-    "I noticed it and don't want to lose it" is not a gate.
+  - `scaffold-go` disposes of its own scope-check findings; you dispose of what's left. `go` builds a *missing* item and reverts an *unasked* one on the user's nod, then re-runs the check — so when `go` ran, the class that reaches you is **different** (built another way than the plan named), which is a ruling to get (route 2) and then act on. When `go` did NOT run and you dispatched the check yourself (Step 4.3), you hold all three: a *missing* item means the phase isn't done — don't tick it, and route the build; an *unasked* leftover is a code repair under the licence. Either way it gets a disposition (Step 7b) — a scope-check finding is never merely reported.
+  - **Addition is a bar, and you do not write it yourself.** This is the section that rots fastest, because at checkpoint time every loose end of the session is in front of you and parking is the cheapest disposition for all of them. It is not the correct one. For each candidate, apply the **admission bar** — it's admitted only if it **needs a decision**, is **materially out of scope**, or is **real work that can't ride along safely**. Clears none → fix it in place now, under the repair licence at the top of this skill (you're already holding the diff, and every item on that licence's example list costs less than the sentence describing it) **or drop it.** *If the fix is smaller than the line describing it, the line is the more expensive artifact.* "I noticed it and don't want to lose it" is not a gate.
   - **Then propose, don't append.** Surviving candidates go to Adam as a short list, each
     with the gate that admits it — "`## Deferred` candidates: 1. <item> (needs a decision:
     …)" — and **only approved ones are written.** Same hard gate as an ADR, same reason.
@@ -157,8 +152,8 @@ session changed. The shape each doc must keep:
 - **5c `knowledge/*.md` (PRIMARY OWNER)** — checkpoint owns the knowledge band: keep it
   coherent, reconcile, and graduate at close (Step 6b). Write here only if the build
   changed how a durable *cross-cutting* invariant works — one with no single code home.
-  State it in the contract's form: **the invariant + why + a pointer to where the code
-  enforces it** (and the test/constraint that guards it, if any). Stay brief — point at
+  State it in the contract's form: the invariant + why + a pointer to where the code
+  enforces it (and the test/constraint that guards it, if any). Stay brief — point at
   code, don't restate it; a localized value/constant belongs in code, not here. Living
   truth, maintained in place, never a log. During a predetermined milestone the spec's
   `references/` are the living rulebook; emergent milestones accrue rules here directly.
@@ -302,7 +297,7 @@ When a collision showed up:
 Runs on every checkpoint, and is the *whole* job when there's no work to save. Sweep
 **all living docs**, not just the touched ones.
 
-**Structural (the deep per-rule grade is `/scaffold-audit`'s).** Check each living doc is
+Structural (the deep per-rule grade is `/scaffold-audit`'s). Check each living doc is
 well-formed at the *stable, Law-level* shape. The detailed per-contract format rules live
 in exactly one drift-guarded place — audit's bundled contract copies — so **don't
 re-enumerate them here; route them to audit.** Check only:
@@ -311,9 +306,7 @@ re-enumerate them here; route them to audit.** Check only:
 3. No Law violations — an append-log / dated entries in a living-truth doc (Law 1); a
    `## Notes` / any catch-all / open-ended section (the one-home rule); or a checkbox in
    `project.md` (Law 2 — a truth doc never carries work-tracking). Fix these on sight. The
-   genuinely driftable per-contract details (e.g. investigation date format, status-token
-   set, `## Backlog`↔`## Deferred` item shape) are audit's deep pass — flag for
-   `/scaffold-audit`, don't grade them here.
+   genuinely driftable per-contract details (e.g. investigation date format, status-token set, `## Backlog`↔`## Deferred` item shape) are audit's deep pass — flag for `/scaffold-audit`, don't grade them here. *That flag is a complete disposition:* audit re-derives these from disk on demand, so nothing is lost by leaving them.
 
 **Coherence** — read across `project.md`, `architecture.md`, `roadmap.md`, `state.md`,
 `knowledge/*.md`, the active `milestone.md` + plans, and `decisions/`:
@@ -330,35 +323,37 @@ re-enumerate them here; route them to audit.** Check only:
 4. **Duplication** — the same fact in two living docs; collapse to the single owner per
    the routing tiebreak.
 5. **Plan-vs-decision staleness** — any unexecuted plan premised on a changed or
-   un-ratified decision, **including a *finalized* plan whose `## Targets`/approach now
-   conflicts with a later decision** (the finalize→execute gap `go`'s freshness check doesn't
-   cover). Flag and route to `scaffold-plan`; do NOT rewrite a plan here.
+   un-ratified decision, including a *finalized* plan whose `## Targets`/approach now
+   conflicts with a later decision (the finalize→execute gap `go`'s freshness check doesn't
+   cover). **Route it (7b route 3)** — into `## Next` if the re-finalize is the next action, otherwise `## Blockers`. Do NOT rewrite the plan here.
 6. **Active-cursor sanity** — `state.md`'s `## Next` points at a milestone + plan that
    exist; the named phase is consistent with `milestone.md`'s checklist.
 7. **Stale dates** — any living doc whose `updated:` is over a week old while its content
    clearly moved.
-8. **Deferred/Backlog grooming nudge** — staleness removal (is an item already built or
-   moot?) needs the code, so it's `audit`'s job, not this sweep's — but a discretionary
-   check nobody's reminded to run isn't a safety net. So the always-on sweep *surfaces the
-   signal*: if the active milestone's `## Deferred` (or `roadmap.md` `## Backlog`) has grown
-   past **~8 items**, or clearly hasn't been groomed in a long while, flag it — "`##
-   Deferred` is at N items; run `/scaffold-audit` to do the deep already-built/stale check,
-   then `/scaffold-plan` to act on the flags." Checkpoint nudges; audit determines. **Read a
-   long list as an admission failure first**: with the bar applied (Step 5a) a list this
-   long shouldn't exist, so the question isn't only "what's stale?" but "what was admitted
-   that should have been fixed in place?" Say that in the flag when the list is mostly small
-   fixes.
+8. **Deferred/Backlog grooming nudge** *(re-derivable from disk — reporting it is exit enough)* — staleness removal (is an item already built or moot?) needs the code, so it's `audit`'s job, not this sweep's — but a discretionary check nobody's reminded to run isn't a safety net. So the always-on sweep *surfaces the signal*: if the active milestone's `## Deferred` (or `roadmap.md` `## Backlog`) has grown past **~8 items**, or clearly hasn't been groomed in a long while, flag it — "`## Deferred` is at N items; run `/scaffold-audit` to do the deep already-built/stale check, then `/scaffold-plan` to act on the flags." Checkpoint nudges; audit determines. **Read a long list as an admission failure first**: with the bar applied (Step 5a) a list this long shouldn't exist, so the question isn't only "what's stale?" but "what was admitted that should have been fixed in place?" Say that in the flag when the list is mostly small fixes.
 
-Fix what's **mechanical and unambiguous** (a broken back-reference path, a stray dated
-entry folded back into truth, a shipped `## Backlog`/`## Deferred` item removed, a
-leftover `## Notes` section drained and removed, a missing/refreshable frontmatter field)
-and note it in Step 8. **Surface** anything needing judgment (a plan
-needing a real rewrite, a two-way contradiction, an ADR that should change, collapsing a
-duplicate / re-homing content between `architecture.md` and `knowledge/`, or a requirement
-checkbox in `project.md` — the `[ ]` syntax is the anti-pattern, but its *content* is a
-requirement to re-home to where it's tested, so surface it, never silently delete the
-content) and route — do not guess. Moving durable content between truth docs is an authoring call
-(`scaffold-plan`/`scaffold-integrate`), not a sweep fix.
+### Disposing of what you find (Step 7b — the part that isn't optional)
+
+**A finding that would be LOST gets one of four exits.** That is the whole test, and it is computable: ask *could a later run re-derive this from disk?* A per-contract format detail could — `/scaffold-audit` re-grades the entire tree on demand — so reporting it in Step 8 is exit enough. A finding that exists only because **this** session saw the diff, ran the tests, or held the conversation cannot be re-derived by anything, and dies at the session boundary unless you dispose of it here. Those get one of the four below, and you say which in Step 8.
+
+In scope: the sweep's own findings, plus anything `go`'s scope check left you, plus anything `/scaffold-audit` produced **in this conversation** (audit writes nothing, so a run from an earlier session left no trace you can read — don't claim to dispose of what you cannot see).
+
+1. **Fixed.** The default, and it covers more than the mechanical cases. *Mechanical:* a broken back-reference path, a stray dated entry folded back into truth, a shipped `## Backlog` / `## Deferred` item removed, a leftover `## Notes` section drained and deleted, a missing or refreshable frontmatter field. **Also fixed**, because a published routing rule is not a judgment call and you own the docs involved:
+   - a duplicated fact across `architecture.md` and `knowledge/` — collapse to the single owner by the routing tiebreak (a fact that changes only when the *business rule* changes → `knowledge/`; otherwise `architecture.md`). That tiebreak decides *that pair only*: a duplication spanning any other two docs has no published rule, so it is route 2;
+   - **content sitting in the wrong truth doc** — re-home it by that same tiebreak;
+   - **a requirement checkbox in `project.md`** — the `[ ]` syntax is the anti-pattern but the *content* is a real requirement, so **never delete the content.** You may re-home it to a `knowledge/` doc, or restate it in `project.md` as plain truth if it's a scope boundary — those are yours. You may **not** put it in a phase plan's `## Acceptance` or a milestone done-contract: editing a finalized plan changes what `go` will build with no freshness check to catch it, and authoring a done-contract is `plan`'s. If that is where it belongs, it is route 3.
+   - **project-code residue** — under the repair licence at the top of this skill.
+2. **Ruled on by Adam, then acted on — in this session.** For a genuine two-way contradiction (two docs assert opposite things and the tiebreak cannot pick) or an ADR that looks wrong: put the two readings in one short question, get the ruling, **and apply it now.** Asking is a step on the way to fixing, never a substitute for it.
+3. **Routed to a home on disk.** An undecided call → `## Open Questions`. A real obstacle → `## Blockers`. Work clearing the admission bar → `## Deferred` / `## Backlog` — **through 5a's proposal gate, never appended on your own judgment**, and if this is a sweep-only run where 5a was skipped, run the bar and the gate here before writing a line.
+
+   Work that genuinely needs authoring — a plan needing a real rewrite, a finalized plan whose approach now conflicts with a later decision — is the one case that can reach `## Next`, under a hard constraint: **`## Next` holds exactly one action and one cursor.** It is the section the whole state machine computes from; a second phase-plan path in it makes `scaffold-status` report an ambiguous active phase and gives `scaffold-go` a choice it must not have. So:
+   - if the re-plan **is** the next action, `## Next` becomes it, concretely — "Re-finalize `milestones/03-x/phases/04-y.md` with `/scaffold-plan --final` — its `## Targets` predate [[0007-…]]" — phrased so a cold session can act on it without this conversation;
+   - if it is **not** the next action (something else is, or a second one already claimed the slot), it goes to `## Blockers` as a named obstacle, one line each.
+
+   You still never rewrite the plan yourself.
+4. **Dropped** — stated out loud in Step 8, not silently.
+
+"Run `/scaffold-plan`" spoken into the transcript is not a disposition. The transcript is the exact thing this system exists to stop depending on: a finding whose only record is chat is lost the moment the session ends. If you can neither fix it nor name a section on disk that takes it, that is the signal to ask Adam (route 2) — not to narrate it and commit.
 
 The inline sweep *samples*; for the deep, independent grading — hard conformance over the
 whole tree and docs vs. actual code — run `/scaffold-audit`.
@@ -366,34 +361,26 @@ whole tree and docs vs. actual code — run `/scaffold-audit`.
 ## Step 8: Review before committing
 
 - Re-read every file you changed; flag any remaining contradiction.
-- `git diff .scaffold/` for the full change set.
-- Show, per file, what changed — and **call out separately**: any proposed ADR (and
-  Adam's decision), any knowledge graduation/retire at close, any sweep fixes, and
-  anything the sweep surfaced for follow-up.
+- `git diff` for the full change set — **not just `.scaffold/`**, since repairs may have landed in project files.
+- Show, per file, what changed — and **call out separately**: any proposed ADR (and Adam's decision), any knowledge graduation/retire at close, any doc fixes, and every project-code repair, listed one by one with its one-line justification. This review is the brake on the repair licence: a repair you don't show is a repair that wasn't approved.
+- **Print the disposition ledger** — every finding that passed through this checkpoint, wherever it came from (the sweep, `go`'s scope check, an audit run in this conversation, Steps 3–5), and which exit it took: fixed / ruled + applied / routed to `<section>` / dropped / re-derivable-from-disk-and-reported. Any line reading as none of those isn't done — dispose of it before asking for approval. Keep this list **as you go**, from Step 3 onward; reconstructing it from memory at Step 8 is the dependency this skill exists to break.
 - Ask: "Checkpoint changes ready. Anything to adjust?" Wait for confirmation; commit only
   after approval.
 
 ## Step 9: Commit
 
-If git is initialized: `git add .scaffold/ && git commit -m "checkpoint: [plan
-summary]"` (use `reconcile: [summary]` when this was a sweep-only run). If the commit
-fails, show the error and stop. List loose threads for next session, then **route to
-next** based on the resulting state:
+If git is initialized: stage `.scaffold/` **plus any project files you repaired**, then `git commit -m "checkpoint: [plan summary]"` (use `reconcile: [summary]` when this was a sweep-only run). When repairs are included, name them in the message body.
+
+**Watch what staging a repaired file actually stages.** `go` never commits, so at checkpoint time the session's feature work is usually uncommitted — and a one-word repair in a file holding 400 uncommitted lines stages all 400 under a `checkpoint:` subject. Either stage the repair alone (`git add -p`), or commit the file whole and **say so in the message body**: a `checkpoint:` commit that silently carries the phase's implementation makes the history unreadable and turns a later revert into a feature deletion.
+
+If the commit fails, show the error and stop.
+
+**There are no "loose threads for next session."** Anything still live was disposed of in Step 7b and is already on disk — so report *where each one landed* (`## Next`, `## Blockers`, `## Open Questions`, `## Deferred`, `## Backlog`), not what it is. Then **route to next** based on the resulting state:
 - Phase paused/partial: "Next session `/scaffold-status` picks up, or `/scaffold-go` to
   resume now."
 - Phase done, more remain: "Next phase: [plan path]. `/scaffold-status` then
   `/scaffold-go`, or `/scaffold-plan` to recalibrate."
 - Milestone closed: "Milestone `NN-slug` done — moved to `.scaffold/milestones/archived/NN-slug/`. Anything outside `.scaffold/` pointing at the old path needs repointing by hand. `/scaffold-plan` for the next."
-- USER tasks pending: "Complete your tasks, then checkpoint again."
+- USER tasks pending: "Complete your tasks, then checkpoint again." (What's outstanding is already on disk from Step 3 — name where.)
 - Blockers present: "Resolve [blocker], then `/scaffold-plan`."
 - Otherwise: "Run `/scaffold-plan`, start working, or done for now."
-
-## Boundaries
-
-Checkpoint does NOT: make code changes (`scaffold-go` builds); make strategic decisions
-or rewrite plans (`scaffold-plan` does — checkpoint *surfaces* plan staleness); write an
-ADR without approval (propose, present, STOP); graduate/retire knowledge silently
-(surface the set, wait); **write into `milestones/archived/` — a closed milestone is a
-record and nothing edits it, so a rule found there that is still live gets restated in
-`architecture.md` or `knowledge/`, never amended in place**; or guess at outcomes
-(evidence or user confirmation required).

@@ -20,12 +20,11 @@ milestone-plan` / `type: phase-brief`, or a milestone folder holds a `plan.md` (
 name is `milestone.md`), the repo predates the current format — stop: "Old scaffold format
 (pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
 
-**Boundary.** Writes PROJECT files only (code, config, assets) — and MAY drop an
-opportunistic research record in `.scaffold/investigations/`. It does NOT touch scaffold
-truth or execution docs: no edits to `state.md`, `roadmap.md`, `architecture.md`,
-`project.md`, `knowledge/`, `glossary.md`, `decisions/`, or the milestone's `milestone.md` — and it
-does NOT tick the `milestone.md` phase checklist. All scaffold write-back, including marking the
-phase complete, is `/scaffold-checkpoint`'s job.
+**Boundary — the one place this skill states it.** Go MAY: write project files (code, config, assets); drop an opportunistic `investigations/YYYYMMDD-slug.md`; dispatch a fresh read-only subagent for the Step 5 scope check.
+
+Go does NOT: touch scaffold truth or execution docs — `state.md`, `roadmap.md`, `architecture.md`, `project.md`, `knowledge/`, `glossary.md`, `decisions/`, the milestone's `milestone.md` — or tick its phase checklist; all scaffold write-back, including marking the phase complete, is `/scaffold-checkpoint`'s. Nor does it: execute a draft or stale plan (refuse, route to finalize); research or propose an approach (that is `plan`'s finalize pass — you execute the approved one); propose or write ADRs (Adam-gated, via plan/checkpoint); expand scope past the plan's items; answer the Step 5 scope check itself (dispatch a fresh agent — self-review is worth nothing); build a *different* finding a second way without the user's ruling; or run `/code-review` automatically (offer it).
+
+**Never write into `.scaffold/milestones/archived/`.** A closed milestone records what was built, not what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`.
 
 ---
 
@@ -48,6 +47,8 @@ current phase plan. Read these in order:
 
 ## Step 2: Check the plan is executable (deterministic)
 
+**First, check the phase isn't already done.** Read the `milestone.md` checklist: if the phase this plan covers is already ticked, say so and stop — nothing to execute. Do this *before* the freshness test below, or a ticked phase whose code has since moved computes as **stale** and you send the user to re-finalize a plan that was already built.
+
 `go` runs only a **final & fresh** plan. Compute the state from the plan's `## Targets`
 section — this is ancestry plus a path-list comparison, it judges nothing:
 
@@ -66,13 +67,13 @@ section — this is ancestry plus a path-list comparison, it judges nothing:
 
    - **(1) fails** (the sha doesn't resolve, or isn't an ancestor of HEAD) → **stale**, no exemptions. The plan was validated against a history that no longer exists — a rebase, a force-push, a different branch. Stop:
      > "Validated `as of <sha>`, which is not in this branch's history (rebase, force-push, or wrong branch). Re-finalize with `/scaffold-plan --final`."
-   - **(2) lists a path that is neither matched by a `## Targets` path entry nor under `.scaffold/`** → **stale**. Stop, and **name the files** — a refusal the user can't check is a refusal they'll learn to dismiss:
+   - (2) lists a path that is neither matched by a `## Targets` path entry, nor under `.scaffold/`, nor touched by a `checkpoint:`/`reconcile:` commit since the stamp (`git log --format=%H%x09%s <sha>..HEAD` names them — `checkpoint` commits its repair-licence tidy-ups under those subjects, and refusing a resume because the last save removed a dead import is the same false refusal the other two exemptions exist to prevent) → **stale**. Stop, and **name the files** — a refusal the user can't check is a refusal they'll learn to dismiss:
      > "Validated `as of <sha>`; these moved outside the plan's declared targets: `<file>`, `<file>`. Re-finalize with `/scaffold-plan --final`."
    - **Otherwise** → **final & fresh**. Proceed.
 
    **Matching a path against `## Targets`:** an entry is a repo-relative path; a trailing `/` covers everything beneath it. `## Targets` entries that name an *interface or surface* in prose rather than a path are ignored by this comparison. Untracked files never trip the gate (`git diff` doesn't list them, and that is correct — they aren't part of the validated code state).
 
-   **Why targets and `.scaffold/` are exempt, so you don't "helpfully" tighten this back:** you already move target files item-by-item within a single session with no re-check — the code moving *is* executing — so moving them across a session boundary is exactly as safe. And `.scaffold/` drift belongs to a different defense entirely (`plan`'s pivot sweep, `checkpoint`'s coherence sweep), never to this check.
+   Why these three are exempt, so you don't "helpfully" tighten this back: you already move target files item-by-item within a single session with no re-check — the code moving *is* executing — so moving them across a session boundary is exactly as safe. And `.scaffold/` drift belongs to a different defense entirely (`plan`'s pivot sweep, `checkpoint`'s coherence sweep), never to this check. A `checkpoint:`/`reconcile:` commit is the third case for the same reason: it is scaffold's own bookkeeping and its bounded repair of *this* work, not a stranger's change to code the plan didn't declare.
 
 (If the repo has no git, there is no sha to check — treat a plan with `## Targets` as
 fresh and note that staleness can't be verified without git.)
@@ -89,9 +90,11 @@ executing, check whether the plan's scope deliverables **already exist in the co
 route to `/scaffold-checkpoint` to record the completion. Only within a genuinely
 in-progress phase do you use Active focus to find where to pick up.
 
+**`[USER]` scope items are not yours to build.** A scope line marked `[USER]` is a human-owned deliverable — creating an OAuth app, provisioning a key. Skip it, say you skipped it, and hand it to `/scaffold-checkpoint`'s USER task check. Exclude `[USER]` items from the `## Scope` you hand the Step 5 agent, or it reports them as *not built* and Step 5's disposition rule tells you to build them — which is exactly the thing this rule forbids.
+
 **Use Active focus for resume context** — it describes where the work currently sits; use
-it to understand where to resume, especially after a pause. **If the user says part of the
-scope is already done, skip it.**
+it to understand where to resume, especially after a pause. If the user says part of the
+scope is already done, skip it.
 
 Present scope and confirm the start (the approach was approved at finalize — you do **not**
 re-propose it). **Print what has moved since the stamp** — not as a question, as
@@ -117,8 +120,8 @@ Step 5 — the scope check runs on every phase, single-item included.
 
 If the work produces a research/analysis output worth keeping (a spike, a gap map, a
 security investigation), write it to `.scaffold/investigations/YYYYMMDD-slug.md` (date as
-`YYYYMMDD`, no hyphens). **Stamp it with `type: investigation` / `schema_version: 2` /
-`updated: <today>` frontmatter** — it is the one scaffold doc `go` writes, and it must be
+`YYYYMMDD`, no hyphens). Stamp it with `type: investigation` / `schema_version: 2` /
+`updated: <today>` frontmatter — it is the one scaffold doc `go` writes, and it must be
 born conformant. Opportunistic — nothing obligates you to create one. If that
 research yields a candidate ruling, leave the analysis here and let `/scaffold-checkpoint`
 *propose* the ADR (decisions are Adam-gated; `go` never writes one).
@@ -131,7 +134,7 @@ When the scope items are done, **dispatch one fresh read-only subagent** (Explor
 2. **Different** — which were built differently from what the plan named?
 3. **Unasked** — what is in this diff that **no scope item called for**?
 
-**Get the diff right — the check is worthless against the wrong one.** Diff against the sha the plan was validated at, from `## Targets`' `_as of <sha>_`: `git diff <sha> -- . ':(exclude).scaffold'` plus any untracked files the phase added. **Exclude `.scaffold/`**: on a phase resumed across a checkpoint the span from the stamp legitimately contains that checkpoint's own doc commits, and the agent would report them as *unasked* work — a false finding that trains the same dismissal habit the freshness gate was fixed to avoid. The scope check judges code against scope, not scaffold's bookkeeping. **Not bare `git diff`** — it shows only unstaged work, so a phase that staged or committed mid-run would hand the agent nothing. **Tell the agent to refuse rather than report clean if the diff it receives is empty**; a check that passes on empty input is worse than no check. No git: pass the working tree's current state of the `## Targets` files plus anything new the phase created, and say in the report that the basis was files, not a diff.
+Get the diff right — the check is worthless against the wrong one. Diff against the sha the plan was validated at, from `## Targets`' `_as of <sha>_`: `git diff <sha> -- . ':(exclude).scaffold'` plus any untracked files the phase added. **Exclude `.scaffold/`**: on a phase resumed across a checkpoint the span from the stamp legitimately contains that checkpoint's own doc commits, and the agent would report them as *unasked* work — a false finding that trains the same dismissal habit the freshness gate was fixed to avoid. The scope check judges code against scope, not scaffold's bookkeeping. **Not bare `git diff`** — it shows only unstaged work, so a phase that staged or committed mid-run would hand the agent nothing. Tell the agent to refuse rather than report clean if the diff it receives is empty; a check that passes on empty input is worse than no check. No git: pass the working tree's current state of the `## Targets` files plus anything new the phase created, and say in the report that the basis was files, not a diff.
 
 **Dispatch it; never answer these yourself.** The value is entirely in the reader being cold — a model reviewing its own work finds nothing. So the agent gets the scope and the diff and nothing else: not this conversation, not the reasoning behind any choice. One agent, not several: two reads of the same diff converge on a compromise and cost double.
 
@@ -140,7 +143,7 @@ Question 3 is the one no other check in scaffold performs — every other pass h
 Report what came back:
 > "Scope check (fresh agent): [N] missing, [N] different, [N] unasked. [Each, one line.]"
 
-**Then act on it — these are code findings, and this is the skill that writes code.** A *missing* scope item: build it, it was always in scope. An *unasked* change: revert it (removing work no scope item called for is not scope expansion). A *different* finding: report it and let the user rule — building it a second way is a decision, not a fix. If you changed anything, re-run the check. Then report what's left.
+Then act on it — these are code findings, and this is the skill that writes code. A *missing* scope item: build it, it was always in scope (a `[USER]` item is never "missing" — it was excluded above). An *unasked* change: **name it and revert on the user's nod — never silently.** The agent is cold by construction, so it cannot tell surplus work from something the user authorized out of scope during this session, or from a repair a mid-phase `checkpoint` committed; reverting on the agent's word alone deletes approved work and the user never sees it go. A *different* finding: report it and let the user rule — building it a second way is a decision, not a fix. If you changed anything, re-run the check. Then report what's left, and hand the remainder to `/scaffold-checkpoint` to dispose of.
 
 Then offer, don't run:
 > "Run a deeper review on this diff (`/code-review` if you have it), or go straight to `/scaffold-checkpoint`?"
@@ -190,8 +193,7 @@ can't both hold, or the plan needs a fact that doesn't exist → **don't offer t
 > "This plan is not satisfiable as written. The contradiction: [what the plan requires, what
 > is actually true, why both cannot hold]. Nothing further built."
 
-That second one is a **legitimate finished outcome, not a failed phase.** State it once and
-stop. Do not propose a fix, and do not pick a reading of the scope that happens to work and
+That second one is a **legitimate finished outcome, not a failed phase.** State it once and stop — then send the user to `/scaffold-checkpoint` before anything else, and say why: you write no scaffold docs, so nothing on disk records the contradiction and `## Next` still points at this plan. Until checkpoint abandons the phase, the next session reads the cursor, runs `go`, and walks into the identical wall. Do not offer `/clear` as a peer option here. Do not propose a fix, and do not pick a reading of the scope that happens to work and
 build that — choosing a reading *is* deciding the contradiction, which is not `go`'s to
 decide. Reporting it is the deliverable; `/scaffold-checkpoint` records it (it abandons the
 phase, which clears the cursor so a resuming session doesn't re-derive the same wall).
@@ -209,19 +211,3 @@ complete the current item, then suggest:
 Don't start a fresh scope item late in a long session — checkpoint first.
 
 ---
-
-## Boundaries
-
-Go does NOT: execute a draft or stale plan (only final & fresh — refuse and route to
-finalize/re-finalize); research or propose an approach (that is `plan`'s finalize pass —
-`go` executes the already-approved approach); write scaffold truth/execution docs
-(`state.md`, `roadmap.md`, `architecture.md`, `project.md`, `knowledge/`, `glossary.md`, `decisions/`,
-the milestone's `milestone.md` are all checkpoint's or plan's job); tick the
-`milestone.md` phase checklist (checkpoint marks completion); propose or write ADRs (Adam-gated,
-routed through plan/checkpoint); or expand scope (only the plan's scope items).
-
-Go also does NOT: answer the Step 5 scope check itself (dispatch a fresh agent — self-review is worth nothing); build a *different* finding a second way without the user's ruling; or run `/code-review` or any deeper review automatically (offer it).
-
-Go MAY: write project files; write an opportunistic `investigations/YYYYMMDD-slug.md`; dispatch a fresh read-only subagent for the Step 5 scope check.
-
-**Never write into `.scaffold/milestones/archived/`.** A closed milestone is a record of what was built, not a statement of what the code does now — read it freely, edit it never. A rule found there that is still live gets restated in `architecture.md` or `knowledge/`; the archive is not amended, and its specs are not cited as current behaviour.

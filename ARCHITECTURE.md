@@ -151,7 +151,7 @@ pre-created while an earlier one is still active, so folder order cannot be the
 authority. `archived/` answers a different question — *is this closed?* — and it is
 derived from the `roadmap.md` `[done]` flip in the same act, never independently.
 
-(`setup`/`cleanup` may also write a `.scaffold/archive/` — singular, a flexible bucket
+(`setup` may also write a `.scaffold/archive/` — singular, a flexible bucket
 for pre-scaffold snapshots and superseded originals with no other home. It is read by no
 skill and is not part of the live model. Distinct from `milestones/archived/`, which is
 structured and holds closed milestones only.)
@@ -230,9 +230,11 @@ A few concepts span the execution docs and don't belong to any single contract:
   1. The stamped sha resolves **and is an ancestor of HEAD**. If not — a rebase, a force-push, a different branch — the plan was validated against a history that no longer exists: **stale**, no exemptions.
   2. Every changed tracked path between the stamp and the working tree is either **named in `## Targets`** or lives **under `.scaffold/`**. Anything else → **stale**, and `go` names the offending files. One command covers the committed span *and* uncommitted edits: `git diff --name-only <sha> --`.
 
-  Both exemptions are principled, not conveniences. **Target files** already move under `go` item-by-item within one session with no re-check — the code moving is what executing *is* — so letting them move across a session boundary is exactly as safe, and erasing that boundary is what scaffold exists to do. **`.scaffold/` files** belong to the *other* staleness obligation: doc drift is defended by `plan`'s pivot sweep and `checkpoint`'s coherence sweep, never by this check. Untracked files never trip the gate.
+  Both exemptions are principled, not conveniences. **Target files** already move under `go` item-by-item within one session with no re-check — the code moving is what executing *is* — so letting them move across a session boundary is exactly as safe, and erasing that boundary is what scaffold exists to do. **`.scaffold/` files** belong to the *other* staleness obligation: doc drift is defended by `plan`'s pivot sweep and `checkpoint`'s coherence sweep, never by this check. A third exemption follows from the repair licence: **a project file touched by a `checkpoint`/`reconcile` commit since the stamp** — refusing a resume because the last save tidied a dead import is the same false refusal the first two exemptions exist to prevent. Untracked files never trip the gate.
 
-  This is also what makes **fresh** a state a *committed* plan can be in. Under a `sha == HEAD?` test it could not be: a commit cannot contain its own hash, so a stamp equal to HEAD exists only as an uncommitted working-tree edit, and the very commit that saves the plan invalidates it. The single-session path survived only because the phase closed before anyone looked. That test failed structurally, not at an edge.
+  **A rewritten plan is not a fresh plan.** Because `.scaffold/` is exempt, editing a finalized plan's scope leaves it reading as *final & fresh* — so whoever rewrites one (the pivot sweep, a migration) **deletes its `## Targets` in the same edit** and sends it back through finalize. Otherwise `go` executes a scope no one validated, against a target list that no longer matches it.
+
+  This is also what makes **fresh** a state a *committed* plan can be in: a commit cannot contain its own hash, so any `sha == HEAD?` test would invalidate a plan the moment it was saved.
 
   **`go` prints the changed-file list before proceeding** — not as a question, as visibility. A passing gate that shows its work is what keeps the refusing gate worth reading; a confirmation prompt here would only relocate the rubber stamp.
 
@@ -296,7 +298,7 @@ Deterministic. Resolve by the two laws when in doubt.
 |-----------|------|
 | Future work NOT tied to the active milestone (a feature/capability that outlives it; or anything surfaced while no milestone is active) — **and clearing the admission bar** | `roadmap.md` → `## Backlog` |
 | Deferred work tied to the active milestone (a bug, cleanup, debt, residual in its scope/code) — **and clearing the admission bar** (needs a decision / materially out of scope / can't ride along safely), Adam-approved | that milestone's `milestone.md` → `## Deferred` |
-| Something noticed in passing that clears no admission gate (a rename, a stale comment, a one-line guard, a duplicate) | fix it in place now, or drop it — **not** a parked line |
+| Something noticed in passing that clears no admission gate (a rename, a stale comment, a one-line guard, a duplicate) | fix it in place now (`checkpoint`'s closing repair licence), or drop it — **not** a parked line |
 | A significant, durable choice + its why | `decisions/NNNN-slug.md` (+ reference it from `architecture.md` if architectural) |
 | Research / analysis output | `investigations/YYYYMMDD-slug.md` |
 | Current technical truth (how it's built, incl. durable run/env) | `architecture.md` |
@@ -319,14 +321,12 @@ each a self-contained artifact that carries the format guidance it needs, writte
 tools you reach for when you need them; the minimum session is status → work →
 checkpoint.
 
-Two structural boundaries hold across the set:
+Three structural boundaries hold across the set:
 
-- **`go` writes code (and optional investigations); never scaffold truth or execution
-  docs.** All *runtime* scaffold write-back is owned by `plan` and `checkpoint`; `setup`
-  creates the initial set and `cleanup` migrates it. Never the reverse — truth-writing
-  skills never touch project code.
+- **`go` writes code (and optional investigations); never scaffold truth or execution docs.** All *runtime* scaffold write-back is owned by `plan` and `checkpoint`; `setup` creates the initial set and `cleanup` migrates it. The reverse holds with exactly one bounded exception: `plan` never touches project code, and `checkpoint` touches it only under the **closing repair licence** — the residue of a session whose diff it is already holding, never new work.
 - **`decisions/` is propose-only.** Skills may draft an ADR and stop; **Adam approves**
   before anything is written.
+- **A finding that would be lost gets a disposition before the session ends.** Three things produce findings — `checkpoint`'s sweep, `audit`, and `go`'s scope check. `go` acts on its own scope-check findings in code (that is the skill that writes code); everything left, and everything the other two produce, is **`checkpoint`'s to dispose of**: **fixed**, **routed to a home on disk**, **ruled on by Adam and then acted on in the same session**, or **dropped**. Naming it in the transcript and committing anyway is not a disposition — the transcript is the one thing this system exists to stop depending on. *The test is losability:* a finding a later run can re-derive from disk (a per-contract format detail — `audit` re-grades the whole tree on demand) is not lost by going unmentioned, so reporting it is exit enough. A finding that existed only because **this** session saw the diff, the run, or the conversation dies with the session, and gets one of the four.
 
 ### The two-tier audit model (no flags)
 
@@ -439,7 +439,9 @@ scaffold truth or execution docs** — that is `checkpoint`'s job. Reads its pla
 
 ### `/scaffold-checkpoint`
 
-**Role:** Save and reconcile. Verify work, update files, run the sweep, commit.
+**Role:** Close the session cleanly. Verify work, update files, sweep, **repair**, commit.
+
+**Why it exists (the first-principles statement).** Checkpoint is the only moment in the system where the diff, the docs and the human are present at the same time. After the commit all three disperse: the diff goes to git, the human leaves, and the next session starts cold and has to re-derive from scratch what is sitting in front of this one for free. So checkpoint's job is **not recording** — recording is the means. Its job is to **leave no known-wrong state in the tree.** The operative rule follows directly: *a finding checkpoint can dispose of, it must dispose of*, because it will never be cheaper to close than right now. Deferring is paying a multiplier to redo the same work later with less information.
 
 Updates the truth docs + the active milestone's `milestone.md` (tick the phase checklist +
 date) + `state.md` + `knowledge/` (when behavior changed).
@@ -456,7 +458,7 @@ date) + `state.md` + `knowledge/` (when behavior changed).
     violations, duplication, plan-vs-decision staleness, `## Next` resolves, stale
     dates.
 - **Auto-detects "no work to save → just sweep"** — run it after hand-edits or to
-  tidy. (This replaces the old standalone reconcile pass; there is no flag.)
+  tidy. There is no flag — detect the no-work case.
 - May **propose** an ADR (gated).
 - **Milestone-close motion:** graduate durable rules to `knowledge/` (reconciling +
   retiring contradicted docs, **surfaced for Adam's confirmation**), flip the
@@ -465,8 +467,11 @@ date) + `state.md` + `knowledge/` (when behavior changed).
 - **Primary owner of `architecture.md`** — it sees the diff and updates the technical
   truth when the build changed how it's built.
 - **Proposes a glossary term on a collision only** — when the session showed the same concept called more than one thing, or one word used for two. A high bar, deliberately: a "any terms today?" prompt every checkpoint trains the answer *no*. Additions **and definition changes** are Adam-gated; removal is not.
-- The inline sweep *flags*; the **deep** grading (hard conformance + docs-vs-code) is
-  `/scaffold-audit`. Git is the history; no log file. Commits `.scaffold/`.
+- **The closing repair licence — checkpoint fixes what it finds, in both bands.**
+  - *Scaffold docs, including the ones it primarily owns.* Collapsing a duplicate and re-homing a fact between `architecture.md` and `knowledge/` are decided by the routing tiebreak above; a published rule is not a judgment call, so checkpoint **applies** it rather than reporting it. (It remains barred from rewriting a *plan* — that is authoring, and it routes.)
+  - *Project code — the session's residue only.* The one exception to "truth-writing skills never touch project code," and it is bounded by what checkpoint is: it holds this session's diff and the human. The test is **"does this need a plan?"** — if yes, it is `plan`/`go` work and gets routed, never fixed here. There is no line-count limit; the judgment is the skill's and the **brake is the pre-commit review**, where every repair lands in a diff Adam approves before anything is committed. A repair is never new capability, and never touches a surface the session did not already touch.
+- **Every finding gets a disposition before the commit — one of four, and "mentioned" is not one of them.** Fixed; routed to a home *on disk* (an undecided call → `## Open Questions`; a real obstacle → `## Blockers`; work clearing the admission bar → `## Deferred` / `## Backlog`; work needing authoring → the concrete instruction written into `## Next`, phrased so a cold session can act on it); ruled on by Adam and then acted on in this same session; or dropped. Saying "run `/scaffold-plan`" into the transcript is not a route — the transcript does not survive the gap, which is the whole reason scaffold exists.
+- The inline sweep *flags*; the **deep** grading (hard conformance + docs-vs-code) is `/scaffold-audit`. Git is the history; no log file. Commits `.scaffold/` — **plus any repaired project files**, in the same commit, named in the message.
 
 ---
 
@@ -489,21 +494,14 @@ milestone is a frozen record, so grading it can only produce findings nobody may
 - **Reality:** verify scaffold claims against actual code — ticked phases really built,
   `architecture.md` matches the real stack, ADRs match reality.
 
-  *Where the stranded-rule check went:* it used to be a third pass re-reading retired
-  specs for rules that should have graduated. It is now enforced at the close instead —
-  and the trade is deliberate, not free. Immutability of the record says nothing about the
-  correctness of the judgment: a rule the closing session failed to notice is now
-  permanently unexamined, where the old pass would have had another look at it. What buys
-  that back is that the close is no longer "lift what you notice" — `checkpoint` must
-  account for **every** rule in the retiring spec (graduated / code-homed / dead) because
-  it is the last moment the question can be asked at all. One thorough pass at the one
-  moment it can still change something, rather than a permanent re-read of files nobody
-  may act on.
+  *Stranded rules are not audit's to catch.* Because nothing may act on a finding inside the archive, the obligation sits at the close: `checkpoint` accounts for **every** rule in the retiring spec (graduated / code-homed / dead), that being the last moment the question can be asked. A rule missed there stays missed.
 
 **Conformance gates reality:** if a doc is malformed enough that its state can't be
 read reliably (e.g. `## Next` doesn't resolve), the reality pass for that area is
 reported as *unreliable* rather than guessed. Findings are returned prioritized; fixes
 go through the owning skill (audit never edits).
+
+**Audit's findings are disposed of by `checkpoint`, not by the transcript.** Audit stays read-only — that independence is the point of the tier — but read-only must not mean *lost*. Audit ends by naming the disposing skill for each finding and, when the run is not immediately followed by one, states plainly that the findings live only in this transcript until a `checkpoint` disposes of them.
 
 ---
 
@@ -549,9 +547,7 @@ stands up `architecture.md` from decisions + run/env + the real code (architectu
 tiebreak); **curates decisions — does not split them** (a monolithic `decisions.md` → an
 Adam-gated promote-the-few session; the rest retire to git; a grandfathered spec's internal
 decisions file is never cracked open); normalizes nonconformant names
-(`2026-06-11-*` → `20260611-*`); drains a legacy `state.md` `## Notes` to each item's real
-home; and **stamps frontmatter** (`schema_version`) so future format migrations are
-detectable.
+(`2026-06-11-*` → `20260611-*`); drains a legacy `state.md` `## Notes` to each item's real home; **archives closed milestones retroactively** (a `[done]` milestone still sitting outside `archived/` is moved there, stamped, and its roadmap path repointed — and because that close never ran, the knowledge-graduation pass runs with it, Adam-gated, since `contracts/knowledge.md` makes a rule missed at close unrecoverable); and **stamps frontmatter** (`schema_version`) so future format migrations are detectable.
 
 **Verify + hand-off (the fixed back end):** before committing, cleanup runs the *same
 light structural + coherence self-check `checkpoint` runs* — proving the mechanical result
@@ -585,7 +581,7 @@ coherent over time; that owner is marked **(primary)** below.
 |----------|-------|--------|------|----|------------|-------|-----------|---------|
 | `project.md` | C | R | U | — | U (rare) | R | U | U |
 | `architecture.md` | C (seed) | R | U (propose) | R | **U (primary)** | R | U | C (from decisions/run-env/code) |
-| `knowledge/*.md` | C (dir) | R | C/U | R | **C/U (primary)** + graduate/retire-on-close | R | C/U (absorb) | — |
+| `knowledge/*.md` | C (dir) | R | C/U | R | **C/U (primary)** + graduate/retire-on-close | R | C/U (absorb) | C (graduate-at-migration, gated) |
 | `glossary.md` | C (empty) | R (silent) | R | R | **propose→gate (primary)** | R | — | C (if absent) |
 | `roadmap.md` | C | R | U (add/remove Backlog) | — | U (+ remove shipped) | R (flag stale) | R (classify) | U (build milestone index) |
 | `state.md` | C | R | U | R | U + sweep | R | — | U |
@@ -599,6 +595,8 @@ coherent over time; that owner is marked **(primary)** below.
 `update` is omitted — it pulls skill files and touches no `.scaffold/` content. `audit`
 is read-only — it grades and reports across every artifact, never writes. The coherence
 reconcile is `checkpoint`'s job — every checkpoint, auto-detecting the no-work case.
+
+The table covers `.scaffold/` artifacts. **Project code** is `go`'s to write, with the single bounded exception of `checkpoint`'s closing repair licence (session residue only, approved in the pre-commit review).
 
 ## Workflows
 
@@ -634,10 +632,7 @@ is now (writing `## Targets` + `as of HEAD`, confirming the approach in plain te
 `go` executes the final & fresh plan and `checkpoint` ticks the `milestone.md` checklist and
 reconciles. Repeat until the milestone closes.
 
-**This is a real added step, called out honestly:** the old `status → go → checkpoint` loop
-gains `plan --final` per phase. That is the point of the redesign — validation happens
-*when it can be correct* (against current code), not when the plan was written ahead of
-it — but it is extra ceremony on a predetermined run, accepted deliberately.
+`plan --final` per phase is extra ceremony on a predetermined run, accepted deliberately: validation has to happen *when it can be correct* — against the code as it is — not when the plan was written ahead of it.
 
 ### Periodic deep check
 
@@ -694,7 +689,7 @@ Each skill states what it does NOT do:
 - `plan`: scaffold docs only — never code.
 - `go`: project files (and optional investigations) only — never scaffold
   truth/execution docs.
-- `checkpoint`: scaffold write-back + commit — never code changes.
+- `checkpoint`: scaffold write-back + commit; project code **only** under the closing repair licence (session residue, shown in the pre-commit review) — never new capability.
 - `audit`: read-only — grades and reports, never writes.
 - `integrate`: ingest only — never executes work or writes project files.
 

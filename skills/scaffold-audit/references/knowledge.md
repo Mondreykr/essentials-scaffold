@@ -13,8 +13,7 @@ it*. One file per coherent rule area.
 
 **Owner(s).** `scaffold-checkpoint` is the **primary owner** — it graduates rules at
 milestone close, reconciles the band, and keeps it coherent. `scaffold-plan` writes a rule
-settled in discussion; `scaffold-integrate` places an externally-authored rulebook. Those
-are the other two lifecycle moments a rule is written. `scaffold-audit` verifies the band
+settled in discussion; `scaffold-integrate` places an externally-authored rulebook. Those are the other two lifecycle moments a rule is written. `scaffold-cleanup` graduates retroactively (Adam-gated) when it archives a milestone whose close never ran — see the enforcement clause below. `scaffold-audit` verifies the band
 against the code (read-only). Read by `scaffold-go`.
 
 ## Required frontmatter
@@ -71,11 +70,7 @@ So, before writing an entry, route it:
   accrue rules here directly.
 - **Invariant:** a rule always has a *living* home — the active spec's `references/` during
   a milestone, `knowledge/` once it retires — never only a retired spec.
-  **Enforced at exactly one moment: the milestone close.** `scaffold-checkpoint`'s close
-  accounts for every rule in the retiring spec — graduated, code-homed, or dead — because
-  once the folder moves to `milestones/archived/` nothing reads it for rules again
-  (`scaffold-audit` does not walk the archive). There is no later sweep that catches a
-  rule missed here.
+  **Enforced at the moment the folder moves, and only then.** `scaffold-checkpoint`'s close accounts for every rule in the retiring spec — graduated, code-homed, or dead — because once the folder moves to `milestones/archived/` nothing reads it for rules again (`scaffold-audit` does not walk the archive). There is no later sweep that catches a rule missed here. The same obligation binds `scaffold-cleanup` when it archives a closed milestone retroactively during a migration: that close never ran, so the move it is about to make is the last legal read of that spec, and the pass runs there under the same Adam gate.
 
 ## Anti-patterns
 

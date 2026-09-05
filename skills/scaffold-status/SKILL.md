@@ -17,8 +17,7 @@ milestone-plan` / `type: phase-brief`, or a milestone folder holds a `plan.md` (
 name is `milestone.md`), the repo predates the current format — stop: "Old scaffold format
 (pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
 
-**Boundary.** Read-only. Status presents and orients; it writes nothing, decides
-nothing, runs nothing. It tells you what's available.
+**Boundary.** Read-only. Status presents and orients: it writes and mutates nothing, decides nothing, and runs no other skill — it tells you what's available. If everything is early or empty, say so plainly and ask what the user wants to work on.
 
 ---
 
@@ -39,17 +38,17 @@ full — list them (Step 3).
 
 ## Step 2: Locate the active milestone + phase
 
-**`state.md`'s `## Next` is the single authority for what's active** — both the milestone
+`state.md`'s `## Next` is the single authority for what's active — both the milestone
 and the current phase plan. Folder order is NOT the authority.
 
-1. Read `## Next`. It points at the active milestone and phase plan (e.g.
-   `milestones/01-rebuild/phases/09-categories.md`).
+1. Read `## Next`. It points at the active milestone and phase plan (e.g. `milestones/01-rebuild/phases/09-categories.md`).
+   **A `## Next` that resolves inside `milestones/archived/` is never active.** A closed milestone is closed by definition, so briefing it as the live phase — and offering `/scaffold-go` on a plan inside a frozen record — is the specific failure the archive rule exists to prevent. Treat it as a **broken close**: name the path, report that there is no active phase, and route to `/scaffold-checkpoint` to repoint the cursor. Do not follow the folder or infer a live equivalent.
 2. Read that milestone's `milestone.md` and the phase plan `## Next` names.
-3. **Fallback only if `## Next` is silent or stale:** the highest-`NN` milestone folder
-   is a *hint*, not the authority — a later-numbered milestone can be pre-created while an
-   earlier one still runs. If you fall back, say so, and flag that `## Next` should be set.
+3. **Fallback only if `## Next` is silent or stale:** the highest-`NN` milestone folder is a *hint*, not the authority — a later-numbered milestone can be pre-created while an earlier one still runs. Look only at the direct children of `milestones/`, excluding `archived/`; a recursive read picks closed milestones out of the archive and can rank one above the live work. If you fall back, say so, and flag that `## Next` should be set.
 
-**Phase done-ness is read from the `milestone.md` checklist** — each phase is a checkbox; a
+**No git? Say so, don't guess.** The freshness computation below runs `git` commands; in a repo without it there is no sha to check. Report the plan as *final, freshness unverifiable (no git)* rather than erroring or calling it fresh.
+
+Phase done-ness is read from the `milestone.md` checklist — each phase is a checkbox; a
 checked box (with a date) means done. No status enum; count checked vs unchecked to see
 how far the milestone has progressed.
 
@@ -73,7 +72,7 @@ State is derived from what the documents say, not from status keywords. Compute:
 - **Phase in flight?** The active `milestone.md` has an unchecked phase and `## Next` points at
   its plan.
 - **Plan state?** For the active plan, read its `## Targets`: **none → draft** (finalize
-  before `go`); **present with an `as of <sha>` stamp that still holds → final & fresh**
+  before `go`); present with an `as of <sha>` stamp that still holds → final & fresh
   (ready to `go`); **stamp doesn't hold → stale** (re-finalize). This tells a resuming
   session whether it can execute or must finalize first.
 
@@ -91,13 +90,7 @@ State is derived from what the documents say, not from status keywords. Compute:
   author the next phase (`/scaffold-plan`); close only if the chunk is genuinely done.
 - **Blocked?** `state.md`'s `## Blockers` has content other than "None."
 - **Open questions?** `state.md`'s `## Open Questions` has content other than "None."
-- **Deferred work parked?** The active milestone's `milestone.md` has a non-empty `## Deferred`
-  list — surface the count; these are known items not yet scheduled. Admission is barred
-  (needs a decision / materially out of scope / can't ride along safely), so the list should
-  be short; if it has grown past **~8 items**, nudge: "`## Deferred` is at N items — longer
-  than the admission bar should allow. Consider `/scaffold-audit` to groom it (the deep
-  already-built/stale check), then `/scaffold-plan` to act." This puts the grooming signal on the session-**entry** path too, so a resuming
-  user sees it even if last session ended without a checkpoint. (A precondition on resuming,
+- **Deferred work parked?** The active milestone's `milestone.md` has a non-empty `## Deferred` list — **report the count and stop there.** Admission is barred, so the list is short by construction; whether *this* one has grown too long is `checkpoint`'s sweep to judge (it owns that threshold) and `/scaffold-audit`'s to investigate. Reporting the number on the session-entry path is what lets a resuming user see it even if the last session ended without a checkpoint; inventing a second threshold here would just drift from checkpoint's. (A precondition on resuming,
   e.g. "reseed the dev DB first," lives in `## Next` and is surfaced with it — there is no
   `## Notes` section.)
 
@@ -121,8 +114,8 @@ Keep it short — a briefing, not a report:
 8. **Health check** — flag contradictions across docs:
    - `## Next` points at a phase plan or milestone folder that doesn't exist.
    - `## Next` is silent while a milestone has unchecked phases (active cursor lost).
-   - A `milestone.md` phase is checked but `roadmap.md` still shows the milestone planned, or
-     every phase is checked but the roadmap line isn't flipped to done.
+   - A `milestone.md` phase is checked but `roadmap.md` still shows the milestone planned, or every phase is checked but the roadmap line isn't flipped to done.
+   - **A broken close** — a `roadmap.md` `[done]` line pointing at a live `milestones/NN-slug/` path, or an `[active]`/`[planned]` line pointing into `archived/`. One string comparison per milestone line, and it catches a close that was interrupted between the folder move and the roadmap flip.
    - `project.md` scope boundaries contradict what the roadmap/active milestone builds.
    - An `architecture.md` statement references a decision (`decisions/NNNN-…`) that's
      missing.
@@ -131,8 +124,7 @@ Keep it short — a briefing, not a report:
    (Plan-vs-decision staleness is NOT checked here — `status` deliberately doesn't read
    `decisions/` or downstream plans. That detection is `checkpoint`'s coherence sweep and
    `plan`'s pivot sweep.)
-9. **Staleness** — if any living-truth doc's frontmatter `updated:` date is more than 7
-   days old while its content has clearly moved on, flag it.
+9. **Staleness** — report each living-truth doc's `updated:` age in days. Whether an age counts as stale is `checkpoint`'s sweep to decide (it owns that threshold, and it can see whether the content moved); you read no code, so you cannot.
 
 ## Step 6: Route to next step
 
@@ -169,10 +161,3 @@ Suggest, don't mandate. Surface multiple options if multiple signals apply.
 > to figure out what's next."
 
 ---
-
-## Boundaries
-
-Status is **read-only**. It does NOT: write or mutate any scaffold doc (it presents and
-orients only); make decisions (it surfaces state and options); or run other skills (it
-tells you what's available). If everything is early or empty, say so plainly and ask what
-the user wants to work on.
