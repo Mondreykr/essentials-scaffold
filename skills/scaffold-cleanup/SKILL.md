@@ -261,9 +261,16 @@ is the sole thing cleanup does when only the rename is behind.
   **Do not fabricate a `## Targets`/`as of <sha>` — cleanup cannot judge "validated against
   current code", and inventing one would forge the readiness signal.** A plan with no
   `## Targets` stays a **draft** (correct — it gets a real `/scaffold-plan --final` pass
-  before its next `go`). A plan that already carries `## Targets` keeps it, but **flag** it:
-  after migration HEAD has moved, so `go` will read it **stale** and route to re-finalize —
-  that is the safe outcome, not a bug.
+  before its next `go`).
+
+  **A plan that already carries `## Targets`: strip the section, demoting it to a draft,
+  and tell the user you did.** Migration is not a code change, so every path it moves is
+  under `.scaffold/` — which means `go`'s freshness check would read that plan as **fresh**
+  and execute it, on the strength of a stamp cleanup can't vouch for and that may predate
+  real code drift. Stripping is the only thing that restores the guarantee, and a draft is
+  a valid state (no conformance break). Say so plainly:
+  > "`<plan>` carried a `## Targets` stamped `as of <sha>` that I can't validate — I've
+  > removed it, so it's a draft again. Run `/scaffold-plan --final` before `go`."
 - **Bump `schema_version: 1` → `2`** on **every** `.scaffold/` doc (the format epoch;
   uniform, so a lingering `1` is the un-migrated marker).
 - **Repoint references** (Step 4 sweep): any `plan.md` path (in `state.md` `## Next`, cross-links) becomes `milestone.md`. Phase-plan file paths are unchanged

@@ -73,10 +73,16 @@ State is derived from what the documents say, not from status keywords. Compute:
 - **Phase in flight?** The active `milestone.md` has an unchecked phase and `## Next` points at
   its plan.
 - **Plan state?** For the active plan, read its `## Targets`: **none → draft** (finalize
-  before `go`); **present with `as of <sha>` at HEAD (no dirty target) → final & fresh**
-  (ready to `go`); **sha behind HEAD or a dirty target → stale** (re-finalize). This tells
-  a resuming session whether it can execute or must finalize first. (Cheap git check:
-  compare the stamped sha to `git rev-parse HEAD`.)
+  before `go`); **present with an `as of <sha>` stamp that still holds → final & fresh**
+  (ready to `go`); **stamp doesn't hold → stale** (re-finalize). This tells a resuming
+  session whether it can execute or must finalize first.
+
+  **The stamp holds** when the sha is an ancestor of HEAD *and* every changed path since
+  is either a `## Targets` path entry or under `.scaffold/`. Two cheap git commands:
+  `git merge-base --is-ancestor <sha> HEAD`, then `git diff --name-only <sha> --`. The
+  question is "did anything move that this plan didn't declare?", **not** "has the repo
+  moved?" — a checkpoint commit moves HEAD on every multi-session phase and is not
+  staleness. Untracked files don't count.
 - **Milestone complete?** Every phase in the active `milestone.md` is checked. For a
   **predetermined** milestone (has `spec/` + pre-written plans) this means it's at its
   done-contract → close + graduate (`/scaffold-checkpoint`) or start a new milestone
@@ -133,13 +139,16 @@ Keep it short — a briefing, not a report:
 Suggest, don't mandate. Surface multiple options if multiple signals apply.
 
 **Phase in flight** — route on the plan's state:
-> - **final & fresh:** "Active: [milestone] / [phase plan] — final & fresh, [N] of [M]
->   phases done. Run `/scaffold-go` to execute it, or `/scaffold-plan` to recalibrate."
+> - **final & fresh:** "Active: [milestone] / [phase plan] — final & fresh (validated
+>   `as of <sha>`; [nothing has moved since / N files moved since, all declared targets or
+>   `.scaffold/`]), [N] of [M] phases done. Run `/scaffold-go` to execute it, or
+>   `/scaffold-plan` to recalibrate."
 > - **draft:** "Active: [milestone] / [phase plan] — still a **draft**. Run
 >   `/scaffold-plan --final` to validate it against the current code before `go`, or work
 >   freeform."
-> - **stale:** "Active: [milestone] / [phase plan] — **stale** (validated `as of <sha>`,
->   code has moved). Re-finalize with `/scaffold-plan --final` before `go`."
+> - **stale:** "Active: [milestone] / [phase plan] — **stale**: validated `as of <sha>`,
+>   and [these moved outside its declared targets: `<file>`, `<file>` / that sha is not in
+>   this branch's history]. Re-finalize with `/scaffold-plan --final` before `go`."
 
 **Milestone complete (all phases checked):**
 > "[Milestone] is fully checked. If this chunk is genuinely done, run

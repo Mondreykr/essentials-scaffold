@@ -49,8 +49,9 @@ without reading code (a behavior, an output, a visible state), never "tests pass
 
 ## Targets   ← OPTIONAL; present only on a FINALIZED plan
 _as of <sha>_
-- `path/to/file` — [what this phase touches here]
-- `interface / surface` — [ditto]
+- `path/to/file.ts` — [what this phase touches here]
+- `path/to/dir/` — [a trailing slash covers everything beneath]
+- non-path note: [an interface or surface, prose — ignored by the freshness comparison]
 ```
 
 ## Draft vs. final (the two plan states)
@@ -60,13 +61,32 @@ stored status enum (Principle 7). The `## Targets` section is the signal, and it
 `as of <sha>` stamp is the evidence that makes the signal auditable:
 
 - **no `## Targets`** → **draft** (code-blind; may be pre-written; not executable).
-- **`## Targets` present, `<sha>` is HEAD** → **final & fresh** (validated against
-  current code; `scaffold-go` may execute).
-- **`## Targets` present, `<sha>` is NOT HEAD** → **stale** (code moved since
-  validation; must be re-finalized before `go`).
+- **`## Targets` present and its stamp still HOLDS** → **final & fresh** (nothing has
+  moved that this plan didn't declare; `scaffold-go` may execute).
+- **`## Targets` present and its stamp does NOT hold** → **stale** (something moved
+  outside what the plan declared; must be re-finalized before `go`).
+
+**The stamp holds** when both are true — a deterministic test, no judgement:
+
+1. `<sha>` resolves **and is an ancestor of HEAD** (`git merge-base --is-ancestor <sha> HEAD`).
+2. Every changed tracked path between `<sha>` and the working tree
+   (`git diff --name-only <sha> --` — this covers the committed span *and* uncommitted
+   edits in one command) is either **matched by a path entry in `## Targets`** or lives
+   **under `.scaffold/`**.
+
+Anything else → stale, and `go` names the offending files.
+
+**Why those two exemptions.** The check asks *"did anything move that this plan didn't
+declare?"*, not *"did the repo move?"* — the broad question makes a routine checkpoint
+and a stranger's commit indistinguishable, so it fires on every multi-session resume and
+gets rubber-stamped. **Target files** already move under `go` item-by-item within one
+session with no re-check (the code moving is what executing *is*), so letting them move
+across a session boundary is exactly as safe. **`.scaffold/` files** belong to the other
+staleness defense — `scaffold-plan`'s pivot sweep and `scaffold-checkpoint`'s coherence
+sweep — never to this check. Untracked files never trip the gate.
 
 `## Targets` lists the files/interfaces the phase touches; `scaffold-plan` writes it
-during a **finalize** pass (`as of HEAD`) and `scaffold-go`'s deterministic `sha == HEAD?`
+during a **finalize** pass (`as of HEAD`) and `scaffold-go`'s deterministic freshness
 check reads it. A plan with no `## Targets` is a valid draft — existing plans are drafts,
 no conformance break.
 
@@ -87,11 +107,17 @@ no conformance break.
 - `NN` is the roadmap ordinal and admits interstitials (`09.1`); never renumber.
 - **`## Targets` requires its `as of <sha>` stamp.** Bare section-presence is not a valid
   signal — the sha is the grounding evidence (audit checks it resolves to a real commit)
-  *and* the staleness backstop (`go` compares it to HEAD). A `## Targets` without a sha is
-  malformed.
-- **Dirty working tree:** the `sha == HEAD?` check assumes committed state. If the tree
-  has uncommitted edits touching any `## Targets` file, treat the plan as **stale** — the
-  validation no longer describes what's on disk.
+  *and* the staleness backstop (`go` runs the freshness test from it). A `## Targets`
+  without a sha is malformed.
+- **Every `## Targets` entry that names a file is a repo-relative path.** Not a style
+  preference: the freshness check compares changed paths against this list, so a file
+  named in prose is invisible to it and shows up as undeclared movement. A trailing `/`
+  covers everything beneath. An entry that names an *interface or surface* rather than a
+  file is allowed and simply ignored by the comparison — but if that surface lives in a
+  file the phase will touch, the file gets its own path entry too.
+- **Uncommitted edits count.** The freshness check reads the working tree, not just the
+  committed span, so an uncommitted change to a file outside `## Targets` and `.scaffold/`
+  makes the plan **stale** exactly as a commit would.
 - **Staleness:** a pre-written downstream plan can go stale when a later decision/plan
   lands. `scaffold-plan` sweeps unexecuted plans (drafts included) on a pivot;
   `scaffold-checkpoint`'s coherence sweep also flags a *finalized* plan whose
@@ -112,6 +138,8 @@ no conformance break.
 - A finalized plan whose `## Approach` only makes sense to someone who already knows the
   project's unwritten conventions (fails the stranger test).
 - A `## Targets` section with no `as of <sha>` stamp (unauditable, no staleness backstop).
+- A `## Targets` that names its files in prose instead of as repo-relative paths (the
+  freshness check can't match them, so the phase's own edits read as undeclared drift).
 - Renumbering interstitials on migration.
 - An unnumbered / prose `## Scope` (nothing can report per deliverable against it).
 - Silent scope expansion during `go` instead of routing out-of-scope to checkpoint.

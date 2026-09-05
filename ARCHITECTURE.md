@@ -215,15 +215,28 @@ A few concepts span the execution docs and don't belong to any single contract:
   enum).** A **draft** is code-blind: high-level, may be pre-written, not executable. A
   **final** plan has been validated against the code *as it is now* and carries a
   `## Targets` section — the files/interfaces the phase touches — stamped `as of <sha>`.
-  The state is read off disk: no `## Targets` → draft; `## Targets` with the sha at HEAD →
-  final & fresh; `## Targets` with the sha behind HEAD (or a dirty target file) → stale.
+  The state is read off disk: no `## Targets` → draft; `## Targets` whose stamp still
+  **holds** → final & fresh; `## Targets` whose stamp no longer holds → stale. The stamp
+  holds when nothing has moved that this plan did not declare — the exact test is the
+  *Freshness* bullet below.
   This is scaffold's own idiom — a signal is *content + evidence*, like the phase checkbox
   is *checkbox + date* — so it is auditable by construction (the sha must resolve to a real
   commit and the named files must exist). **Finalizing is where the code-aware,
   reasoning-heavy work lives** (`plan`'s finalize pass); `go` is then a thin executor
-  behind a deterministic `sha == HEAD?` gate. This split is what lets the reasoning step
+  behind a deterministic freshness gate. This split is what lets the reasoning step
   and the execution step run on different models / clean contexts, with a reviewable seam
   between them.
+- **Freshness — the stamp holds until something moves that the plan did not declare.** The question is *not* "has the repo moved?" A phase that spans a `/clear` moves the repo by construction, and so does `checkpoint` committing `.scaffold/`. Asking the broad question makes a harmless save and a stranger's commit **indistinguishable** — both merely differ from HEAD — so the gate fires on every resume, and a gate you pass without reading is not a gate. The test is deterministic and judges nothing:
+  1. The stamped sha resolves **and is an ancestor of HEAD**. If not — a rebase, a force-push, a different branch — the plan was validated against a history that no longer exists: **stale**, no exemptions.
+  2. Every changed tracked path between the stamp and the working tree is either **named in `## Targets`** or lives **under `.scaffold/`**. Anything else → **stale**, and `go` names the offending files. One command covers the committed span *and* uncommitted edits: `git diff --name-only <sha> --`.
+
+  Both exemptions are principled, not conveniences. **Target files** already move under `go` item-by-item within one session with no re-check — the code moving is what executing *is* — so letting them move across a session boundary is exactly as safe, and erasing that boundary is what scaffold exists to do. **`.scaffold/` files** belong to the *other* staleness obligation: doc drift is defended by `plan`'s pivot sweep and `checkpoint`'s coherence sweep, never by this check. Untracked files never trip the gate.
+
+  This is also what makes **fresh** a state a *committed* plan can be in. Under a `sha == HEAD?` test it could not be: a commit cannot contain its own hash, so a stamp equal to HEAD exists only as an uncommitted working-tree edit, and the very commit that saves the plan invalidates it. The single-session path survived only because the phase closed before anyone looked. That test failed structurally, not at an edge.
+
+  **`go` prints the changed-file list before proceeding** — not as a question, as visibility. A passing gate that shows its work is what keeps the refusing gate worth reading; a confirmation prompt here would only relocate the rubber stamp.
+
+  One residual gap, accepted explicitly: an outside commit touching *only* this plan's declared targets passes. Narrow for a solo developer on one branch, and strictly better than a check that is dismissed every time.
 - **`--draft` / `--final` is a user-intent shortcut, not a mode enum.** `plan` asks
   "draft or finalize?" when the argument is absent; the flag only skips the ask. It is
   **never stored** anywhere on disk — the plan's state is still derived from `## Targets`
@@ -234,8 +247,9 @@ A few concepts span the execution docs and don't belong to any single contract:
   can go stale two ways, and each has a defense:
   - **Finalize→execute drift** — a plan finalized `as of X`, then code moves before `go`
     runs (a `/clear`, a pause, a week-long gap — scaffold's whole reason to exist).
-    Defended by `go`'s **deterministic** `sha == HEAD?` check (it judges nothing — it
-    compares two hashes); mismatch → `go` refuses and routes to re-finalize.
+    Defended by `go`'s **deterministic** freshness check (it judges nothing — ancestry
+    plus a path-list comparison, per *Freshness* above); undeclared movement → `go`
+    refuses, names the files, and routes to re-finalize.
   - **Plan-set drift** — phases reordered/cut, or a plan premised on a since-superseded
     decision. Defended by `plan`'s pivot sweep over all *unexecuted* plans (**drafts
     included** — a draft on a superseded ADR still breaks the ADR gate) and
@@ -403,14 +417,16 @@ update the milestone's `milestone.md`; **finalize** a plan; and set `state.md` N
 Writes project files and may write an `investigations/` record; **does NOT write
 scaffold truth or execution docs** — that is `checkpoint`'s job. Reads its plan from
 `milestones/NN/phases/` and **computes its state** (draft / final&fresh / stale) from
-`## Targets` + the `sha == HEAD?` check:
+`## Targets` + the freshness check:
 
 - **draft** (no `## Targets`) → stop: finalize it with `/scaffold-plan --final`, or work
   freeform (status → work → checkpoint). `go` has no research/propose step of its own — a
   draft is not for `go` to figure out.
-- **stale** (sha behind HEAD, or a dirty target) → stop: re-finalize with
-  `/scaffold-plan --final`.
-- **final & fresh** → execute exactly what `## Scope` names, one deliverable at a time.
+- **stale** (the stamp is not an ancestor of HEAD, or something moved that `## Targets`
+  and `.scaffold/` do not cover) → stop, **name the offending files**, and re-finalize
+  with `/scaffold-plan --final`.
+- **final & fresh** → print what has moved since the stamp, then execute exactly what
+  `## Scope` names, one deliverable at a time.
   The approach was already approved in plain terms at finalize, so `go` confirms the
   start and works item-by-item — it does not re-propose. Out-of-scope discoveries route
   to checkpoint rather than expanding silently.
@@ -650,7 +666,7 @@ reality.
 | Document type | frontmatter `type:` (authoritative); filename/location as fallback |
 | Active milestone | `state.md` `## Next` names it (authority). Fallback hint only: highest `NN` folder, when Next is silent |
 | Active phase | `state.md` `## Next` names the phase plan |
-| Plan state | no `## Targets` → **draft**; `## Targets` + `as of <sha>` at HEAD → **final & fresh**; sha behind HEAD or a dirty target file → **stale**. `go` executes only final & fresh |
+| Plan state | no `## Targets` → **draft**; `## Targets` + `as of <sha>` that still **holds** (sha is an ancestor of HEAD, and every changed path is in `## Targets` or under `.scaffold/`) → **final & fresh**; otherwise → **stale**. `go` executes only final & fresh |
 | Phase done? | the milestone's `milestone.md` checklist entry is checked (with a date) |
 | Milestone ready to close? | `milestone.md` fully checked AND its done-contract met (emergent: only when Adam says the chunk is done). The `roadmap.md` `[done]` flip is the *output* of closing, not a precondition |
 | Milestone mode | derived: has `spec/` + pre-written plans → predetermined; else emergent |
@@ -710,8 +726,9 @@ light structural + coherence sweep. Works.
 `plan`, on the pivot, sweeps all unexecuted plans (drafts included) in the active
 milestone against the change and flags/rewrites the stale one. That is the *plan-set*
 defense. Separately, a plan that was *finalized* and then left while code moved is
-caught deterministically at execution time by `go`'s `sha == HEAD?` check — it refuses
-and routes to re-finalize. `checkpoint`'s coherence sweep is the backstop for a finalized
+caught deterministically at execution time by `go`'s freshness check — a change outside
+the plan's declared `## Targets` makes it refuse, name the files, and route to
+re-finalize. `checkpoint`'s coherence sweep is the backstop for a finalized
 plan whose targets/approach conflict with a later decision.
 
 **A plan depends on a not-yet-approved decision:**

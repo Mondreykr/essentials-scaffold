@@ -108,6 +108,14 @@ Verify the scaffold's claims against the actual code:
   readiness signal is ungrounded (route to `plan` to re-finalize). This closes the
   "unfalsifiable by construction" hole: the signal is only trustworthy because it's
   auditable.
+- **Finalized-plan `## Targets` are machine-comparable** — every entry that names a file
+  is a repo-relative path (a trailing `/` covers what's beneath), not a file named in
+  prose. `go`'s freshness check matches changed paths against this list, so a prose-named
+  file is invisible to it and the phase's own edits read as undeclared drift. An entry
+  that names an *interface or surface* rather than a file is fine and simply ignored by
+  that comparison. Also flag a stamp that is **not an ancestor of HEAD**
+  (`git merge-base --is-ancestor <sha> HEAD`) — the plan was validated against a history
+  that no longer exists, so it is stale regardless of what its targets say.
 - **Standing blockers are real** — each `state.md` Blocker is corroborated by the code /
   state, not stale or already resolved.
 - **Deferred / backlog items aren't already done** — this is the deliberate, expensive

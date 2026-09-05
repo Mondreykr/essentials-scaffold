@@ -49,7 +49,7 @@ current phase plan. Read these in order:
 ## Step 2: Check the plan is executable (deterministic)
 
 `go` runs only a **final & fresh** plan. Compute the state from the plan's `## Targets`
-section — this is a hash comparison, it judges nothing:
+section — this is ancestry plus a path-list comparison, it judges nothing:
 
 1. **No `## Targets`** → **draft**. Stop:
    > "This plan isn't finalized. Run `/scaffold-plan --final` to validate it against the
@@ -57,13 +57,22 @@ section — this is a hash comparison, it judges nothing:
 
    Do **not** try to research or propose an approach yourself — a draft is `plan`'s to
    finalize, and freeform is scaffold's existing wing-it path, not a `go` override.
-2. **`## Targets` present** → read its `_as of <sha>_` stamp and compare to HEAD:
-   - `git rev-parse "<sha>"` **≠** `git rev-parse HEAD` → **stale**. Stop:
-     > "Validated `as of <sha>`; code has moved. Re-finalize with `/scaffold-plan --final`."
-   - HEAD matches, but a target file is dirty (`git status --porcelain -- <target paths>`
-     is non-empty) → **stale** (the validation no longer describes what's on disk). Same
-     stop + re-finalize message.
-   - HEAD matches and no target is dirty → **final & fresh**. Proceed.
+2. **`## Targets` present** → read its `_as of <sha>_` stamp and ask **whether the stamp still holds**. The question is *not* "has the repo moved?" — a phase that spans a `/clear` moves the repo by construction, and so does `checkpoint` committing `.scaffold/`. The question is **"has anything moved that this plan did not declare?"** Two commands answer it:
+
+   ```
+   git merge-base --is-ancestor <sha> HEAD    # (1) still on this history?
+   git diff --name-only <sha> --              # (2) what has moved since — committed AND uncommitted
+   ```
+
+   - **(1) fails** (the sha doesn't resolve, or isn't an ancestor of HEAD) → **stale**, no exemptions. The plan was validated against a history that no longer exists — a rebase, a force-push, a different branch. Stop:
+     > "Validated `as of <sha>`, which is not in this branch's history (rebase, force-push, or wrong branch). Re-finalize with `/scaffold-plan --final`."
+   - **(2) lists a path that is neither matched by a `## Targets` path entry nor under `.scaffold/`** → **stale**. Stop, and **name the files** — a refusal the user can't check is a refusal they'll learn to dismiss:
+     > "Validated `as of <sha>`; these moved outside the plan's declared targets: `<file>`, `<file>`. Re-finalize with `/scaffold-plan --final`."
+   - **Otherwise** → **final & fresh**. Proceed.
+
+   **Matching a path against `## Targets`:** an entry is a repo-relative path; a trailing `/` covers everything beneath it. `## Targets` entries that name an *interface or surface* in prose rather than a path are ignored by this comparison. Untracked files never trip the gate (`git diff` doesn't list them, and that is correct — they aren't part of the validated code state).
+
+   **Why targets and `.scaffold/` are exempt, so you don't "helpfully" tighten this back:** you already move target files item-by-item within a single session with no re-check — the code moving *is* executing — so moving them across a session boundary is exactly as safe. And `.scaffold/` drift belongs to a different defense entirely (`plan`'s pivot sweep, `checkpoint`'s coherence sweep), never to this check.
 
 (If the repo has no git, there is no sha to check — treat a plan with `## Targets` as
 fresh and note that staleness can't be verified without git.)
@@ -85,9 +94,15 @@ it to understand where to resume, especially after a pause. **If the user says p
 scope is already done, skip it.**
 
 Present scope and confirm the start (the approach was approved at finalize — you do **not**
-re-propose it):
-> "Phase: [plan filename], final & fresh. [N] scope items to execute [out of M — N
+re-propose it). **Print what has moved since the stamp** — not as a question, as
+visibility. A gate that passes silently teaches nothing; a gate that shows its work is what
+makes the refusing case worth reading:
+> "Phase: [plan filename], final & fresh. Since `<sha>`: [N] files moved, all declared
+> targets or `.scaffold/` — [list them]. [N] scope items to execute [out of M — N
 > already done]. Starting now."
+
+If nothing has moved since the stamp, say "nothing has moved since `<sha>`" rather than
+printing an empty list.
 
 ## Step 4: Execute
 
@@ -116,7 +131,7 @@ When the scope items are done, **dispatch one fresh read-only subagent** (Explor
 2. **Different** — which were built differently from what the plan named?
 3. **Unasked** — what is in this diff that **no scope item called for**?
 
-**Get the diff right — the check is worthless against the wrong one.** Diff against the sha the plan was validated at, from `## Targets`' `_as of <sha>_`: `git diff <sha>` plus any untracked files the phase added. **Not bare `git diff`** — it shows only unstaged work, so a phase that staged or committed mid-run would hand the agent nothing. **Tell the agent to refuse rather than report clean if the diff it receives is empty**; a check that passes on empty input is worse than no check. No git: pass the working tree's current state of the `## Targets` files plus anything new the phase created, and say in the report that the basis was files, not a diff.
+**Get the diff right — the check is worthless against the wrong one.** Diff against the sha the plan was validated at, from `## Targets`' `_as of <sha>_`: `git diff <sha> -- . ':(exclude).scaffold'` plus any untracked files the phase added. **Exclude `.scaffold/`**: on a phase resumed across a checkpoint the span from the stamp legitimately contains that checkpoint's own doc commits, and the agent would report them as *unasked* work — a false finding that trains the same dismissal habit the freshness gate was fixed to avoid. The scope check judges code against scope, not scaffold's bookkeeping. **Not bare `git diff`** — it shows only unstaged work, so a phase that staged or committed mid-run would hand the agent nothing. **Tell the agent to refuse rather than report clean if the diff it receives is empty**; a check that passes on empty input is worse than no check. No git: pass the working tree's current state of the `## Targets` files plus anything new the phase created, and say in the report that the basis was files, not a diff.
 
 **Dispatch it; never answer these yourself.** The value is entirely in the reader being cold — a model reviewing its own work finds nothing. So the agent gets the scope and the diff and nothing else: not this conversation, not the reasoning behind any choice. One agent, not several: two reads of the same diff converge on a compromise and cost double.
 

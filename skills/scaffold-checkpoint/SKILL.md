@@ -331,7 +331,7 @@ re-enumerate them here; route them to audit.** Check only:
    the routing tiebreak.
 5. **Plan-vs-decision staleness** — any unexecuted plan premised on a changed or
    un-ratified decision, **including a *finalized* plan whose `## Targets`/approach now
-   conflicts with a later decision** (the finalize→execute gap `go`'s sha check doesn't
+   conflicts with a later decision** (the finalize→execute gap `go`'s freshness check doesn't
    cover). Flag and route to `scaffold-plan`; do NOT rewrite a plan here.
 6. **Active-cursor sanity** — `state.md`'s `## Next` points at a milestone + plan that
    exist; the named phase is consistent with `milestone.md`'s checklist.

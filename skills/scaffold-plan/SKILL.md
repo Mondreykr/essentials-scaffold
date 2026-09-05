@@ -280,6 +280,21 @@ one the user names).
    phase touches, and stamp it with the current commit — get it with `git rev-parse --short
    HEAD` and write `_as of <sha>_` under the heading. This is the grounding evidence that
    makes the plan auditable and gives `go` its staleness backstop.
+
+   **Every entry that names a file must be a repo-relative path** (a trailing `/` covers
+   everything beneath it) — `go`'s freshness check matches changed paths against this
+   list, so a file named only in prose is invisible to it and the phase's own edits will
+   read as undeclared drift. An entry naming an *interface or surface* rather than a file
+   is fine and is ignored by that comparison; if that surface lives in a file the phase
+   will touch, give the file its own path entry too.
+
+   **Be complete, not minimal.** This list is the phase's declaration of what it may move.
+   A file the phase will genuinely touch but that you leave out will stop `go` on resume.
+   Erring wide costs nothing here; erring narrow costs a false refusal later.
+
+   The stamp does **not** have to stay uncommitted to stay valid — freshness is "nothing
+   moved that the plan didn't declare", so committing the plan (or checkpointing mid-phase)
+   keeps it fresh.
 3. **Tighten Scope/Approach** against what the code actually is, and **ensure `##
    Acceptance` is user-verifiable** — an observable outcome, not "tests pass".
 4. **Apply the stranger test.** Ask: could a competent builder who has never seen this
