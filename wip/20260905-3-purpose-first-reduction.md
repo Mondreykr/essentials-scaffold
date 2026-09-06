@@ -156,3 +156,18 @@ For each skill, in this order:
 - **"Out-of-scope discoveries route to checkpoint, never silent expansion"** inside the plan template's `## Scope` explainer. A `go`-time rule that `go`'s own skill carries; it changed nothing the plan author does.
 
 **Next:** `go` (3,183), then the small five (`audit` 2,237, `setup` 1,997, `status` 1,876, `integrate` 1,630, `update` 675) in one pass. Same method, same closure check. Expect `go`'s pass-1 branches to be the surplus kind.
+
+## Session 4 — executed 2026-09-06 · `go` · outcome
+
+**Done.** No `references/` split — every path in `go` (freshness gate, read-set, scope check, escape hatch) runs on every invocation, so nothing is rare-path. Nothing added to `ARCHITECTURE.md`; its `go` section already carried every argument stripped (the fresh-agent rationale, the two-exit rationale, the read-set contradiction rule). The duplicated already-ticked check (stated in Step 2 and again in Step 3) collapsed to one.
+
+| | words | ≈ tokens loaded per invocation |
+|---|---|---|
+| `SKILL.md` before | 3,183 | 4,900 |
+| `SKILL.md` after | 1,870 | 3,000 |
+
+**−41 % on the body; 119 lines.** Waste-kind split of the ~1,310 words removed: ~1,250 rationale and repetition (the freshness-exemption argument, the "why a cold reader" argument stated three times, the unsatisfiable-exit rationale, the `.scaffold/`-exclusion argument), ~60 duplicated instruction, **surplus behaviour zero**. The expectation that `go`'s pass-1 branches were surplus did not hold: the closure walk found every branch fires on a case that occurs.
+
+**Verification — closure agent, inverted lens.** 64 behaviours walked: 62 kept, 1 weakened, 0 dropped. The weakening (`updated: <today>` on the investigation record) was restored. The agent also flagged one wording shift in the freshness exemption: my cut said a path is exempt only if touched *solely* by `checkpoint:`/`reconcile:` commits, where the pre-cut exempted a path touched by *any* such commit. Reverted to the pre-cut wording so this pass changes no behaviour — but the pre-cut wording is the looser reading and arguably wrong (a file a checkpoint tidied and a stranger later edited reads as fresh). **Open for Adam:** tighten to "solely", in the spec first, or leave.
+
+**Dropped, as decisions:** none.
