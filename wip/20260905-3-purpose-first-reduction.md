@@ -115,4 +115,4 @@ For each skill, in this order:
 
 **Not verified.** Whether the bare imperatives hold in a real checkpoint run — unchanged, no real use yet. The purpose sentence itself — Adam has not ruled on Q1.
 
-**Next:** `cleanup` (progressive disclosure: the six one-time migration playbooks → `references/`), then `plan`, `go`, then the small five in one pass. Same method, same closure check.
+**Next:** `cleanup` (progressive disclosure: the six one-time migration playbooks → `references/`), then `plan`, `go`, then the small five in one pass. Same method, same closure check. **Adam's Step 5 ruling generalizes:** a paraphrase of a document's shape is an FYI, not an instruction — cut it from every skill that edits an existing doc; the shape is on disk and audit grades it. (`setup` creates docs from nothing and is the exception.)
