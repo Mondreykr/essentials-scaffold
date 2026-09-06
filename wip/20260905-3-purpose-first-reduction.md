@@ -116,3 +116,23 @@ For each skill, in this order:
 **Not verified.** Whether the bare imperatives hold in a real checkpoint run — unchanged, no real use yet. The purpose sentence itself — Adam has not ruled on Q1.
 
 **Next:** `cleanup` (progressive disclosure: the six one-time migration playbooks → `references/`), then `plan`, `go`, then the small five in one pass. Same method, same closure check. **Adam's Step 5 ruling generalizes:** a paraphrase of a document's shape is an FYI, not an instruction — cut it from every skill that edits an existing doc; the shape is on disk and audit grades it. (`setup` creates docs from nothing and is the exception.)
+
+## Session 2 — executed 2026-09-06 · `cleanup` · outcome
+
+**Done.** Purpose sentence as drafted (Q1 still unruled). Nothing needed adding to `ARCHITECTURE.md` — every argument stripped (why cleanup is objective-driven, why the self-check is not audit, why `## Targets` is stripped) was already in its `/scaffold-cleanup` section. Q2 applied at full strength: the six one-time migration playbooks moved to `references/`, **one file per playbook** so a run loads only the ones its inventory matched (a v1-rename-only repo loads 200 words, not 1,150). Two playbooks small enough to stay inline (name normalization, `state.md` `## Notes` drain).
+
+| | words | ≈ tokens loaded per invocation |
+|---|---|---|
+| `SKILL.md` before | 4,099 | 6,900 |
+| `SKILL.md` after | 1,512 | 2,500 |
+| `references/` (six files, loaded per matched pattern) | 1,156 total | 230–450 each |
+
+**−63 % on the body; 119 lines.** Waste-kind split of the ~2,590 words removed from the body: ~1,150 rare-path (moved), ~1,400 rationale and repetition (the not-audit's-job point stated three times; idempotency twice; the never-guess rule three times; the fenced frontmatter templates repeating the one frontmatter rule five times), **surplus behaviour zero** — same finding as `checkpoint`.
+
+**Shape paraphrase ruling, applied with one exception.** The tree diagram and the fenced doc templates are gone. The section lists for `milestone.md`, `roadmap.md`, `architecture.md` and a phase plan were kept as one-liners inside the playbooks, because cleanup authors those docs from nothing in a migration — the shape is not yet on disk for it to read, which is the `setup` exception, not the edit-an-existing-doc case.
+
+**Verification — closure agent, inverted lens.** 92 behaviours walked: 47 kept, 41 moved, 4 weakened, 0 dropped. All four weakened were unintended and restored at ~25 words: the two Laws as one-line placement tiebreak, the unconditional drop of `someday / never` backlog entries, the literal `type: glossary`, the "no append-log" term in the Step 7 check. Table: `scratchpad/closure-cleanup.md` (ephemeral). `scripts/sync-contracts.sh --check` passes; no spec text references the cleanup skill's internal structure, so nothing to propagate.
+
+**Dropped, as decisions:** none.
+
+**Next:** `plan` (4,749), then `go` (3,183), then the small five. Expect the third waste kind (surplus behaviour) to finally appear in `plan`/`go` — their pass-1 branches were that kind; put each candidate in front of Adam with its word count.
