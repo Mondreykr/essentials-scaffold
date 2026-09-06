@@ -1,6 +1,6 @@
 # Finalize pass (`--final`)
 
-Turn a draft into an execution-ready **final** plan by validating it against the code as it is now. Run it on the plan `state.md` `## Next` points at, or the one the user names. Steps 1–6 edit the plan in place; `## Targets` and `state.md` are written only at step 7, on confirmation, so an abandoned pass leaves a draft on disk. On a *re*-finalize, delete the existing `## Targets` at step 1. If any step surfaces that the plan rests on an unratified decision, resolve the ADR gate (Phase 3) first.
+Turn a draft into an execution-ready **final** plan by validating it against the code as it is now. Run it on the plan `state.md` `## Next` points at, or the one the user names. Steps 1–6 edit the plan in place; `## Targets` and `state.md` are written only at step 7, on confirmation, so an abandoned pass leaves a draft on disk. On a *re*-finalize, delete the existing `## Targets` at step 1.
 
 1. **Research the current code.** Identify the files, interfaces and dependencies the phase will touch. Delegate the search to fresh read-only subagents on the fastest cheap model available, each with a named search space; they return what to read and why (paths, headings — no summary, no verdict); the reading and judgment are yours.
 
@@ -14,7 +14,7 @@ Turn a draft into an execution-ready **final** plan by validating it against the
 
    Zero hits is normal. If the hits together say the cut is wrong, propose a re-cut at step 6.
 
-4. **Stranger test.** Could a competent builder who has never seen this project execute this plan from the plan alone? Every "no" marks an unwritten rule the plan leans on. Name it in `## Approach`, or point to where it is written; if it lives in `knowledge/` or `decisions/`, the fix is a `## Governed by` entry plus a line in `## Approach` on how it applies — never a pasted copy.
+4. **Stranger test.** Could a competent builder who has never seen this project execute this plan from the plan alone? Every "no" marks an unwritten rule the plan leans on. Name it in `## Approach`, or point to where it is written — and a rule the plan states, you have read at its source this pass, never inferred from the code; if it lives in `knowledge/` or `decisions/`, the fix is a `## Governed by` entry plus a line in `## Approach` on how it applies — never a pasted copy.
 
 5. **Write `## Governed by`.** List every file in `.scaffold/knowledge/` and `.scaffold/decisions/` with its opening rule line — choose from the listing, never from memory. One test per candidate: **if you built this phase in violation of this document's rule, would the phase be wrong?** Yes → list it, naming the rule (not the topic) in a few words; if you cannot name the rule, it does not belong. A `decisions/` file is a candidate only while `Status:` is `Accepted`: a `Superseded` one is replaced by its successor if that binds; a `Proposed` one that would bind stops finalize until the ADR gate resolves it. Keep the list tight — `go` reads every entry in full.
 
