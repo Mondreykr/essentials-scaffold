@@ -60,46 +60,13 @@ _as of <sha>_
 
 ## `## Governed by` — the read-set (the twin of `## Targets`)
 
-`## Targets` is what the phase **writes**; `## Governed by` is what it must have **read**.
-It lists the `knowledge/` and `decisions/` documents whose rules bind this phase, each as a
-repo-relative path, each with a short note naming *which* rule binds it.
+`## Targets` is what the phase **writes**; `## Governed by` is what it must have **read**: the `knowledge/` and `decisions/` documents whose rules bind this phase, each a repo-relative path with a short note naming *which* rule binds. `scaffold-go` resolves and reads every entry in full before executing, so an entry is a path, never a `[[wikilink]]`, a title or prose — a pointer `go` cannot resolve is a rule nobody loaded. **Point, don't copy:** a plan does not restate a rule it points at; `## Approach` says how the rule applies to this phase.
 
-**Why paths, not prose.** A plan is paper: it cannot read, only point. Scaffold already
-learned this on `## Targets` — a file named only in prose is invisible to the freshness
-check. A rule pointer is inert for the same reason: `scaffold-go` resolves and reads what
-this section names before executing, so a rule mentioned in `## Approach` prose is a rule
-nobody loaded.
-
-**The consequence, stated so it is not lost: a plan that points reliably stops carrying its
-own copy of the rules.** Phase plans inflate because reading a knowledge doc has been a
-suggestion, so authors paste the rules in ("the rules this plan leans on") to be safe. Once
-the pointer is honoured by `go`, the paste is redundant — restating a `knowledge/` rule in a
-plan is a second home for that rule, and the second home is the one that goes stale. Point;
-do not copy.
-
-**Mandatory at finalize, optional in the contract.** A draft may omit it. The finalize pass
-either writes the section or writes the **exact sentence** below into `## Approach` —
-optional-and-nobody-authors-it is how the section dies quietly. Both readings are auditable:
-a finalized plan has exactly one of them — the section or the sentence, never both.
-
-The sentence is **fixed wording**, not a paraphrase, because a grader that has to judge prose
-intent is the one non-computable test in a system built on computable state:
+**Mandatory on a finalized plan, optional on a draft.** A finalized plan carries exactly one of two forms: the section with at least one entry, or — for a phase governed by nothing — this sentence in `## Approach`, **verbatim**, so the check is a grep and not a judgement about prose:
 
 > Governed by: none — no `knowledge/` or `decisions/` document constrains this phase.
 
-Its presence is a `grep`; a finalized plan carrying neither the section nor that line is
-malformed.
-
-**What belongs.** Only `.scaffold/knowledge/*.md` and `.scaffold/decisions/*.md` paths — the
-two homes of durable rules. Not the milestone spec (that is scope, not rule), not another
-phase plan (a plan is not a rule; a genuine dependency on a sibling is a seam, written into
-`## Approach`), not source files (those are `## Targets`).
-
-**A `decisions/` entry is an *Accepted* ADR.** A superseded ADR is kept on disk, so its path
-resolves and passes every other test here while its ruling is dead — and `go` would read it as
-binding law. Check the candidate's `**Status:**` line: `Superseded by [[NNNN-…]]` → point at the
-successor instead; `Proposed` → the ADR gate resolves first (a plan is never authored on a
-not-yet-approved ADR), never a pointer.
+**What belongs.** Only `.scaffold/knowledge/*.md` and `.scaffold/decisions/*.md` — the two homes of durable rules. Not the milestone spec (scope, not rule), not a sibling plan (a dependency on one is a seam in `## Approach`), not source files (those are `## Targets`). A `decisions/` entry names an **Accepted** ADR: a `Superseded` one is kept on disk and resolves while its ruling is dead, so it points at its successor instead; a `Proposed` one resolves through the ADR gate before finalize completes.
 
 ## Draft vs. final (the two plan states)
 
@@ -156,41 +123,10 @@ no conformance break.
   signal — the sha is the grounding evidence (audit checks it resolves to a real commit)
   *and* the staleness backstop (`go` runs the freshness test from it). A `## Targets`
   without a sha is malformed.
-- **`## Governed by` is mandatory on a finalized plan.** Finalize writes the section, or
-  writes into `## Approach` the fixed sentence given above — **verbatim** ("Governed by:
-  none — …"), so the check is a grep and not a judgement about prose. A finalized plan with neither is malformed.
-- **The two forms are exclusive — a plan carries the `## Governed by` section or the
-  `Governed by: none` line, never both.** Both present is malformed, and the re-finalize path
-  is how it arises: a plan that carried the sentence and now points at real documents must lose
-  the sentence in the same edit. Otherwise the plan asserts on disk that nothing constrains the
-  phase while its own read-set names two documents, and every reader passes it — `go` reads the
-  section and never looks at the line, presence checks are satisfied twice over, and the next
-  reader (stranger test, `scaffold-integrate` deciding whether a doc binds, a human) believes the
-  false sentence. Both forms are a grep; so is the contradiction.
-- **An empty `## Governed by` is malformed.** The heading with no entries under it satisfies
-  every presence check while naming nothing to read — the section dying quietly behind a
-  passing grade, which is the exact failure the mandatory rule exists to prevent. It also
-  erases the distinction the fixed sentence carries: governed-by-nothing *asserted* versus
-  never filled in. A phase governed by nothing carries the sentence in `## Approach` and no
-  section at all; a section present carries at least one entry.
-- **Every `## Governed by` entry is a repo-relative path under `.scaffold/knowledge/` or
-  `.scaffold/decisions/`.** Not a style preference: `scaffold-go` resolves and reads these
-  before executing, so a `[[wikilink]]` or a prose mention is inert. Each entry names which
-  rule binds the phase, in a few words — enough that a reader can tell whether the pointer is
-  still the right one.
-- **A `## Governed by` path that does not resolve is malformed** (same grade as a `## Targets`
-  sha that does not resolve): `go` cannot read what is not there, and a dangling pointer reads
-  as governance that isn't happening.
-- **A `## Governed by` entry under `.scaffold/decisions/` names an ADR whose `**Status:**` is
-  `Accepted`.** Resolving on disk is not enough: a `Superseded` ADR is deliberately kept, so it
-  passes the path and existence tests while `go` reads a dead ruling as binding — and a plan
-  finalized before the supersession stays *final & fresh*, because the freshness test exempts
-  everything under `.scaffold/`. A superseded entry is replaced by its successor; a `Proposed`
-  one goes through the ADR gate before finalize completes.
-- **Point, don't copy.** A plan does not restate the content of a rule it points at. A pasted
-  copy of a `knowledge/` rule is a second home for that rule and the one that goes stale;
-  where a plan needs the rule *applied* to this phase, `## Approach` says how it applies and
-  the pointer supplies the rule itself.
+- **A finalized plan carries exactly one read-set form.** Either a `## Governed by` section with at least one entry, or the verbatim `Governed by: none` line in `## Approach`. Neither, both, or an empty heading is malformed — each passes a presence check while asserting something false about what `go` will read. A re-finalize that changes form deletes the other in the same edit.
+- **Every `## Governed by` entry is a repo-relative path under `.scaffold/knowledge/` or `.scaffold/decisions/` that resolves on disk, followed by a few words naming the rule that binds.** A path that does not resolve is malformed (same grade as a `## Targets` sha that does not resolve).
+- **A `decisions/` entry names an ADR whose `**Status:**` is `Accepted`.** Resolving on disk is not enough — a `Superseded` ADR is deliberately kept and `go` would read the dead ruling as binding. Superseded → repoint at the successor; Proposed → the ADR gate resolves first.
+- **Point, don't copy.** A plan does not restate the content of a rule it points at; `## Approach` says how the rule applies to this phase and the pointer supplies the rule.
 - **Every `## Targets` entry that names a file is a repo-relative path.** Not a style
   preference: the freshness check compares changed paths against this list, so a file
   named in prose is invisible to it and shows up as undeclared movement. A trailing `/`
@@ -209,21 +145,7 @@ no conformance break.
   builder who already knows the unwritten conventions is underspecified and nothing else
   reveals where.
 - A plan is never authored on a not-yet-approved ADR (the ADR gate resolves first).
-- **No two unexecuted plans in a milestone claim the same deliverable.** Checked at finalize
-  (`scaffold-plan`'s neighbour check) against every unexecuted sibling plan in the same
-  milestone — unexecuted meaning its `milestone.md` `## Phases` entry is unticked **or not
-  there at all** (a just-written plan the checklist hasn't caught up with is in reach, and
-  its missing entry is a separate structural finding). *Claims
-  the same deliverable* is decided by subtraction, not by matching words: **if the sibling
-  executed first, exactly as written, would this scope item still need doing in full?** Yes
-  → the plans do not overlap. This rule is the grade; `scaffold-plan` carries the full
-  procedure and its admission bar. Where two plans genuinely touch the same work, that is allowed and the seam is
-  written into `## Approach` — which plan owns what, and what the other assumes. What is not
-  allowed is the same deliverable sitting unresolved in two scopes, because both plans are
-  correct and the work simply gets built twice. **Graded across plans, not on one plan** — its
-  subject is the *other* documents, so a per-document conformance grade marks it **n-a**; it is
-  checked by `scaffold-plan`'s neighbour check at finalize and by `/scaffold-audit`'s reality
-  pass.
+- **No two unexecuted plans in a milestone claim the same deliverable.** Unexecuted = the plan's `milestone.md` `## Phases` entry is unticked or absent. *Claims the same deliverable* is decided by subtraction, not word-matching: **if the sibling executed first, exactly as written, would this scope item still need doing in full?** Yes → no overlap. Two plans that genuinely touch the same work write the seam into `## Approach` — who owns what, and what the other assumes. **Graded across plans, not on one plan** — a per-document conformance grade marks it **n-a**; `scaffold-plan`'s neighbour check enforces it at finalize and `/scaffold-audit`'s reality pass grades it after the fact.
 
 ## Anti-patterns
 
@@ -232,22 +154,10 @@ no conformance break.
 - A plan premised on an unratified decision.
 - A finalized plan whose `## Approach` only makes sense to someone who already knows the
   project's unwritten conventions (fails the stranger test).
-- A finalized plan with no `## Governed by` and no sentence in `## Approach` saying it is
-  governed by nothing (the section dies quietly exactly here).
-- An empty `## Governed by` — the heading with nothing under it (passes every check, reads
-  nothing; write the fixed sentence instead).
-- A plan carrying both a populated `## Governed by` and the `Governed by: none` line — it names
-  what governs it and denies being governed in the same document (delete the line at re-finalize).
-- A `## Governed by` entry written as a `[[wikilink]]`, a doc title, or prose (`go` can't
-  resolve it, so nothing is read).
-- A `## Governed by` path pointing outside `.scaffold/knowledge/` or `.scaffold/decisions/` —
-  a sibling phase plan, a spec, a source file.
-- A plan carrying its own pasted copy of a `knowledge/` rule ("the rules this plan leans on")
-  instead of pointing at it.
-- A `## Governed by` entry pointing at a `Superseded` or `Proposed` ADR (`go` reads a dead or
-  unratified ruling as binding law).
-- Two unexecuted plans in one milestone claiming the same deliverable with no seam written
-  (**graded across plans** — n-a for a per-document conformance pass).
+- A finalized plan whose read-set is malformed — no `## Governed by` and no verbatim `Governed by: none` line, an empty heading, or both forms at once.
+- A `## Governed by` entry that is not a resolving repo-relative path under `.scaffold/knowledge/` or `.scaffold/decisions/` (a `[[wikilink]]`, a title, prose, a sibling plan, a spec, a source file), or that names a `Superseded` or `Proposed` ADR.
+- A plan carrying its own pasted copy of a `knowledge/` rule ("the rules this plan leans on") instead of pointing at it.
+- Two unexecuted plans in one milestone claiming the same deliverable with no seam written (**graded across plans** — n-a for a per-document conformance pass).
 - A `## Targets` section with no `as of <sha>` stamp (unauditable, no staleness backstop).
 - A `## Targets` that names its files in prose instead of as repo-relative paths (the
   freshness check can't match them, so the phase's own edits read as undeclared drift).

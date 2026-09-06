@@ -62,6 +62,10 @@ The **spec** is `ARCHITECTURE.md` + `contracts/`. We build the skills from it.
 design in the spec, then propagate to the skills — never hack a skill and let the spec
 rot into stale parallel notes. `/scaffold-audit` is the backstop that catches drift.
 
+## Size discipline
+
+Every rule has one altitude, and text at the wrong altitude is a defect, not a style choice. `ARCHITECTURE.md` carries the argument for a rule, once. A contract carries the gradeable rule and any verbatim string a check greps for. A skill carries the imperative, with one clause of *why* only where the rule is counter-intuitive enough that an agent would otherwise reason around it. A new case earns a clause only when the existing escape — surface it at the confirmation seam and ask — does not already cover it; an enumerated branch per edge case is the bloat pattern. Yardstick for a new mechanism: it costs about what its nearest existing twin costs (a new phase-plan section costs what `## Targets` costs). Any review loop that fixes findings runs a deletion lens with equal standing — *what here is said twice, or rules on a case that needs no rule?* — and reports word counts per file before and after; a loop whose finding rate does not decay is generating text, not quality.
+
 ## Active work
 
 None in flight. The commands → self-contained skills migration — schema hardening and the

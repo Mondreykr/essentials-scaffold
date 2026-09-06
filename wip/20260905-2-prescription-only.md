@@ -76,3 +76,35 @@
 - **`/scaffold-plan`** — this is a scoping conversation before it is an editing job. Q1 and Q3 are decisions, not tasks.
 - **`/pressure-test` on Q2** before committing to it. The named failure mode: a skill stripped to bare imperatives that an agent then "improves" by reasoning around, because nothing told it what the rule was protecting. That would trade bloat for silent non-compliance, which is worse.
 - **Nothing adversarial on the trimming itself, and this is deliberate** — an adversarial reviewer pointed at prose asks *"what does this fail to say?"*, which is the exact question that produced the bloat. If a review lens is used at all here, it must be inverted before it is aimed at anything.
+
+## Pass 2 — executed 2026-09-05 · outcome
+
+**Done, uncommitted.** Edit-down from `f209c3d` (Q4: edit, not rewrite), spec first then skills, under three rulings made without Adam: **Q2** — rationale lives in `ARCHITECTURE.md` once; contracts carry the gradeable rule plus any verbatim string; skills carry the imperative with at most one clause of *why* where the rule is counter-intuitive. **Q3** — the `## Targets` yardstick: the `## Governed by` step in `scaffold-plan` is now 244 words against `## Targets` at 261; the neighbour check, a whole new pass, is 500. **Q5** — a `## Size discipline` section added to the factory `CLAUDE.md` (altitude rule, escape-before-branch, twin yardstick, deletion lens with equal standing, word counts reported per loop).
+
+**Two structural changes did most of the work without prose.** (1) Finalize order is now research → tighten → neighbour check → stranger test → `## Governed by` → confirm → *then* `## Targets` + `state.md`. Stamping only on confirmation deletes the whole "hard stop must delete `## Targets`" / "abandoned pass" / "re-run the subtraction test after tightening" apparatus: there is never a stamp nobody confirmed. A re-finalize deletes the old stamp at step 1. (2) Enumerated branches (thin sibling, ownership, unanswerable comparison) collapsed to the existing escape — surface it at the confirmation seam and ask.
+
+| file | `cab8997` | `f209c3d` | now | still added |
+|---|---|---|---|---|
+| `ARCHITECTURE.md` | 8,746 | 10,866 | 10,103 | +1,357 |
+| `contracts/phase-plan.md` | 1,578 | 2,957 | 2,275 | +697 |
+| `scaffold-plan` | 3,767 | 6,300 | 4,778 | +1,011 |
+| `scaffold-go` | 2,851 | 3,623 | 3,183 | +332 |
+| `scaffold-status` | 1,741 | 2,204 | 2,034 | +293 |
+| `scaffold-audit` | 1,834 | 2,884 | 2,237 | +403 |
+| `scaffold-checkpoint` | 5,837 | 6,208 | 5,976 | +139 |
+| `scaffold-integrate` | 1,482 | 1,695 | 1,630 | +148 |
+| `scaffold-cleanup` | 4,067 | 4,116 | 4,099 | +32 |
+
+**8,950 added words → 4,412 (−51 %).** `ARCHITECTURE.md` keeps the largest share on purpose: it is the one home for the argument.
+
+**Verification — inverted lens only.** One fresh agent checked each of the 82 findings for *closure* (closed / moot / re-opened), forbidden from hunting new findings. Result: 81 closed, 1 re-opened (the whole-hit ownership tiebreaker, which I had cut deliberately in favour of the confirmation seam — restored as one sentence rather than argue it), plus two spec-vs-skill disagreements (audit's derived grade in ARCH lacked "or n-a"; integrate's skill lacked "unexecuted") — both fixed. Per-finding table: `scratchpad/closure-table.md` of this session (ephemeral; not committed). `scripts/sync-contracts.sh --check` passes.
+
+### Q1 — behaviour cuts, ruled by Adam 2026-09-05
+
+Adam ruled on the four candidates: **cut** `status`'s fourth plan state (read-set malformed — `go` refuses the plan at load with the same routing one hop later) and **cut** the >3-hits hard stop (the agent now proposes a re-cut at the confirmation seam when the hits say the cut is wrong; the hit-counting rule went with it). **Keep** audit's pasted-rule signature (the one check that grades the read-set's thesis) and **keep** checkpoint's unlisted-plan check (checkpoint already owns the checklist). Findings deliberately re-opened by the two cuts: `status-calls-a-read-setless-plan-final-and-fresh`, `status-calls-a-plan-go-ready-without-checking-the-read-set`, `status-read-set-check-and-fourth-plan-state-exist-in-no-spec` (moot — the state no longer exists anywhere), `neighbour-more-than-three-hits-halt`, `more-than-three-hits-branch-contradicts-every-hit-resolves`, `neighbour-hit-count-unit-undefined` (moot — no branch to contradict, nothing to count). Final: `status` 1,876 (+135 over `cab8997`), `ARCHITECTURE.md` 10,002 (+1,256), `scaffold-plan` 4,749 (+982). **Total remaining: 4,220 of the 8,950 added words (−53 %).**
+
+### Not verified
+
+- The behaviour has still never run on a real project. Unchanged.
+- Whether the compressed imperatives hold up without their rationale in a skill's hands (the Q2 objection). Untested; the size-discipline rule assumes yes.
+- `CLAUDE.md` `## Active work` still says "None in flight" while two `wip/` handoffs exist — pre-existing, left alone.

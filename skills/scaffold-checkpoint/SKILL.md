@@ -133,8 +133,7 @@ session changed. The shape each doc must keep:
     Nothing is added silently.
 
   If a *plan* shifted (phases reordered/scope changed), that's `scaffold-plan`'s job — note
-  and route. Adding a **missing** entry for a plan file that already exists is not a shift and
-  is yours (Step 7 structural check 4).
+  and route. Adding a **missing** entry for an existing plan file is yours (Step 7 structural check 4).
 - **5b `state.md` (always)** — exactly four sections (Active focus / Next / Blockers /
   Open Questions), no others:
   - **Active focus** — one paragraph, rewritten to reflect this session's outcome.
@@ -308,22 +307,7 @@ re-enumerate them here; route them to audit.** Check only:
    `## Notes` / any catch-all / open-ended section (the one-home rule); or a checkbox in
    `project.md` (Law 2 — a truth doc never carries work-tracking). Fix these on sight. The
    genuinely driftable per-contract details (e.g. investigation date format, status-token set, `## Backlog`↔`## Deferred` item shape) are audit's deep pass — flag for `/scaffold-audit`, don't grade them here. *That flag is a complete disposition:* audit re-derives these from disk on demand, so nothing is lost by leaving them.
-4. **Every plan file is listed.** Each `milestones/NN-slug/phases/*.md` in a live milestone
-   has an entry in that `milestone.md`'s `## Phases`. A file with no entry counts as
-   *unexecuted* everywhere else in the system, so an unlisted plan stays permanently in the
-   reach of `plan`'s neighbour check and pivot sweep. **Position is not a judgment call** —
-   the entry sorts by the file's `NN-` prefix (an interstitial `09.1` sits between `09` and
-   `10`; never renumber), and 5a already owns that checklist's shape. **The tick state is.**
-   Add the entry **unticked** and Fixed-class only when the phase is plainly unbuilt — no
-   `## Targets`, or targets that don't exist on disk, and nothing in this session's record
-   says it ran. If the plan's `## Targets` show as built, or the record says it executed,
-   **that is route 2** — ask, then write the entry with the ruled tick state. The unlisted
-   plan usually comes from a session that ended without a checkpoint, i.e. exactly the case
-   where it may have run; writing it unticked asserts on disk that done work is undone, and
-   *unexecuted* is load-bearing — `plan`'s neighbour check can legally drop a live plan's
-   item to a sibling that will never run. Listing a file that exists decides nothing; the
-   tick decides. This is the one plan-shape edit 5a's "route it to `scaffold-plan`" does not
-   cover.
+4. **Every plan file is listed.** Each `milestones/NN-slug/phases/*.md` in a live milestone has an entry in that `milestone.md`'s `## Phases`, sorted by the file's `NN-` prefix. An unlisted plan reads as *unexecuted* everywhere else in the system, so the tick state is load-bearing: add the entry unticked (Fixed-class) only when the phase is plainly unbuilt — no `## Targets`, or targets that don't exist on disk; if its targets show as built or the record says it ran, that is **route 2** — ask, then write the ruled tick state.
 
 **Coherence** — read across `project.md`, `architecture.md`, `roadmap.md`, `state.md`,
 `knowledge/*.md`, the active `milestone.md` + plans, and `decisions/`:
@@ -343,7 +327,7 @@ re-enumerate them here; route them to audit.** Check only:
    un-ratified decision, including a *finalized* plan whose `## Targets`/approach now
    conflicts with a later decision (the finalize→execute gap `go`'s freshness check doesn't
    cover). **Route it (7b route 3)** — into `## Next` if the re-finalize is the next action, otherwise `## Blockers`. Do NOT rewrite the plan here.
-   **Not this check: overlap between two unexecuted plans.** Plan-set coherence (no two unexecuted plans in a milestone claim the same deliverable) is the third staleness obligation, and it already has two enforcers: `/scaffold-plan`'s neighbour check *writes* the resolution at finalize, and `/scaffold-audit`'s reality pass *grades* the set read-only after the fact — the one that can still see an overlap in a milestone where no plan is being finalized. Checkpoint is not a third: it neither authors plans nor spins the fresh graders, so it could only guess at an overlap it has no licence to resolve. If audit surfaced one **in this conversation**, it is a finding to dispose of (7b route 3, to `/scaffold-plan`), not a check to re-run here.
+   Overlap between two unexecuted plans is **not** this check — `/scaffold-plan`'s neighbour check and `/scaffold-audit` own it; one audit surfaced in this conversation is disposed of via 7b route 3, not re-graded here.
 6. **Active-cursor sanity** — `state.md`'s `## Next` points at a milestone + plan that
    exist; the named phase is consistent with `milestone.md`'s checklist.
 7. **Stale dates** — any living doc whose `updated:` is over a week old while its content
