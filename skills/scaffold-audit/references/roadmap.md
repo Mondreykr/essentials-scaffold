@@ -4,12 +4,12 @@ schema_version: 2
 
 # Contract — `roadmap.md`
 
-**Purpose.** The program at 20k feet: the milestone index + the backlog.
+**Purpose.** The program at 20k feet: the milestone index + the backlog index.
 
 **Band.** Living truth.
 
 **Owner(s).** Created by `scaffold-setup`. Maintained by `scaffold-plan` (adds backlog
-items; removes one on promotion to a milestone/phase), `scaffold-checkpoint` (flips a
+index lines with their files; removes one on promotion to a milestone/phase), `scaffold-checkpoint` (flips a
 line to `[done]` at close; removes a backlog item shipped that session),
 `scaffold-cleanup` (builds the index). Read by `scaffold-status`; reality-checked by
 `scaffold-audit` (flags items already built or stale).
@@ -35,8 +35,8 @@ updated: YYYY-MM-DD
 - [planned] 03-<slug> — one-liner → milestones/03-<slug>/
 
 ## Backlog
-- [ ] <future feature, one line>
-- [ ] <future feature, one line>
+- [ ] <slug> — <one line> → backlog/<slug>.md
+- [ ] <slug> — <one line> → backlog/<slug>.md
 ```
 
 ## Rules
@@ -64,10 +64,11 @@ updated: YYYY-MM-DD
   earns a line only by needing a decision, being materially out of scope, or being real work
   that can't ride along safely — otherwise it's fixed in place or dropped. A genuine future
   capability clears gate 2 by definition; a small fix noticed in passing clears nothing.
-- **One line, hard.** Each item is a single terse line — a pointer/reminder, not a
-  summary. No sub-bullets, no detail-bearing parentheticals, no multi-clause paragraphs.
-  If it needs more than a line, it's a phase plan or an investigation, not a backlog
-  entry.
+- **One index line per item, and a file behind every line.** The line is
+  `- [ ] <slug> — <one line> → backlog/<slug>.md`; the detail (trigger, shape, no-gos)
+  lives in that file (`contracts/backlog.md`), never here. A line without a pointer, a
+  pointer to a missing file, or a `backlog/` file with no line is a broken pair. Line and
+  file are always added and removed together.
 - **`- [ ]`, never ticked.** Items are written as open checklist items and **leave by
   removal**, never by checking. An item is removed when it's promoted into a milestone/
   phase (by `scaffold-plan`) or shipped (by `scaffold-checkpoint`). A `- [x]` line is an
@@ -78,7 +79,7 @@ updated: YYYY-MM-DD
 - Per-phase build detail (belongs in the milestone's `milestone.md`).
 - Ground-level milestone debt — bugs, cleanups, residuals (belongs in `milestone.md`
   `## Deferred`).
-- A multi-line / paragraph backlog item (one line only).
+- A broken backlog pair: a line without its `→ backlog/<slug>.md` pointer, or a pointer whose file is missing.
 - A `someday / never` / rejected-idea entry (a rejected option is an ADR alternative or
   it's simply gone — the backlog is not a graveyard).
 - A `- [x]` checked item, or a shipped feature still listed.

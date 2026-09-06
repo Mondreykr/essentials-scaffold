@@ -81,7 +81,7 @@ None.
   disguised as prose inside `## Active focus`** (the one free-text section; "we still
   need to reconcile X" is a deferred item, not a status). Route it: durable run/env →
   `architecture.md`; deferred work → the milestone's `milestone.md` `## Deferred` or `roadmap.md`
-  `## Backlog`; an undecided question → `## Open Questions`.
+  `## Backlog` (a `backlog/<slug>.md` + its index line); an undecided question → `## Open Questions`.
 - Append-log / dated history accreting in any section (Law 1 violation).
 - Bullets, code blocks, or quoted prompts in `Active focus`.
 - Resolved Blockers/Open Questions left in place.

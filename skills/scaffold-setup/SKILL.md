@@ -34,7 +34,7 @@ Create the `.scaffold/` structure, conformant from birth. The other skills maint
 ```
 .scaffold/
   project.md   architecture.md   roadmap.md   state.md   glossary.md
-  knowledge/   decisions/   investigations/
+  knowledge/   decisions/   investigations/   backlog/
   milestones/01-<slug>/milestone.md
   milestones/01-<slug>/phases/
 ```
@@ -122,10 +122,10 @@ updated: [today]
 - [active] 01-<slug> — [one line: what this chunk delivers] → milestones/01-<slug>/
 
 ## Backlog
-- [ ] [Future feature — program-altitude, one terse line]
+- [ ] <slug> — [one line] → backlog/<slug>.md
 ```
 
-Status token exactly one of `[done] | [active] | [planned]`. Backlog holds work not tied to the active milestone, one `- [ ]` line each, never ticked. Program altitude only: a milestone's phases live in its `milestone.md`, never here.
+Status token exactly one of `[done] | [active] | [planned]`. Backlog holds work not tied to the active milestone: one `- [ ]` index line each, never ticked, each pointing at its `backlog/<slug>.md` (sections `## What` / `## Trigger` / `## Shape` / `## Not doing`, `type: backlog`, `Unknown.` where not yet known). Program altitude only: a milestone's phases live in its `milestone.md`, never here.
 
 ### state.md
 
@@ -200,7 +200,7 @@ After creating the files, launch an **Explore** subagent ("very thorough") to ma
 
 - stack, patterns, conventions, data access → `architecture.md`
 - module structure / what-it-is → `project.md` `## What it is`
-- known issues or code TODOs → **not `state.md`**. Run the admission bar: an item that needs a decision, is materially out of scope, or is real work that can't ride along safely, and isn't tied to the seed milestone → one terse `roadmap.md` `## Backlog` line, Adam-gated. Everything else → dropped.
+- known issues or code TODOs → **not `state.md`**. Run the admission bar: an item that needs a decision, is materially out of scope, or is real work that can't ride along safely, and isn't tied to the seed milestone → one `roadmap.md` `## Backlog` index line plus its `backlog/<slug>.md`, Adam-gated. Everything else → dropped.
 
 ## Step 5: Renaming the seed milestone
 

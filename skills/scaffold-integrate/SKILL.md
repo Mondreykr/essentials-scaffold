@@ -72,7 +72,7 @@ Only these, and only what the artifact states plainly:
 
 - **Durable run/env facts and conditions** (how to run, env vars, deployment shape, "runs against a dev DB until cutover") → `architecture.md` `## Run / env`. A one-off resume precondition is flagged for `plan`/`checkpoint` to fold into `## Next`, not written.
 - **An explicit scope boundary** → `project.md` `## Scope` or `## Not building`, as plain truth, never a checkbox. A verifiable invariant goes where it is tested (done-contract, a plan's acceptance, `knowledge/`), not a truth doc.
-- **An implied milestone or backlog line** → flag for `/scaffold-plan`; propose, don't author.
+- **An implied milestone or backlog item** → flag for `/scaffold-plan`; propose, don't author.
 
 Present the set and **STOP for confirmation** if there is anything beyond the primary placement:
 > "Extracting into truth docs:

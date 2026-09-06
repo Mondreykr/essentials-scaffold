@@ -62,13 +62,17 @@ The **spec** is `ARCHITECTURE.md` + `contracts/`. We build the skills from it.
 design in the spec, then propagate to the skills — never hack a skill and let the spec
 rot into stale parallel notes. `/scaffold-audit` is the backstop that catches drift.
 
-## Size discipline
+## Development protocol
 
-Every rule has one altitude, and text at the wrong altitude is a defect, not a style choice. `ARCHITECTURE.md` carries the argument for a rule, once. A contract carries the gradeable rule and any verbatim string a check greps for. A skill carries the imperative, with one clause of *why* only where the rule is counter-intuitive enough that an agent would otherwise reason around it. A new case earns a clause only when the existing escape — surface it at the confirmation seam and ask — does not already cover it; an enumerated branch per edge case is the bloat pattern. Yardstick for a new mechanism: it costs about what its nearest existing twin costs (a new phase-plan section costs what `## Targets` costs). Any review loop that fixes findings runs a deletion lens with equal standing — *what here is said twice, or rules on a case that needs no rule?* — and reports word counts per file before and after; a loop whose finding rate does not decay is generating text, not quality.
+Every change to this repo runs the same four moves. **The change is the unit** — the whole repo is never re-swept; that is what this protocol exists to make unnecessary.
+
+1. **North star first, one sentence.** Before editing, write what the change makes a skill *do*, in one sentence, and name its nearest existing twin — a new doc type costs what `investigations/` costs, a new section costs what `## Targets` costs. A change that cannot be said in a sentence is two changes, or is not yet understood.
+2. **Spec first, then propagate.** `ARCHITECTURE.md` carries the argument, once. A contract carries the gradeable rule and any verbatim string a check greps for. A skill carries the imperative, with one clause of *why* only where the rule is counter-intuitive enough that an agent would otherwise reason around it. Nothing lands in a skill that the spec does not state.
+3. **Cut pass over the diff, before commit.** Every added paragraph answers one question: *if deleted, would the agent do something different in a case that actually occurs?* No → delete. It is the reason → `ARCHITECTURE.md`, once. Rare path → `references/`. A new case earns a clause only when the existing escape — surface it at the confirmation seam and ask — does not cover it; an enumerated branch per edge case is the bloat pattern. Then run `scripts/words.sh` and put its net line in the commit message; a skill body that grew states why.
+4. **Review finds contradictions and removals, never gaps.** No lens on this repo asks *what does this fail to say?* — that loop built 26,000 words. The allowed questions: what is said twice, what rules on a case that needs no rule, what contradicts the spec. When existing text was cut, one fresh agent walks the pre-cut text and reports each behaviour kept / moved / weakened / dropped; it may not propose additions. Every dropped behaviour is a named decision in the commit or handoff.
+
+**Hard limits on the result.** A skill body stays under 3,000 words and a reference file under 1,000; over the line, something is cut before the commit. A skill that edits an existing doc never paraphrases that doc's shape — the shape is on disk and audit grades it; only a skill that authors a doc from nothing carries its template. No open-ended or catch-all section, anywhere.
 
 ## Active work
 
-**Purpose-first reduction of all nine skills — complete and closure-verified (2026-09-06).** Handoff: `wip/20260905-3-purpose-first-reduction.md` (read its last section first). The commands → self-contained skills migration
-new `/scaffold-audit` included — is **complete**: all 9 `/scaffold-[skill]` skills ship
-from `skills/`. There is no separate handoff file; `ARCHITECTURE.md` + `contracts/` are the
-authority, and the skills are derived from them.
+**Backlog files + development protocol landed 2026-09-06** — handoff `wip/20260906-4-backlog-files-and-dev-protocol.md`. The purpose-first reduction (`wip/20260905-3-…`) is complete and closure-verified. All nine `/scaffold-[skill]` skills ship from `skills/`; `ARCHITECTURE.md` + `contracts/` are the authority.

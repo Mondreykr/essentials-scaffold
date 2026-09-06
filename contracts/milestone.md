@@ -104,7 +104,7 @@ Adam-gated.]
   active milestone — its scope, its code, or its goal?* **Tied → it belongs here** (it's
   moot or owned elsewhere once this milestone closes): a bug, cleanup, debt, residual, or
   doc/spec-reconciliation task surfaced inside the milestone and not yet scheduled into a
-  phase. **Not tied (or no milestone is active) → NOT here** → `roadmap.md` `## Backlog`.
+  phase. **Not tied (or no milestone is active) → NOT here** → `backlog/<slug>.md` + its `roadmap.md` `## Backlog` line.
   Scheduled work is a phase plan, not a `## Deferred` line. A spec-reconciliation task
   ("update SPEC §X to match the code") is tied work and lives here; if the milestone's
   spec maintains its own backlog you may route it there instead, but `## Deferred` is
@@ -131,7 +131,7 @@ Adam-gated.]
 - Renumbering interstitial phases on migration, or renaming the folder on archive —
   `NN-slug` is unchanged by the move to `archived/`.
 - Editing this file, its spec, or its phase plans after the move to `archived/`.
-- A program-altitude feature in `## Deferred` (belongs in `roadmap.md` `## Backlog`).
+- A program-altitude feature in `## Deferred` (belongs in `backlog/<slug>.md` + its `roadmap.md` `## Backlog` line).
 - A multi-line / paragraph `## Deferred` item, or a `- [x]` checked deferred item.
 - **A parked item the parking session could have fixed in place** — a rename, a stale
   comment, a one-line guard, a redundant entry. The bar's signature failure: the line costs

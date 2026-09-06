@@ -21,7 +21,7 @@ Migrate an existing `.scaffold/` — any old, partial or hand-edited layout — 
 
 The end-state `/scaffold-setup` produces and the contracts define. When a placement is in doubt, the two Laws decide: truth ≠ history; a doc lives at the layer that owns its lifecycle. Done means every one of these holds:
 
-- `project.md`, `architecture.md`, `roadmap.md`, `state.md` exist and are conformant. `roadmap.md` holds `## Milestones` + `## Backlog` at program altitude only. `state.md` holds exactly Active focus / Next / Blockers / Open Questions, `None.` where empty, no `## Notes`.
+- `project.md`, `architecture.md`, `roadmap.md`, `state.md` exist and are conformant. `roadmap.md` holds `## Milestones` + `## Backlog` at program altitude only, every backlog line pointing at an existing `backlog/<slug>.md`. `state.md` holds exactly Active focus / Next / Blockers / Open Questions, `None.` where empty, no `## Notes`.
 - `knowledge/` exists. `glossary.md` exists — created empty if the scaffold predates it, **never seeded** from the old docs or the code.
 - `decisions/NNNN-slug.md` (4-digit) and `investigations/YYYYMMDD-slug.md` (no dashes in the date) are folders with conformant names.
 - Each chunk of work is `milestones/NN-slug/` holding `milestone.md` (Objectives / Phases as checkbox + date / Done-contract / optional Deferred), `phases/NN-slug.md` (interstitials like `09.1` preserved), optional `spec/`.
@@ -41,6 +41,7 @@ Two hard stops:
 
 Otherwise report the real state, one line per finding, each with its target:
 > - `roadmap.md` — per-phase build plan (target: program-altitude index + Backlog)
+> - `roadmap.md` — N bare `## Backlog` lines (target: one `backlog/<slug>.md` per line — `references/backlog-files.md`)
 > - `plans/` — N phase plans, incl. interstitials 06.1, 09.1
 > - `decisions.md` — single file, N entries (target: curated `decisions/`)
 > - `architecture.md` — absent
@@ -78,6 +79,7 @@ Each legacy pattern has a playbook in `references/`. Read only those your invent
 | `architecture.md` absent or thin | `references/architecture-standup.md` |
 | a monolithic `decisions.md` | `references/decisions-curation.md` |
 | a `[done]` milestone outside `archived/` | `references/archive-closed.md` |
+| a `## Backlog` line without a `→ backlog/` pointer | `references/backlog-files.md` |
 
 Two more are small enough to state here:
 

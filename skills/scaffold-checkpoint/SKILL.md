@@ -69,7 +69,7 @@ Touch only what this session changed.
 - **5c `knowledge/*.md`** — only if the build changed a durable **cross-cutting** invariant with no single code home. Point at the enforcing code, don't restate it; a constant stays in code. During a predetermined milestone the spec's `references/` are the rulebook.
 - **5d `architecture.md`** — update *how it's built* in place when it changed. Ratify or supersede an ADR in Step 6 → update the statement citing it (`[[NNNN-…]]`) in the same turn. Tiebreak against `knowledge/`: a fact that changes only when the *business rule* changes belongs in `knowledge/`.
 - **5e `project.md`** — only if identity or scope boundaries changed; a verifiable invariant routes to where it is tested, never here.
-- **5f `roadmap.md`** — a `## Backlog` line only if it clears 5a's admission bar **and** is not tied to the active milestone (tied → `## Deferred`). Remove any `## Backlog` item this session shipped. The `[done]` flip happens at close.
+- **5f `roadmap.md`** — a `## Backlog` entry only if it clears 5a's admission bar **and** is not tied to the active milestone (tied → `## Deferred`). An entry is a pair, written together: the index line `- [ ] <slug> — <one line> → backlog/<slug>.md` and the file (`type: backlog`; `## What` / `## Trigger` / `## Shape` / `## Not doing`, `Unknown.` where not yet known). Remove any `## Backlog` item this session shipped — its index line and its `backlog/<slug>.md`, both. The `[done]` flip happens at close.
 
 ## Step 6: Decisions + milestone close
 

@@ -34,7 +34,7 @@ New skills on an old layout misread it. Check for any marker:
 
 - **Pre-restructure:** a single `.scaffold/decisions.md` file, a `.scaffold/plans/` folder, a per-phase build plan inside `roadmap.md`, no `architecture.md`, docs lacking `type` / `schema_version` frontmatter.
 - **Pre-rename (v1):** any doc with `schema_version: 1`, `type: milestone-plan` or `type: phase-brief`, or a milestone folder holding `plan.md`.
-- **Current-schema changes** (`schema_version: 2` cannot catch these; every format change adds a marker here): a `roadmap.md` `[done]` line whose path is not under `milestones/archived/` (or a `[done]` folder outside `archived/`); no `.scaffold/glossary.md`.
+- **Current-schema changes** (`schema_version: 2` cannot catch these; every format change adds a marker here): a `roadmap.md` `[done]` line whose path is not under `milestones/archived/` (or a `[done]` folder outside `archived/`); no `.scaffold/glossary.md`; a `## Backlog` line without a `→ backlog/` pointer.
 
 Any marker → emit, unsoftened:
 > "⚠ This project is on an OLD scaffold layout, but the skills were just updated. Run /scaffold-cleanup NOW — before any other scaffold skill (status / plan / go / checkpoint). They expect the current layout and will misread the old one."

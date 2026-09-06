@@ -17,7 +17,7 @@ The deep, independent review: grade the whole live tree against its contracts, t
 
 ## Step 1: Inventory
 
-In scope: the four truth docs, `glossary.md` if present, all of `knowledge/`, `decisions/`, `investigations/`, every live `milestones/NN-slug/` (`milestone.md`, `spec/`, `phases/*`). Skip `milestones/archived/`; the one archive check needs no reading: every `roadmap.md` `[done]` line points into `archived/`, and no `[active]` / `[planned]` line does. A doc's frontmatter `type:` selects its contract; filename is a fallback. Ignore `.gitkeep`.
+In scope: the four truth docs, `glossary.md` if present, all of `knowledge/`, `backlog/`, `decisions/`, `investigations/`, every live `milestones/NN-slug/` (`milestone.md`, `spec/`, `phases/*`). Skip `milestones/archived/`; the one archive check needs no reading: every `roadmap.md` `[done]` line points into `archived/`, and no `[active]` / `[planned]` line does. A doc's frontmatter `type:` selects its contract; filename is a fallback. Ignore `.gitkeep`.
 
 Three gates:
 1. The tree **wholesale** lacks `type` / `schema_version` frontmatter → stop: "This scaffold predates the current format — run /scaffold-cleanup to migrate, then re-audit."
@@ -48,7 +48,7 @@ Verify claims against the code:
 - **`## Governed by` resolves** — the disk half (the text half was Step 2): every path exists; every `decisions/` entry is `**Status:** Accepted` (open it — a `Superseded` ADR resolves on disk while its ruling is dead); no **pasted rule** — a heading or lead-in enumerating rules, or a passage restating a rule of any `knowledge/` or `decisions/` doc inventoried at Step 1 without tying it to this phase's own items, files or steps (prose saying how a rule applies is required, never a finding). Route to `plan`.
 - **Plan-set coherence** — per live milestone, compare `## Objective`, `## Scope`, `## Approach` of its **unexecuted** plans (unticked or missing entry — a missing entry is its own finding). Grade exactly what `plan`'s neighbour check grades: a hit is a scope item for which, **if the other plan executed first exactly as written, the item would not still need doing in full**, *and* you can name the one artifact both would leave in the same end state; or a forward pointer naming an unexecuted sibling without saying who owns the work. A pointer naming an owner, or a seam in either `## Approach`, is never a finding. Route to `plan`.
 - **Standing blockers are real** — each Blocker corroborated, not already resolved.
-- **Deferred / backlog items aren't already done** — for each `## Deferred` and `## Backlog` item, check the code: shipped or no longer applies → flag for removal (route to `checkpoint`/`plan`).
+- **Deferred / backlog items aren't already done** — for each `## Deferred` and `## Backlog` item, check the code: shipped or no longer applies → flag for removal (route to `checkpoint`/`plan`). A backlog item whose `## Trigger` has occurred → flag for promotion (route to `plan`).
 - **Deferred items cleared the admission bar** — does each still need a decision, sit materially out of scope, or constitute real work that can't ride along safely? A fix you can see is a rename, a one-line guard, a stale comment, or a duplicate of `## Next` or a plan → **fix-in-place** (or drop), not work to schedule. Report the count; a list long on these is an admission failure against the skill that parked them.
 - **In-flight work** — uncommitted changes or recent edits the docs don't reflect (a checkpoint may be overdue).
 

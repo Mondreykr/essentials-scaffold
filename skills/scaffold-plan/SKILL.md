@@ -1,7 +1,7 @@
 ---
 name: scaffold-plan
 argument-hint: "[--draft|--final] [what to plan]"
-description: Persist an agreed direction into the scaffold docs — the single authoring skill. Routes each thing to its one home: a backlog idea to roadmap, a new chunk to a milestone + milestone.md, how-to-build-it to phase plans, a cross-cutting truth shift to architecture.md, and always updates state.md's Next cursor. Proposes ADRs (Adam-gated) and sweeps stale plans on a pivot. Use whenever the user wants to plan, scope, decide what to build next, add a milestone or phase, capture a decision or requirement, or write down a direction you've agreed on — even if they only say "plan this", "let's scope it", or "write that down". Writes scaffold docs only, never code.
+description: Persist an agreed direction into the scaffold docs — the single authoring skill. Routes each thing to its one home: a backlog idea to a backlog/ file + roadmap index line, a new chunk to a milestone + milestone.md, how-to-build-it to phase plans, a cross-cutting truth shift to architecture.md, and always updates state.md's Next cursor. Proposes ADRs (Adam-gated) and sweeps stale plans on a pivot. Use whenever the user wants to plan, scope, decide what to build next, add a milestone or phase, capture a decision or requirement, or write down a direction you've agreed on — even if they only say "plan this", "let's scope it", or "write that down". Writes scaffold docs only, never code.
 ---
 
 # scaffold-plan
@@ -27,7 +27,7 @@ Read `state.md` and `roadmap.md` first.
 
 ## Inline description
 
-Invoked with a description ("plan add an export endpoint"): treat it as the agreed direction, run Phase 1 silently, then weigh it. A one-line backlog idea → run the admission bar, **propose the line and wait**, then write it — nothing more. Anything creating a milestone, authoring plans, shifting architecture truth or touching a decision → Phase 2.
+Invoked with a description ("plan add an export endpoint"): treat it as the agreed direction, run Phase 1 silently, then weigh it. A backlog idea → run the admission bar, **propose the index line and the file's four sections and wait**, then write both — nothing more. Anything creating a milestone, authoring plans, shifting architecture truth or touching a decision → Phase 2.
 
 ## Draft or final (`--draft` / `--final`)
 
@@ -62,15 +62,15 @@ Never author a plan premised on an unratified decision. If the direction rests o
 - **One agent session per phase.** A phase needing a mid-phase `/clear` is two phases.
 - **Wide refactor → expand–contract.** Add the new form, migrate call sites, remove the old: three phases, green at each boundary.
 
-**4b — the write-set.** State exactly what you'll touch — "`roadmap.md` — add backlog line", "`milestones/NN-slug/phases/07-slug.md` — new phase plan", "`milestone.md` — add Phase 07 to the checklist", "`state.md` — Active focus + Next", … — and ask "Approve?" Wait; adjust to whatever Adam changes.
+**4b — the write-set.** State exactly what you'll touch — "`roadmap.md` — add backlog index line", "`backlog/<slug>.md` — new", "`milestones/NN-slug/phases/07-slug.md` — new phase plan", "`milestone.md` — add Phase 07 to the checklist", "`state.md` — Active focus + Next", … — and ask "Approve?" Wait; adjust to whatever Adam changes.
 
 ## Phase 5: Author — one home each
 
 Write only what the direction calls for. Every datum has exactly one home below; never add a catch-all / "misc" / "notes" section — a datum with no home is a design question for Adam, not a bucket.
 
 - **Admission bar, before routing.** An item earns a `## Deferred` / `## Backlog` line only if it **needs a decision**, is **materially out of scope**, or is **real work that can't ride along safely**. Clears none → fixed in place or dropped, never parked. Propose each addition with the gate it clears; write only what Adam approves. Removal is ungated.
-- **Backlog ↔ Deferred — one test:** *tied to the active milestone (its scope, code or goal)?* Not tied, or no active milestone → `roadmap.md` `## Backlog`. Tied → that milestone's `## Deferred`. One terse `- [ ]` line, never ticked; an item leaves by removal when promoted or shipped.
-- **Grooming.** You own *promotion*: pull an item into a phase plan and remove its line in the same write. Never remove an item as "done" on your own judgment — shipped-removal is `checkpoint`'s, stale-detection `audit`'s. When an item no longer clears the admission bar, say so and remove it on Adam's nod.
+- **Backlog ↔ Deferred — one test:** *tied to the active milestone (its scope, code or goal)?* Not tied, or no active milestone → `backlog/<slug>.md` (`type: backlog`; `## What` / `## Trigger` / `## Shape` / `## Not doing`, `Unknown.` where not yet known; it holds shape and cites `knowledge/` / `decisions/`, never restates them) plus its index line `- [ ] <slug> — <one line> → backlog/<slug>.md` in `roadmap.md` `## Backlog`, always both. Tied → that milestone's `## Deferred`, one terse `- [ ]` line. Never ticked; an item leaves by removal when promoted or shipped.
+- **Grooming.** You own *promotion*: pull an item into a milestone or phase plan (its `## Shape` and `## Not doing` inform the scope) and delete its file and index line in the same write. Never remove an item as "done" on your own judgment — shipped-removal is `checkpoint`'s, stale-detection `audit`'s. When an item no longer clears the admission bar, say so and remove it on Adam's nod.
 - **New milestone** → `.scaffold/milestones/NN-slug/`. `NN` = one above the highest across BOTH `milestones/*/` and `milestones/archived/*/` (counting live folders alone re-issues `01` once earlier milestones are archived). The slug is a sticky namespace. Seed `milestone.md`: `type: milestone`; `# Milestone NN — <slug>`; `## Objectives`; `## Phases` (checkbox + completion-date slot per phase); `## Done-contract`. Add it to `roadmap.md` `## Milestones` (`[planned]` / `[active]` token + one-liner + folder pointer). Heavy scoping → `spec/`, the spec itself or a pointer file.
 - **Phase plan(s)** → `milestones/NN-slug/phases/NN-slug.md`, each added to the milestone's `## Phases`. Numbers reset per milestone; interstitials (`09.1`) allowed and preserved — never renumber siblings. `type: phase-plan`. Sections: `# Phase NN — <slug>`; `## Objective` (what it delivers, a sentence or two); `## Scope` (numbered deliverables `go` executes, human-owned items marked `[USER]`; an investigation deliverable notes `Output: .scaffold/investigations/YYYYMMDD-slug.md`); `## Approach` (key decisions and what to watch — point at the spec or ADR, never copy); `## Acceptance` (an outcome the user can observe without reading code — never "tests pass"). A fresh plan is a **draft**: no `## Targets`, no `## Governed by`; only finalize adds them.
 - **Requirement / product constraint** → `project.md` (`## Scope` or `## Not building`) as plain truth, **never a checkbox**. A verifiable invariant goes where it is tested — a plan's `## Acceptance`, a done-contract, `spec/`, or `knowledge/` — not a truth doc.

@@ -84,7 +84,8 @@ and retire with their milestone.
 | **Architecture truth** | How it's built — tenancy, auth, stack, data-access, deployment, conventions | `.scaffold/architecture.md` | living |
 | Domain/behavioral truth | Durable cross-cutting invariants (each: the rule + why + a pointer to where code enforces it) | `.scaffold/knowledge/*.md` | living |
 | Anchor terms | The words that must mean one thing here — canonical form named, rivals retired | `.scaffold/glossary.md` | living |
-| Program | Milestones (done/active/planned) + backlog | `.scaffold/roadmap.md` | living |
+| Program | Milestones (done/active/planned) + the backlog index | `.scaffold/roadmap.md` | living |
+| Backlog item | One future item: what, trigger, shape, not-doing | `.scaffold/backlog/<slug>.md` | living; leaves by deletion |
 | Active state | Where we are now / next / blockers / open questions | `.scaffold/state.md` | living (churns) |
 | Decisions | Load-bearing *why* + rejected alternatives (ADRs) | `.scaffold/decisions/NNNN-slug.md` | frozen; **Adam-gated** |
 | Research | Investigations / analyses produced while working | `.scaffold/investigations/YYYYMMDD-slug.md` | frozen |
@@ -105,7 +106,9 @@ milestone).
   # ── LIVING TRUTH (overwritten in place; never reconstructed from a log) ──
   project.md                      what this product is & why (identity/scope)
   architecture.md                 how it's built (tech truth)
-  roadmap.md                      the program: milestone index + backlog
+  roadmap.md                      the program: milestone index + backlog index
+  backlog/
+    <slug>.md                     one future item — what / trigger / shape / not doing
   state.md                        where we are now / next / blockers / open questions
   glossary.md                     anchor terms — what things are called (may be empty)
   knowledge/
@@ -191,6 +194,7 @@ a point-in-time capture (investigations). A new doc type picks its scheme by thi
 | `state` | living | `.scaffold/state.md` | `contracts/state.md` |
 | `knowledge` | living | `.scaffold/knowledge/*.md` | `contracts/knowledge.md` |
 | `glossary` | living | `.scaffold/glossary.md` | `contracts/glossary.md` |
+| `backlog` | living | `.scaffold/backlog/<slug>.md` | `contracts/backlog.md` |
 | `decision` | history | `.scaffold/decisions/NNNN-slug.md` | `contracts/decision.md` |
 | `investigation` | history | `.scaffold/investigations/YYYYMMDD-slug.md` | `contracts/investigation.md` |
 | `milestone` | execution | `.scaffold/milestones/NN-slug/milestone.md` | `contracts/milestone.md` |
@@ -271,8 +275,10 @@ A few concepts span the execution docs and don't belong to any single contract:
   inside it, in its scope or code, but not scheduled into a phase: a bug, a cleanup,
   deferred debt, a review residual. **The Backlog↔Deferred discriminator is one computable
   test — "is it tied to the active milestone?"** Tied → here (it's moot or owned elsewhere
-  once the milestone closes); not tied, or no milestone is active → `roadmap.md`
-  `## Backlog` (it outlives any current milestone).
+  once the milestone closes); not tied, or no milestone is active → `backlog/<slug>.md`, indexed by one
+  `roadmap.md` `## Backlog` line (it outlives any current milestone).
+
+  **A backlog item is a file, every one of them.** A one-line item loses the thing that makes it real — its *trigger* ("demand, not a date") — or grows into a paragraph and bloats the index. So each item is a file with four fixed sections (`## What`, `## Trigger`, `## Shape`, `## Not doing`) and `roadmap.md` `## Backlog` is a pure index, one pointer line per file, its size fixed by construction. *Every* item gets a file, not only the detailed ones: partial coverage would make each skill judge which items have files, and that judgement is what a disk-driven system cannot make. The file holds *shape* and *points*; a rule still routes to `knowledge/` and a choice to `decisions/` — otherwise the dumping ground has moved, not gone. Full statement: `contracts/backlog.md`.
 
   **Admission is a bar, and it runs before routing.** Tied-ness answers *which list*; it
   never answered *whether the thing deserves a line*, and without that gate a deferred list
@@ -300,7 +306,7 @@ Deterministic. Resolve by the two laws when in doubt.
 
 | The thing | Home |
 |-----------|------|
-| Future work NOT tied to the active milestone (a feature/capability that outlives it; or anything surfaced while no milestone is active) — **and clearing the admission bar** | `roadmap.md` → `## Backlog` |
+| Future work NOT tied to the active milestone (a feature/capability that outlives it; or anything surfaced while no milestone is active) — **and clearing the admission bar** | `backlog/<slug>.md` + its index line in `roadmap.md` `## Backlog` |
 | Deferred work tied to the active milestone (a bug, cleanup, debt, residual in its scope/code) — **and clearing the admission bar** (needs a decision / materially out of scope / can't ride along safely), Adam-approved | that milestone's `milestone.md` → `## Deferred` |
 | Something noticed in passing that clears no admission gate (a rename, a stale comment, a one-line guard, a duplicate) | fix it in place now (`checkpoint`'s closing repair licence), or drop it — **not** a parked line |
 | A significant, durable choice + its why | `decisions/NNNN-slug.md` (+ reference it from `architecture.md` if architectural) |
@@ -547,7 +553,7 @@ stands up `architecture.md` from decisions + run/env + the real code (architectu
 tiebreak); **curates decisions — does not split them** (a monolithic `decisions.md` → an
 Adam-gated promote-the-few session; the rest retire to git; a grandfathered spec's internal
 decisions file is never cracked open); normalizes nonconformant names
-(`2026-06-11-*` → `20260611-*`); drains a legacy `state.md` `## Notes` to each item's real home; **archives closed milestones retroactively** (a `[done]` milestone still sitting outside `archived/` is moved there, stamped, and its roadmap path repointed — and because that close never ran, the knowledge-graduation pass runs with it, Adam-gated, since `contracts/knowledge.md` makes a rule missed at close unrecoverable); and **stamps frontmatter** (`schema_version`) so future format migrations are detectable.
+(`2026-06-11-*` → `20260611-*`); drains a legacy `state.md` `## Notes` to each item's real home; **gives every bare `## Backlog` line its `backlog/<slug>.md`** (sections Adam does not supply read `Unknown.`); **archives closed milestones retroactively** (a `[done]` milestone still sitting outside `archived/` is moved there, stamped, and its roadmap path repointed — and because that close never ran, the knowledge-graduation pass runs with it, Adam-gated, since `contracts/knowledge.md` makes a rule missed at close unrecoverable); and **stamps frontmatter** (`schema_version`) so future format migrations are detectable.
 
 **Verify + hand-off (the fixed back end):** before committing, cleanup runs the *same
 light structural + coherence self-check `checkpoint` runs* — proving the mechanical result
@@ -583,7 +589,8 @@ coherent over time; that owner is marked **(primary)** below.
 | `architecture.md` | C (seed) | R | U (propose) | R | **U (primary)** | R | U | C (from decisions/run-env/code) |
 | `knowledge/*.md` | C (dir) | R | C/U | R | **C/U (primary)** + graduate/retire-on-close | R | C/U (absorb) | C (graduate-at-migration, gated) |
 | `glossary.md` | C (empty) | R (silent) | R | R | **propose→gate (primary)** | R | — | C (if absent) |
-| `roadmap.md` | C | R | U (add/remove Backlog) | — | U (+ remove shipped) | R (flag stale) | R (classify) | U (build milestone index) |
+| `roadmap.md` | C | R | U (add/remove Backlog index line) | — | U (+ remove shipped) | R (flag stale) | R (classify) | U (build milestone index) |
+| `backlog/<slug>.md` | C (dir) | — | **C/D (primary)** — with its index line, always both | — | C (routed finding) / D (shipped) | R (already built; trigger fired) | — | C (one per old backlog line) |
 | `state.md` | C | R | U | R | U + sweep | R | — | U |
 | `decisions/NNNN-slug.md` | C (dir) | R (on ref) | **propose→gate** | — | **propose→gate** | R | — | migrate (Adam gates survivors) |
 | `investigations/YYYYMMDD-slug.md` | C (dir) | R (lists) | R | C (opportunistic) | R | R | — | U (rename + stamp) |
