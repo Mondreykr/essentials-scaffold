@@ -14,10 +14,11 @@ Pull the latest scaffold **skills** into `~/.claude/skills/` and tidy up after o
 ## Step 1: Pull the latest skills
 
 ```bash
+rm -rf $HOME/.claude/skills/scaffold-*
 npx degit mondreykr/scaffold/skills $HOME/.claude/skills --force
 ```
 
-Overwrites the `scaffold-*` folders in place; unrelated skills are untouched. Confirm all nine `scaffold-*/SKILL.md` landed (setup, status, plan, go, checkpoint, audit, integrate, cleanup, update) and that `scaffold-audit/references/` holds its 11 contract copies — audit without them grades against nothing. Either check fails → re-run.
+Remove first: degit overwrites but never deletes, so a retired contract copy or reference file would survive and audit would grade against it. Unrelated skills are untouched. Confirm all nine `scaffold-*/SKILL.md` landed (setup, status, plan, go, checkpoint, audit, integrate, cleanup, update) and that `scaffold-audit/references/` is non-empty — audit without it grades against nothing. Either check fails → re-run.
 
 ## Step 2: Retire command-era installs
 
