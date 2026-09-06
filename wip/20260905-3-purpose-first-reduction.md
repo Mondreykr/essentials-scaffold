@@ -189,3 +189,27 @@ For each skill, in this order:
 **Repo totals after this session:** skill bodies 26,422 → 13,347 words (−49 %); plus 2,141 words in `references/` across `checkpoint` (1), `cleanup` (6), `plan` (1), loaded on-path only. `scripts/sync-contracts.sh --check` passes.
 
 **Open for Adam:** (1) the `go` freshness exemption wording — "any" vs "solely" a `checkpoint:` commit (Session 4); (2) Q3 — one deduplication pass over `ARCHITECTURE.md` (10,002 words) was recommended at the end of this pass and has not been done; nothing was added to it, so it is not urgent.
+
+## Session 6 — executed 2026-09-06 · closure verification of the small five · outcome
+
+**Done.** One fresh closure agent per skill, pre-cut (`ccd0a3b`) vs post-cut, inverted lens, forbidden from proposing additions. Tables: `scratchpad/closure-<skill>.md` of this session (ephemeral).
+
+| Skill | walked | kept | moved | weakened | dropped | action |
+|---|---|---|---|---|---|---|
+| `status` | 61 | 60 | 1 | 0 | 0 | none |
+| `update` | 31 | 31 | 0 | 0 | 0 | none |
+| `integrate` | 58 | 54 | 3 | 0 | 1 | drop confirmed as decision |
+| `audit` | 55 | 53 | 1 | 1 | 0 | restored (~8 words) |
+| `setup` | 55 | 52 | 0 | 2 | 1 | 2 restored (~30 words), 1 drop confirmed |
+
+**Restored (unintended weakenings):** `audit` pasted-rule check — "a heading *or lead-in* enumerating rules" and "a rule of any `knowledge/` or `decisions/` doc *inventoried at Step 1*" (the corpus the comparison runs against). `setup` roadmap template — "Program altitude only: a milestone's phases live in its `milestone.md`, never here." `setup` state template — the transient-state routing line (resume precondition → `## Next`; durable run/env → `architecture.md`; blocker → `## Blockers`), the one case an existing-codebase seed actually hits.
+
+**Dropped, as decisions:**
+- `integrate` Step 5 — "if `architecture.md` doesn't exist and the facts are slim, propose creating it." Unreachable: the Precondition already stops when `architecture.md` is missing, in the pre-cut text too.
+- `setup` architecture commentary — "inline `[[NNNN-…]]` references *are* the decision index; there is no separate index file." Unreachable at setup: `decisions/` is created empty and curation is not setup's job; `checkpoint` owns the citation-index rule.
+
+**Repo totals after this session:** skill bodies 13,421 words (26,422 before the pass, −49 %); `status` 1,220 · `setup` 1,253 · `audit` 1,329 · `integrate` 1,091 · `update` 416. `references/` across `checkpoint` (1), `cleanup` (6), `plan` (1): 2,660 words measured this session — Session 5's 2,141 was under-counted. `scripts/sync-contracts.sh --check` passes.
+
+**The pass is complete.** All nine skills cut and closure-verified. Across the five closure walks this session, 260 behaviours walked, 3 weakened, 2 dropped — both drops unreachable branches. Surplus behaviour across the whole pass: ~60 words (`plan`, Session 3). The lever was rationale and repetition, not surplus jobs; Adam's "not that complicated" held in the sense that the *system* was simple and the *text* was not.
+
+**Open for Adam (unchanged):** (1) `go` freshness exemption — "any" vs "solely" a `checkpoint:` commit, spec first; (2) Q3 — a deduplication pass over `ARCHITECTURE.md` (10,002 words, nothing added to it during this pass). (3) Whether bare imperatives hold in real use — still untested; the next real checkpoint run is the evidence.

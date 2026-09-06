@@ -68,7 +68,7 @@ Every rule has one altitude, and text at the wrong altitude is a defect, not a s
 
 ## Active work
 
-**Purpose-first reduction of all nine skills — cut complete, verification of the last five pending.** Handoff: `wip/20260905-3-purpose-first-reduction.md` (read its last section first). The commands → self-contained skills migration
+**Purpose-first reduction of all nine skills — complete and closure-verified (2026-09-06).** Handoff: `wip/20260905-3-purpose-first-reduction.md` (read its last section first). The commands → self-contained skills migration
 new `/scaffold-audit` included — is **complete**: all 9 `/scaffold-[skill]` skills ship
 from `skills/`. There is no separate handoff file; `ARCHITECTURE.md` + `contracts/` are the
 authority, and the skills are derived from them.

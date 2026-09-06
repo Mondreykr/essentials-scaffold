@@ -125,7 +125,7 @@ updated: [today]
 - [ ] [Future feature — program-altitude, one terse line]
 ```
 
-Status token exactly one of `[done] | [active] | [planned]`. Backlog holds work not tied to the active milestone, one `- [ ]` line each, never ticked.
+Status token exactly one of `[done] | [active] | [planned]`. Backlog holds work not tied to the active milestone, one `- [ ]` line each, never ticked. Program altitude only: a milestone's phases live in its `milestone.md`, never here.
 
 ### state.md
 
@@ -151,7 +151,7 @@ None.
 None.
 ```
 
-These four headings are the whole document — no `## Notes`. Literal `None.` when empty.
+These four headings are the whole document — no `## Notes`. Literal `None.` when empty. A resume precondition rides in `## Next`; a durable run/env fact goes to `architecture.md`; a blocker to `## Blockers`.
 
 ### glossary.md
 
