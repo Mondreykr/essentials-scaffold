@@ -30,3 +30,11 @@ Move 3 (cut pass) trimmed the new contract 333 → 302 words and one plan clause
 
 1. `go` freshness exemption — "any" vs "solely" a `checkpoint:` commit (spec first).
 2. Q3 from the reduction — a deduplication pass over `ARCHITECTURE.md` (now 10,235 words). Under the new protocol this would be a one-off; it is the last whole-file sweep on the table.
+
+## Follow-ups executed 2026-09-06 (Adam ruled yes to all three)
+
+1. **Freshness exemption tightened to "solely"** — `09f34d3`. Spec first (`ARCHITECTURE.md` Freshness bullet, `contracts/phase-plan.md`), then `go` and `status`. +51 words.
+2. **`ARCHITECTURE.md` deduplication** — the last whole-file sweep. 10,270 → ~9,270 words. Removed only statements made twice in the same document: Design Principle 5 (the intro paragraph), the second "three bands" paragraph, the contracts-are-master paragraph (intro + `CLAUDE.md`), "Why the split", the staleness-obligations bullet's restatement of Freshness and the pivot sweep, `go`'s draft/stale restatement, `checkpoint`'s sweep and close-motion restatements, the disposition bullet's restatement of structural boundary 3, audit's disposal paragraph, the coverage-table trailer, the AI-strategy boundaries list and Gates section, and five Edge Cases that restated sections above. "A milestone closes" folded into *Milestone lifecycle*, now the one home for the close motion. Closure agent: 104 statements walked, 38 deduped, 8 weakened, 1 dropped; five weakenings restored (why drafts are swept; supersede/prune in the ADR gate; `frontmatter` as the stamp location; the Law 2 tag; a pointer'd spec is maintained in place until close). **Dropped as decisions:** the "(its Phase 4a)" skill-internal pointer; "Persistence buys durability at this cost, accepted explicitly" (rhetoric, no rule); the "(architecture ↔ decisions)" example; "Interactive phases require explicit user response" (every instance survives; the generalization added no behaviour).
+3. **Real use** — not done here; Adam's next session on clarifi, starting with `/scaffold-update`.
+
+The record question: `wip/` is the record and is tracked in git. Nothing further is written.
