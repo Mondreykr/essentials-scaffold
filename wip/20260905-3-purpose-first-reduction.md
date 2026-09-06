@@ -136,3 +136,23 @@ For each skill, in this order:
 **Dropped, as decisions:** none.
 
 **Next:** `plan` (4,749), then `go` (3,183), then the small five. Expect the third waste kind (surplus behaviour) to finally appear in `plan`/`go` — their pass-1 branches were that kind; put each candidate in front of Adam with its word count.
+
+## Session 3 — executed 2026-09-06 · `plan` · outcome
+
+**Done.** Adam ruled 2026-09-06: purpose sentences are the Role lines as written (Q1 closed); the one-line section lists for docs a skill authors from nothing stay (the `setup` exception extends to `cleanup`'s and `plan`'s authoring paths). Nothing added to `ARCHITECTURE.md`; one pointer there repointed (Plan-set coherence → `skills/scaffold-plan/references/finalize.md`). Q2 applied: the **Finalize pass** (steps 1–7, neighbour check, stranger test, `## Governed by`, `## Targets`) moved to `references/finalize.md`, loaded on `--final` or the auto-finalize offer only — a distinct mode, mutually exclusive with the author flow in any one invocation.
+
+| | words | ≈ tokens loaded per invocation |
+|---|---|---|
+| `SKILL.md` before | 4,749 | 7,450 |
+| `SKILL.md` after | 1,985 | 3,200 |
+| `references/finalize.md` (on `--final`) | 985 | 1,600 |
+
+**−58 % on the body; 91 lines.** Waste-kind split of the ~2,760 words removed from the body: ~1,400 rare-path (the finalize pass, itself cut 1,400 → 985 by stripping rationale — the `## Targets` freshness argument was stated three times, the "reading code is not writing code" clause twice), ~1,300 rationale and repetition (the fenced plan template with its frontmatter block and bracketed explainers; the ADR-gate rationale; the "checkpoint owns architecture.md" ownership notes; the whole `## Edge cases` section, four of whose five bullets restated Phases 2, 3 and 6), and **surplus behaviour ~60 words** — the first appearance of the third waste kind, see drops.
+
+**Verification — closure agent, inverted lens.** 138 behaviours walked: 101 kept, 33 moved, 2 weakened, 2 dropped. Both weakenings were unintended and restored at ~15 words: the finalize path now explicitly replaces Phases 1–6 and still reports per Phase 7 (the pre-cut had finalize skip triage); `type: phase-plan` is stated on the plan-authoring bullet. Table: `scratchpad/closure-plan.md` (ephemeral). `scripts/sync-contracts.sh --check` passes.
+
+**Dropped, as decisions:**
+- **"Files look stale" edge case** — `plan` flagging an old `updated:` and offering refresh-now-or-note-for-checkpoint. Surplus: `checkpoint`'s sweep item 7 owns the stale-date check with the actual threshold; `plan` sets `updated:` on every file it writes anyway.
+- **"Out-of-scope discoveries route to checkpoint, never silent expansion"** inside the plan template's `## Scope` explainer. A `go`-time rule that `go`'s own skill carries; it changed nothing the plan author does.
+
+**Next:** `go` (3,183), then the small five (`audit` 2,237, `setup` 1,997, `status` 1,876, `integrate` 1,630, `update` 675) in one pass. Same method, same closure check. Expect `go`'s pass-1 branches to be the surplus kind.
