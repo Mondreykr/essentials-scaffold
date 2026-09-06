@@ -2,7 +2,7 @@
 
 Turn a draft into an execution-ready **final** plan by validating it against the code as it is now. Run it on the plan `state.md` `## Next` points at, or the one the user names. Steps 1–6 edit the plan in place; `## Targets` and `state.md` are written only at step 7, on confirmation, so an abandoned pass leaves a draft on disk. On a *re*-finalize, delete the existing `## Targets` at step 1. If any step surfaces that the plan rests on an unratified decision, resolve the ADR gate (Phase 3) first.
 
-1. **Research the current code.** Identify the files, interfaces and dependencies the phase will touch. Delegate the search to fresh read-only subagents on the fastest cheap model available, each with a named search space; they return what to read and why (paths, headings — no summary, no verdict),; the reading and judgment are yours.
+1. **Research the current code.** Identify the files, interfaces and dependencies the phase will touch. Delegate the search to fresh read-only subagents on the fastest cheap model available, each with a named search space; they return what to read and why (paths, headings — no summary, no verdict); the reading and judgment are yours.
 
 2. **Tighten `## Scope` / `## Approach`** against what the code actually is; make `## Acceptance` an outcome the user can observe, never "tests pass".
 
