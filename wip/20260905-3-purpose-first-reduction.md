@@ -89,3 +89,30 @@ For each skill, in this order:
 - **`/skill-creator:skill-creator`** — as guidance only, for the progressive-disclosure split (what moves to `references/`) and the writing patterns. Not for its evals.
 - **`/pressure-test` on the per-skill purpose sentences** before any cut — the one place adversarial review belongs, because a wrong purpose sentence makes every downstream deletion wrong.
 - **Nothing adversarial on the stripped text.** Verification is the closure agent in step 5. A gap-hunting lens on the result re-runs the loop that built the problem.
+
+## Session 1 — executed 2026-09-06 · `checkpoint` · outcome
+
+**Done, uncommitted.** Purpose sentence used as drafted above (Q1: Role line as written — Adam has not yet confirmed or re-cut it). Every paragraph classified with the step-2 question; nothing needed adding to `ARCHITECTURE.md` — every argument stripped from the skill was already there (the *why it exists* paragraph, the repair licence, the losability test, the milestone lifecycle, the `## Next` authority rule in `contracts/state.md`). Q2 answered yes: the 6b close motion + reopen procedure moved to `skills/scaffold-checkpoint/references/milestone-close.md`, loaded only on a confirmed close.
+
+| | words | ≈ tokens loaded per invocation |
+|---|---|---|
+| `SKILL.md` before | 5,976 | 9,300 |
+| `SKILL.md` after | 2,747 | 4,300 |
+| `references/milestone-close.md` (once per milestone) | 519 | 820 |
+
+**−53 % on the body; 131 lines.** Per section: preamble 731 → 420, Step 5 1,004 → 456, Step 7 sweep 712 → 361, 7b disposition 778 → ~430, 6b 936 → ~70 + 519 in the reference, Step 9 277 → 108.
+
+**The waste-kind measurement (was "Not verified" above).** Of the ~3,160 words removed: roughly 500 is rare-path text moved out (6b), roughly 2,500 is rationale and repetition (the disposition principle alone was stated four times; the `## Notes` rule three times; every gate restated in the boundary paragraph and again at its step), and **surplus behaviour is close to zero** — see the drops below. For `checkpoint` the third waste kind is not the lever; the first two are. That likely does not generalize to `plan` and `go`, whose pass-1 branches were the surplus kind.
+
+**Verification — closure agent, inverted lens.** 117 behaviours walked from the pre-cut text: 93 kept, 10 moved (all constraints and verbatim strings intact in the reference), 11 weakened, 3 dropped. Nine of the weakened/dropped were unintended and restored at a cost of ~100 words (the ledger note on a rejected repair, the `## Deferred` proposal string and the section-optional clause, "citations are the index", "pruned" in the ADR gate, old/new side by side for a glossary edit, `/scaffold-plan --final`, the cortex and `docs/` Law-2 checks, the route-to-next branches). Table: `scratchpad/closure-checkpoint.md` of this session (ephemeral). `scripts/sync-contracts.sh --check` passes.
+
+**Dropped, as decisions:**
+- The grooming nudge's second trigger, "clearly hasn't been groomed in a long while" — no computable test; the ~8-item threshold stays.
+- The verbatim milestone-closed message in Step 9 — the reference's step 6 already requires printing old and new paths and the reason.
+- The A/B/C checkpoint-kind enumeration collapsed to two; case C's only behaviour (skip the 5a tick) is stated inline.
+
+**Step 5 shape paraphrase — ruled by Adam 2026-09-06: dropped.** 5b–5f described each doc's required shape (four sections, one paragraph, `None.` when empty, the ADR-citation index, the status tokens). His reading: a vague shape is an FYI that does nothing concrete. The shape is enforced by the file on disk and graded by the Step 7 sweep and audit; the skill now carries routing only (what goes where, the `knowledge/`↔`architecture.md` tiebreak, the admission bar, the coupling rule). Body 2,818 → 2,747 words.
+
+**Not verified.** Whether the bare imperatives hold in a real checkpoint run — unchanged, no real use yet. The purpose sentence itself — Adam has not ruled on Q1.
+
+**Next:** `cleanup` (progressive disclosure: the six one-time migration playbooks → `references/`), then `plan`, `go`, then the small five in one pass. Same method, same closure check.
