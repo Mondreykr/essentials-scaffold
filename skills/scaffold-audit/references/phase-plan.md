@@ -97,7 +97,7 @@ gets rubber-stamped. **Target files** already move under `go` item-by-item withi
 session with no re-check (the code moving is what executing *is*), so letting them move
 across a session boundary is exactly as safe. **`.scaffold/` files** belong to the other
 staleness defense — `scaffold-plan`'s pivot sweep and `scaffold-checkpoint`'s coherence
-sweep — never to this check. **A project file a `checkpoint` commit touched since the stamp** is exempt on the same reasoning: `checkpoint`'s repair licence commits session residue under `checkpoint:` / `reconcile:` subjects, and a resume must not be refused for the tidy-up the last save performed. Identify them with `git log --format=%H%x09%s <sha>..HEAD` and exempt the paths of commits whose subject starts `checkpoint:` or `reconcile:`. Untracked files never trip the gate.
+sweep — never to this check. **A project file touched only by `checkpoint:` / `reconcile:` commits since the stamp** is exempt on the same reasoning: `checkpoint`'s repair licence commits session residue under those subjects, and a resume must not be refused for the tidy-up the last save performed. Identify them with `git log --format=%H%x09%s <sha>..HEAD`; a path is exempt only if every commit touching it in that range has a subject starting `checkpoint:` or `reconcile:` and it has no uncommitted change. Untracked files never trip the gate.
 
 `## Targets` lists the files/interfaces the phase touches; `scaffold-plan` writes it
 during a **finalize** pass (`as of HEAD`) and `scaffold-go`'s deterministic freshness

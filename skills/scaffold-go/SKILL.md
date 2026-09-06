@@ -37,7 +37,7 @@ Compute the plan's state from `## Targets` — ancestry plus a path-list compari
 
    - **(1) fails** (sha doesn't resolve or isn't an ancestor) → **stale**, no exemptions:
      > "Validated `as of <sha>`, which is not in this branch's history (rebase, force-push, or wrong branch). Re-finalize with `/scaffold-plan --final`."
-   - **(2) lists a path** that is not matched by a `## Targets` path entry, not under `.scaffold/`, and not touched by a `checkpoint:` / `reconcile:` commit from (3) → **stale**. Stop and **name the files**:
+   - **(2) lists a path** that is not matched by a `## Targets` path entry, not under `.scaffold/`, and not touched *solely* by `checkpoint:` / `reconcile:` commits from (3) (any other commit or an uncommitted edit on it counts) → **stale**. Stop and **name the files**:
      > "Validated `as of <sha>`; these moved outside the plan's declared targets: `<file>`, `<file>`. Re-finalize with `/scaffold-plan --final`."
    - **Otherwise** → **final & fresh**.
 
