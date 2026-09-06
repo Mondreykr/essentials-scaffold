@@ -171,3 +171,21 @@ For each skill, in this order:
 **Verification — closure agent, inverted lens.** 64 behaviours walked: 62 kept, 1 weakened, 0 dropped. The weakening (`updated: <today>` on the investigation record) was restored. The agent also flagged one wording shift in the freshness exemption: my cut said a path is exempt only if touched *solely* by `checkpoint:`/`reconcile:` commits, where the pre-cut exempted a path touched by *any* such commit. Reverted to the pre-cut wording so this pass changes no behaviour — but the pre-cut wording is the looser reading and arguably wrong (a file a checkpoint tidied and a stranger later edited reads as fresh). **Open for Adam:** tighten to "solely", in the spec first, or leave.
 
 **Dropped, as decisions:** none.
+
+## Session 5 — executed 2026-09-06 · the small five · CUT, NOT VERIFIED
+
+**Session ended on context (Adam called it at 4 %).** All five were cut and committed in one pass with the same method, but **no closure agent has run on any of them.** That is the first thing the next session does — one fresh agent per skill, pre-cut vs post-cut, the inverted lens, forbidden from proposing additions; restore unintended weakenings, list intended drops as decisions. Pre-cut copies were in this session's ephemeral scratchpad; recover them with `git show ccd0a3b:skills/scaffold-<skill>/SKILL.md`.
+
+| Skill | before | after |
+|---|---|---|
+| `status` | 1,876 | 1,220 |
+| `setup` | 1,997 | 1,222 (templates kept verbatim — setup authors from nothing; commentary under each cut) |
+| `audit` | 2,237 | 1,320 |
+| `integrate` | 1,630 | 1,091 (the `## Principles` section deleted — restated the boundary and Steps 3–4) |
+| `update` | 675 | 416 |
+
+**Intended drops to confirm at verification** (nothing else was meant to go): none deliberate beyond rationale — every cut was classed as rationale or repetition at write time. If the closure agent reports a DROPPED row, treat it as unintended unless it is pure explanation.
+
+**Repo totals after this session:** skill bodies 26,422 → 13,347 words (−49 %); plus 2,141 words in `references/` across `checkpoint` (1), `cleanup` (6), `plan` (1), loaded on-path only. `scripts/sync-contracts.sh --check` passes.
+
+**Open for Adam:** (1) the `go` freshness exemption wording — "any" vs "solely" a `checkpoint:` commit (Session 4); (2) Q3 — one deduplication pass over `ARCHITECTURE.md` (10,002 words) was recommended at the end of this pass and has not been done; nothing was added to it, so it is not urgent.

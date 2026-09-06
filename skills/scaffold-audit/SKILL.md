@@ -5,161 +5,62 @@ description: Deep, independent, read-only review of a scaffold project — grade
 
 # scaffold-audit
 
-The deep, independent review. Where `checkpoint`'s inline sweep *samples*, audit grades
-the whole tree hard and checks it against reality. It is **read-only** — it reports drift
-and never edits. Depth is already chosen by invoking audit at all, so it **always does both
-passes, no asking**: conformance, then reality.
+The deep, independent review: grade the whole live tree against its contracts, then check it against the code. **Read-only** — report drift, edit nothing. **Both passes always run, no asking**, conformance first, gating reality.
 
-`.scaffold/milestones/archived/` is out of scope, entirely and always. A closed
-milestone is a frozen record of what was built, not a claim about the code — grading it
-can only produce findings nobody may act on, since nothing edits the archive. Do not
-inventory it, do not grade it, do not read it looking for drift.
+**Boundary.** Write nothing; every fix routes to the owning skill. Never propose an ADR or touch code. Never read or grade anything under `milestones/archived/` — a frozen record, and nothing may act on a finding there.
 
-**Boundary.** Read-only. Audit grades and reports; it writes nothing. Every fix routes back through the skill that owns the doc (`plan`/`checkpoint`/`integrate`/`cleanup`) — audit never edits, proposes ADRs, or touches code. It also never **reads or grades anything under `milestones/archived/`**, and never skips a pass: both always run, conformance first, gating reality.
+**Run it independently.** Dispatch **fresh read-only subagents** (Explore / general-purpose): one or more for the conformance pass, and, only after it clears, one or more for the reality pass. Each is told it is grading, not fixing, and grades against the bundled contracts in this skill's `references/` (pass the absolute path), never from recollection. Synthesize here.
 
-**Run it independently.** To grade without the bias of the working session's context,
-dispatch **fresh read-only subagents** (Explore / general-purpose) rather than judging
-from memory: one (or more) for the conformance pass over the doc tree, and — only after
-conformance clears — one or more for the reality pass against the code. Synthesize their
-findings here. Each agent is told it is grading, not fixing, and grades against the
-**bundled contracts** (Step 2), not from recollection.
-
-**Precondition.** `.scaffold/` exists with truth docs. If not: "No scaffold here — run
-/scaffold-setup (fresh) or /scaffold-cleanup (migrate an old layout)."
+**Precondition.** `.scaffold/` exists with truth docs. If not: "No scaffold here — run /scaffold-setup (fresh) or /scaffold-cleanup (migrate an old layout)."
 
 ---
 
 ## Step 1: Inventory
 
-List every doc in scope: the four `.scaffold/` truth docs, `glossary.md` if present, all of
-`knowledge/`, `decisions/`, `investigations/`, and every **live** `milestones/NN-slug/`
-(`milestone.md`, `spec/`, `phases/*`). **Skip `milestones/archived/` and everything under
-it** — closed milestones are records, not graded docs. The one thing worth checking about
-the archive costs no reading: every `roadmap.md` `[done]` line should point into
-`milestones/archived/`, and no `[active]`/`[planned]` line should. Read each doc's frontmatter `type:` — that is
-authoritative and selects which conformance rules apply (filename/location is only a
-fallback). Ignore `.gitkeep` placeholders.
+In scope: the four truth docs, `glossary.md` if present, all of `knowledge/`, `decisions/`, `investigations/`, every live `milestones/NN-slug/` (`milestone.md`, `spec/`, `phases/*`). Skip `milestones/archived/`; the one archive check needs no reading: every `roadmap.md` `[done]` line points into `archived/`, and no `[active]` / `[planned]` line does. A doc's frontmatter `type:` selects its contract; filename is a fallback. Ignore `.gitkeep`.
 
-**Three gates before grading.** (1) If the tree *wholesale* lacks `type`/`schema_version`
-frontmatter (a pre-current-format / un-migrated layout), stop and report: "This scaffold
-predates the current format — run /scaffold-cleanup to migrate, then re-audit," rather
-than flooding per-doc 'missing frontmatter' findings. (2) A *missing* mandatory truth doc
-(`project` / `architecture` / `roadmap` / `state`) is itself a conformance finding — the
-four are always present in a current scaffold. A missing or term-less `glossary.md` is **not** a finding — it is optional by construction, like an empty `knowledge/`. (3) **Unknown / pre-rename doc** — a doc
-whose frontmatter `type` matches **no** bundled contract (e.g. `milestone-plan` /
-`phase-brief`, the pre-rename names), **or** any doc still carrying `schema_version: 1`
-(a partial-migration marker, even when its `type` is current), is an **un-migrated** doc,
-not a malformed one. Do **not** force-grade it against a same-shaped contract or guess its
-type from filename; report it as "unmigrated — run /scaffold-cleanup" and move on. (Current
-type names are `milestone` and `phase-plan`.)
+Three gates:
+1. The tree **wholesale** lacks `type` / `schema_version` frontmatter → stop: "This scaffold predates the current format — run /scaffold-cleanup to migrate, then re-audit."
+2. A missing mandatory truth doc is a conformance finding. A missing or term-less `glossary.md` is not.
+3. A doc whose `type` matches no bundled contract (`milestone-plan`, `phase-brief`), or any doc with `schema_version: 1` → **unmigrated**, not malformed: report "unmigrated — run /scaffold-cleanup", never force-grade or guess its type.
 
-## Step 2: Conformance pass (runs FIRST — gates the rest)
+## Step 2: Conformance pass — first, gates the rest
 
-Grade each doc **against its contract.** This skill bundles a verbatim copy of every
-format contract in `references/` — one file per `type` (`references/roadmap.md`,
-`references/state.md`, `references/project.md`, …). The contract is the oracle: grade
-against the file, never from memory or a remembered paraphrase. (The copies are kept
-identical to the factory masters by `scripts/sync-contracts.sh`; they are the authority
-here.)
+`references/` holds a verbatim copy of every contract, one per `type`. The contract file is the oracle.
 
-**Grade one rule at a time — never a holistic verdict.** A whole-doc "this looks fine"
-judgment is exactly how a real violation slips through: the grader skims, the doc reads
-clean, and a present-but-ignored rule is never checked. To prevent that, for each doc:
+**One rule at a time, never a holistic verdict.** For each doc:
 
-1. **Select the contract** from the doc's frontmatter `type:` (authoritative;
-   filename/location is only a fallback).
-2. **Walk the contract line by line** — every item in its **Required structure**, every
-   bullet in **Rules**, and every entry in **Anti-patterns**. For *each* one, emit an
-   explicit verdict — **pass / fail / n-a** — with the evidence (the doc line or section
-   that satisfies or violates it). Every anti-pattern is checked **by name**; you may not
-   drop one because the doc "seems clean." This per-rule table is the deliverable.
-   A rule whose evidence is another doc or the disk — the cross-plan deliverable rule, a `## Governed by` path resolving, an ADR's status — takes the verdict **n-a (graded in Step 3)**, never a guessed fail; the Step 3 bullet that owns it does the grading and the Step 4 report carries its outcome. Only what needs disk defers: a pure text test (entry shape, the folder a path names, the fixed `Governed by: none` line, an empty heading, both forms at once) is graded here.
-3. **Also check** frontmatter (`type` / `schema_version` / `updated`)
-   and brevity (no bloat that signals a Law-1 append-log). For `knowledge/` specifically,
-   flag **form-drift**: an entry that restates code (a value/constant with a single code
-   home) or has grown past a concise *invariant + why + pointer*.
+1. Select the contract by `type:`.
+2. Walk the contract line by line — every **Required structure** item, every **Rules** bullet, every **Anti-patterns** entry — and emit **pass / fail / n-a** with evidence (the doc line or section). Every anti-pattern is checked by name. This per-rule table is the deliverable. A rule whose evidence is another doc or the disk (the cross-plan deliverable rule, a `## Governed by` path resolving, an ADR's status) takes **n-a (graded in Step 3)**, never a guessed fail; a pure text test (entry shape, the folder a path names, the fixed `Governed by: none` line, an empty heading, both forms at once) is graded here.
+3. Also check frontmatter (`type` / `schema_version` / `updated`) and brevity (bloat that signals a Law-1 append-log). For `knowledge/`, flag **form-drift**: an entry restating code (a value with a single code home) or grown past *invariant + why + pointer*.
 
-Dispatch the fresh grading subagent(s) with the absolute path to this skill's
-`references/` directory and the instructions above, so they grade against the bundled
-contracts rather than recalling rules. A doc's overall grade — **conforms / minor /
-malformed** — is *derived* from its table: **conforms only if every rule passed or was
-n-a**, and a rule deferred to Step 3 counts as n-a only once Step 3 has graded it. A
-contract whose `type` doesn't apply to a given file (e.g. an embedded full spec, which
-keeps its own authoring convention) is marked n-a, not force-graded.
+The doc's grade — **conforms / minor / malformed** — is derived: conforms only if every rule passed or was n-a, and a deferred rule counts as n-a only once Step 3 has graded it. A file no contract applies to (an embedded full spec) is n-a, not force-graded.
 
-## Step 3: Reality pass (gated by conformance)
+## Step 3: Reality pass — gated by conformance
 
-Verify the scaffold's claims against the actual code:
+Verify claims against the code:
 
-- **Ticked phases really built** — for each `[x]` phase in an active/closed `milestone.md`,
-  the deliverables exist in the code.
-- **Architecture matches the real stack** — `architecture.md`'s Stack / Data access /
-  Deployment reflect the manifests and code, not an aspiration.
-- **ADRs match reality** — an `Accepted` ADR's ruling is actually what the code does (a
-  contradiction means the ADR is stale or silently violated).
-- **Knowledge invariants hold in the code** — for each `knowledge/` entry, the code
-  site(s) it points to exist and still implement the invariant. Flag a pointer that no
-  longer resolves, or a rule the code now violates (route to `checkpoint`). This is the
-  payoff of the pointer form and the backstop for a thin milestone-close graduation.
-- **Finalized-plan `## Targets` are grounded** — for each plan carrying a `## Targets`
-  section, the named files/interfaces exist in the code and the `as of <sha>` stamp
-  resolves to a real commit (`git cat-file -e <sha>`). A `## Targets` with no sha, an
-  unresolvable sha, or a named file that doesn't exist is a finding — it means the
-  readiness signal is ungrounded (route to `plan` to re-finalize). This closes the
-  "unfalsifiable by construction" hole: the signal is only trustworthy because it's
-  auditable.
-- **Finalized-plan `## Targets` are machine-comparable** — every entry that names a file
-  is a repo-relative path (a trailing `/` covers what's beneath), not a file named in
-  prose. `go`'s freshness check matches changed paths against this list, so a prose-named
-  file is invisible to it and the phase's own edits read as undeclared drift. An entry
-  that names an *interface or surface* rather than a file is fine and simply ignored by
-  that comparison. Also flag a stamp that is **not an ancestor of HEAD**
-  (`git merge-base --is-ancestor <sha> HEAD`) — the plan was validated against a history
-  that no longer exists, so it is stale regardless of what its targets say.
-- **Finalized-plan `## Governed by` resolves** — the disk half of the read-set rules (the text half was graded in Step 2 and is not re-reported): every path exists on disk; every `.scaffold/decisions/` entry names an ADR whose `**Status:**` is `Accepted` (open it — a `Superseded` ADR resolves on disk while its ruling is dead, and this is the only place that is caught); and the plan carries no **pasted rule** — a heading or lead-in that enumerates rules ("the rules this plan leans on"), or a passage restating the rule statement of any `knowledge/` or `decisions/` doc inventoried at Step 1 without tying it to this phase's own scope items, files or steps. Prose saying how a rule applies to this phase is required, never a finding. Route each to `plan` to re-finalize.
-- **Plan-set coherence within a milestone** — for each live milestone, compare the `## Objective`, `## Scope` and `## Approach` of its **unexecuted** plans (entry unticked in `milestone.md` `## Phases`, or no entry — the missing entry is its own structural finding). Grade exactly what `plan`'s neighbour check grades, or you punish conformance: a hit is a scope item for which, **if the other plan executed first exactly as written, the item would not still need doing in full**, *and* you can name the one artifact both would leave in the same end state; or a forward pointer naming an unexecuted sibling **without saying who owns the work**. A pointer that names an owner, or a seam written in either `## Approach`, is the prescribed resolution and never a finding. Route to `plan`.
-- **Standing blockers are real** — each `state.md` Blocker is corroborated by the code /
-  state, not stale or already resolved.
-- **Deferred / backlog items aren't already done** — this is the deliberate, expensive
-  check the lighter skills can't do: for each `milestone.md` `## Deferred` and `roadmap.md`
-  `## Backlog` item, verify against the actual code whether it's already built or no longer
-  applies. Flag every item that looks shipped or stale for removal (route to
-  `checkpoint`/`plan`) — audit reports, never deletes. This is the housekeeping pass that
-  keeps the lists from silently accreting done work.
-- **Deferred items actually cleared the admission bar** — the same pass, one question
-  further, and only audit can answer it because it needs the code: for each item, does it
-  still **need a decision**, sit **materially out of scope**, or constitute **real work that
-  can't ride along safely**? An item whose fix you can see is a rename, a one-line guard, a
-  stale comment, or a duplicate of something `state.md` `## Next` or a phase plan already
-  carries **failed admission** — flag it as *fix-in-place* (or *drop*), not as work to
-  schedule. Report the count: a list long on fix-in-place items is an admission failure, and
-  the finding is against the skill that parked them, not just the list.
-- **In-flight / uncommitted work** — flag uncommitted changes or recent edits the docs
-  don't yet reflect (a checkpoint may be overdue).
+- **Ticked phases really built** — each `[x]` phase's deliverables exist.
+- **Architecture matches the real stack** — Stack / Data access / Deployment reflect manifests and code.
+- **ADRs match reality** — an `Accepted` ruling is what the code does.
+- **Knowledge invariants hold** — each entry's code pointer resolves and still implements the invariant (route to `checkpoint`).
+- **`## Targets` grounded** — for each finalized plan: named files exist; the `as of <sha>` resolves (`git cat-file -e <sha>`) and is an ancestor of HEAD (`git merge-base --is-ancestor <sha> HEAD`); every file entry is a repo-relative path (a trailing `/` covers beneath), not a file named in prose (interface entries are fine). Any failure → route to `plan`.
+- **`## Governed by` resolves** — the disk half (the text half was Step 2): every path exists; every `decisions/` entry is `**Status:** Accepted` (open it — a `Superseded` ADR resolves on disk while its ruling is dead); no **pasted rule** — a heading enumerating rules, or a passage restating a `knowledge/` or `decisions/` rule without tying it to this phase's own items, files or steps (prose saying how a rule applies is required, never a finding). Route to `plan`.
+- **Plan-set coherence** — per live milestone, compare `## Objective`, `## Scope`, `## Approach` of its **unexecuted** plans (unticked or missing entry — a missing entry is its own finding). Grade exactly what `plan`'s neighbour check grades: a hit is a scope item for which, **if the other plan executed first exactly as written, the item would not still need doing in full**, *and* you can name the one artifact both would leave in the same end state; or a forward pointer naming an unexecuted sibling without saying who owns the work. A pointer naming an owner, or a seam in either `## Approach`, is never a finding. Route to `plan`.
+- **Standing blockers are real** — each Blocker corroborated, not already resolved.
+- **Deferred / backlog items aren't already done** — for each `## Deferred` and `## Backlog` item, check the code: shipped or no longer applies → flag for removal (route to `checkpoint`/`plan`).
+- **Deferred items cleared the admission bar** — does each still need a decision, sit materially out of scope, or constitute real work that can't ride along safely? A fix you can see is a rename, a one-line guard, a stale comment, or a duplicate of `## Next` or a plan → **fix-in-place** (or drop), not work to schedule. Report the count; a list long on these is an admission failure against the skill that parked them.
+- **In-flight work** — uncommitted changes or recent edits the docs don't reflect (a checkpoint may be overdue).
 
-**The gate (hard):** if a doc is malformed enough that its state can't be read reliably
-(e.g. `## Next` doesn't resolve, a `milestone.md` checklist is unparseable), report the reality
-of that area as **unreliable — fix conformance first**, rather than guessing. Don't infer
-through a broken doc. A rule Step 2 deferred here that this gate blocks is reported as
-**ungraded — blocked by conformance**, naming the doc — it does not count as a pass.
+**The gate (hard):** a doc too malformed to read reliably (`## Next` doesn't resolve, an unparseable checklist) → report that area as **unreliable — fix conformance first**, never infer through it. A Step 2 rule deferred here that the gate blocks → **ungraded — blocked by conformance**, naming the doc; not a pass.
 
 ## Step 4: Report
 
-Return findings **prioritized** (malformed/blocking first, then reality contradictions,
-then minor conformance). Conformance findings come straight from the Step 2 per-rule
-tables — surface **every failed rule** (doc → the exact contract rule → evidence); do not
-collapse them into a single per-doc grade. Each finding names the doc, the specific rule,
-and **which skill owns the fix**:
+Prioritized: malformed/blocking, then reality contradictions, then minor conformance. Surface **every failed rule** from the Step 2 tables (doc → exact contract rule → evidence); never collapse to a per-doc grade. Each finding names the owning skill:
 
-- format / section / frontmatter drift → `scaffold-checkpoint` (sweep) or
-  `scaffold-cleanup` (structural)
-- a truth/identity/plan change → `scaffold-plan`
-- an absorbed-artifact issue → `scaffold-integrate`
-- an ADR that should change → propose via `scaffold-plan`/`scaffold-checkpoint`
-  (Adam-gated)
+- format / section / frontmatter drift → `checkpoint` (sweep) or `cleanup` (structural)
+- a truth / identity / plan change → `plan`
+- an absorbed-artifact issue → `integrate`
+- an ADR that should change → propose via `plan`/`checkpoint` (Adam-gated)
 
-End by stating audit changed nothing, and what to run next.
-
-**Say where the findings live until they're acted on.** Audit is read-only by design — that independence is the point of the tier — but read-only must not mean *lost*. These findings exist only in this transcript. Each already names its owning skill above; `scaffold-checkpoint` disposes of the rest (it fixes, gets a ruling and applies it, or routes each to a section on disk). Close by saying so plainly and **naming the owners you actually assigned**, e.g.: *"Audit wrote nothing. Two findings are `/scaffold-cleanup`'s, one is `/scaffold-plan`'s, the rest `/scaffold-checkpoint` can dispose of. They live only in this conversation — nothing on disk records that this audit ran, so anything you don't act on now goes with the session."*
-
-**Run the owning skill first when one is named.** A structural-migration finding sent to `/scaffold-checkpoint` hits its version guard and bounces straight back to `/scaffold-cleanup` — and under its repair licence it might instead attempt a cleanup-class fix it isn't scoped for.
+Close by stating audit changed nothing, naming the owners you assigned, and saying the findings live only in this transcript until a `checkpoint` disposes of them, e.g.: *"Audit wrote nothing. Two findings are `/scaffold-cleanup`'s, one is `/scaffold-plan`'s, the rest `/scaffold-checkpoint` can dispose of. They live only in this conversation — nothing on disk records that this audit ran, so anything you don't act on now goes with the session."* **Run a named owning skill before `checkpoint`** — a cleanup-class finding sent to `checkpoint` hits its version guard or tempts a repair it isn't scoped for.

@@ -6,80 +6,41 @@ description: Absorb an external artifact (a spec or design doc) into a scaffold 
 
 # scaffold-integrate
 
-Pure ingest: absorb an external artifact, route it to its one home, and lift operational
-facts into the truth docs. Nothing more — authoring, reconciling, and migrating belong to
-other skills.
+Pure ingest: absorb an external artifact, route it to its one home, lift operational facts into the truth docs. Place; don't dissect. The original is never modified or deleted unless the user says so.
 
-**Boundary.** Integrate does NOT: author plans or phase plans (`scaffold-plan`); run a
-coherence sweep or write back build results (`scaffold-checkpoint`); migrate an old-format
-repo (`scaffold-cleanup`); create/supersede/prune a decision (`decisions/` is Adam-gated —
-surface a ruling and hand to `plan`/`checkpoint`, never write one here); place an artifact into `.scaffold/milestones/archived/` — a closed milestone takes no new content, so an artifact that belongs to closed work routes to `knowledge/` or to the active milestone instead; or change code.
+**Boundary.** Never: author plans or a `milestone.md` (`plan`); sweep or write back build results (`checkpoint`); migrate an old layout (`cleanup`); create, supersede or prune a decision (surface the ruling for `plan`/`checkpoint`, Adam-gated); write `investigations/` (`go`'s band); place anything under `milestones/archived/` (closed work takes no new content — route to `knowledge/` or the active milestone); edit a plan; change code.
 
-**Precondition.** The four `.scaffold/` truth docs (`project.md`, `architecture.md`, `roadmap.md`, `state.md`) exist. If any is missing, stop: "Scaffold
-files missing or incomplete — run /scaffold-setup first."
+**Precondition.** `project.md`, `architecture.md`, `roadmap.md`, `state.md` exist under `.scaffold/`. If not, stop: "Scaffold files missing or incomplete — run /scaffold-setup first."
 
-**Version guard.** If any `.scaffold/` doc carries `schema_version: 1`, a `type:
-milestone-plan` / `type: phase-brief`, or a milestone folder holds a `plan.md` (the current
-name is `milestone.md`), the repo predates the current format — stop: "Old scaffold format
-(pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
+**Version guard.** Any doc with `schema_version: 1`, `type: milestone-plan` / `type: phase-brief`, or a milestone folder holding `plan.md` → stop: "Old scaffold format (pre-rename) — run /scaffold-cleanup to migrate first; the current skills will misread it."
 
-**Frontmatter.** Any `.scaffold/` doc you create or touch carries `type` /
-`schema_version: 2` / `updated:` (set to today).
+**Frontmatter.** Any doc you create or touch carries `type` / `schema_version: 2` / `updated:` (today).
 
 ---
 
 ## Step 1: Locate the artifact
 
-The artifact is named in the invocation (e.g. "integrate docs/20260326-import-spec/") —
-a single file or a directory. **If none was named,** ask which artifact to absorb; do not
-scan or guess. **If the path doesn't exist,** stop and report — don't try alternatives.
+Named in the invocation — a file or a directory. None named → ask; do not scan or guess. Path doesn't exist → stop and report; try no alternatives.
 
 ## Step 2: Read for routing
 
-Read enough to classify — purpose, scope, shape:
-
-1. The artifact itself (the file, or a directory's entry/index doc plus its structure —
-   note any `references/`, `DECISIONS.md`, `STATE.md` it carries).
-2. `roadmap.md` — does this scope an existing milestone, or a new one?
-3. `architecture.md` — to spot operational facts it carries that the truth docs lack.
-
-Don't read all of `knowledge/` or every milestone — only what you need to place it.
+Read the artifact (a directory's entry doc plus its structure — note any `references/`, `DECISIONS.md`, `STATE.md` it carries), `roadmap.md` (which milestone, or a new one?), and `architecture.md` (which operational facts the truth docs lack). Read no more than placement needs.
 
 ## Step 3: Classify — spec or knowledge
 
-Exactly one primary home:
+Exactly one primary home; state it and the destination before writing:
 
-- **Scopes a milestone** (a spec/contract/design doc defining a chunk of work — active, or about to start) → that milestone's **`spec/`** (Step 4a). **Never a closed one:** a milestone under `milestones/archived/` takes no new content, so a spec arriving late for finished work routes by what it actually is — enduring rules → `knowledge/`; anything else → say it describes closed work and place nothing.
-- **Cross-cutting durable knowledge** (a domain/behavioral rulebook that outlives any one
-  milestone — "how the ledger replays", "reconciliation tolerances") → **`knowledge/`**
-  (Step 4b).
+- **Scopes a milestone** (a spec, contract or design doc for a chunk of work, active or about to start) → that milestone's `spec/` (4a). Never a closed one: a spec arriving for archived work routes by what it is — enduring rules → `knowledge/`; anything else → say it describes closed work and place nothing.
+- **Cross-cutting durable knowledge** (a rulebook that outlives any one milestone) → `knowledge/` (4b).
 
-Tiebreak: if its authority is *bounded by a milestone's lifecycle* (retires when that work
-closes) → spec; if it's *durable truth that stays current as code changes* → knowledge. A
-spec's enduring rules graduate to `knowledge/` later, but that graduation is
-`checkpoint`'s milestone-close job, not integrate's. State the classification and
-destination before writing.
+Tiebreak: authority bounded by a milestone's lifecycle → spec; durable truth that stays current as code changes → knowledge. Graduating a spec's enduring rules later is `checkpoint`'s close job. The two bins are exhaustive: a research doc routes by the same test, and raw analysis that is neither is **not absorbed** — it stays in its own home; any durable rule it yields graduates to `knowledge/`, any decision becomes a proposed ADR.
 
-**These two bins are exhaustive.** A research/analysis doc routes by the same test — a
-durable rulebook → `knowledge/`, a milestone-scoping doc → `spec/`. Integrate never writes
-`investigations/` (that band is for records *produced while working*, owned by `go`). Raw
-external analysis that is neither a durable rule nor a milestone spec is **not absorbed** —
-scaffold points outward; it stays in its own home (or cortex), and any durable rule it
-yields graduates to `knowledge/` while any decision becomes a proposed ADR.
+## Step 4a: A milestone spec → `spec/`
 
-## Step 4a: Route a milestone spec to `spec/`
+Identify the milestone from `roadmap.md` (confirm if ambiguous or the folder doesn't exist). Then copy or pointer — ask if not obvious:
 
-Identify the target milestone from `roadmap.md` (confirm if ambiguous or the folder
-doesn't exist yet). Then **copy vs. pointer** (ask if not obvious):
-
-- **Copy in** — the artifact has no other home and belongs to scaffold. Place it at
-  `.scaffold/milestones/NN-slug/spec/` (a file, or the directory contents). The original
-  is **never modified or deleted** — copy, don't move, unless the user says to. An
-  embedded full spec keeps its own authoring convention; scaffold imposes no frontmatter
-  on it.
-- **Pointer file** — the spec should stay where it lives (shared, owned by another tool,
-  or grandfathered in `docs/`). Write a short pointer at
-  `.scaffold/milestones/NN-slug/spec/POINTER.md`:
+- **Copy in** — no other home. Place at `.scaffold/milestones/NN-slug/spec/` (file or directory contents). Copy, don't move. An embedded spec keeps its own convention; no frontmatter imposed.
+- **Pointer** — the spec stays where it lives (shared, owned by another tool, grandfathered in `docs/`). Write `.scaffold/milestones/NN-slug/spec/POINTER.md`:
 
   ```markdown
   ---
@@ -92,62 +53,32 @@ doesn't exist yet). Then **copy vs. pointer** (ask if not obvious):
 
   The spec for this milestone lives at: `[relative/path/to/spec]`
 
-  It is maintained in place and is the **live rulebook** for this milestone until it
-  closes; its `references/` (if any) are the active rules. Do not copy its content into
-  `.scaffold/`. At milestone close, its enduring rules graduate to `knowledge/` (a
-  `/scaffold-checkpoint` job).
+  It is maintained in place and is the **live rulebook** for this milestone until it closes; its `references/` (if any) are the active rules. Do not copy its content into `.scaffold/`. At milestone close, its enduring rules graduate to `knowledge/` (a `/scaffold-checkpoint` job).
 
   Why it lives outside scaffold: [shared / external tool owns it / grandfathered].
   ```
 
-**Pointer'd-spec rule (hard):** its internals are **never cracked open or absorbed**. A
-carried `DECISIONS.md` / `STATE.md` / `references/` stays whole inside it — do not split
-into `.scaffold/decisions/`, `state.md`, or `knowledge/`. A spec is **live, not frozen**,
-until its milestone closes; integrate only places it (or its pointer).
+**A pointer'd spec's internals are never cracked open.** Its `DECISIONS.md` / `STATE.md` / `references/` stay whole — nothing is split into `decisions/`, `state.md` or `knowledge/`.
 
-## Step 4b: Route durable knowledge to `knowledge/`
+## Step 4b: Durable knowledge → `knowledge/`
 
-Place the artifact at `.scaffold/knowledge/<slug>.md` (slug from its subject —
-`ledger-replay.md`, `reconciliation.md`); named by topic, not date. Stamp `type:
-knowledge` frontmatter. **If a knowledge doc on the same topic exists,** don't silently
-overwrite or blind-append — show the overlap and ask: (a) merge into the existing doc, (b)
-save as a distinct doc, (c) replace. Reconciling *contradictions* across the whole set is
-`checkpoint`'s sweep — integrate handles only the doc it's placing. A sprawling external
-rulebook is placed as-is (ingest does not dissect); conforming it to the knowledge
-contract's concise *invariant + why + pointer* form is `checkpoint`'s graduation/maintenance
-job as the band's primary owner, not integrate's.
+Place at `.scaffold/knowledge/<slug>.md`, slug from subject (`ledger-replay.md`), `type: knowledge`. A doc on the same topic already exists → show the overlap and ask: merge / save as distinct / replace — never silently overwrite or append. A sprawling rulebook is placed as-is; conforming it to *invariant + why + pointer* is `checkpoint`'s.
 
-**A new rule can bind an already-finalized plan.** A plan's `## Governed by` is stamped at finalize and nothing re-checks it, so after placing a `knowledge/` doc read every unexecuted plan carrying `## Targets` in every live milestone (never `milestones/archived/`; a plan with no `## Targets` is a draft and gets its read-set when it finalizes). For each, ask `plan`'s binding test: **if that phase were built in violation of this document's rule, would the phase be wrong?** Yes, and its read-set does not name this path (a plan carrying the `Governed by: none` line counts) → name it in the Step 6 report and route: "run `/scaffold-plan --final` on it — its read-set predates `knowledge/<slug>.md`." No → not a finding; absence of the path alone is never the trigger. Integrate never edits a plan.
+**A new rule can bind an already-finalized plan.** After placing, read every unexecuted plan carrying `## Targets` in every live milestone (never `archived/`; a draft gets its read-set at finalize). For each: **if that phase were built in violation of this document's rule, would the phase be wrong?** Yes, and its `## Governed by` does not name this path (a `Governed by: none` line counts) → report it in Step 6: "run `/scaffold-plan --final` on it — its read-set predates `knowledge/<slug>.md`." Absence of the path alone is never the trigger.
 
-## Step 5: Extract operational facts into the truth docs
+## Step 5: Lift operational facts into the truth docs
 
-Beyond its primary home, lift operational facts — and only these:
+Only these, and only what the artifact states plainly:
 
-- **Durable run/env facts** (how to run it, env vars, deployment shape, data-access) →
-  `architecture.md`. If it doesn't exist and the facts are slim, propose creating it.
-- **A durable run/env *condition*** the artifact sets (e.g. "runs against a dev DB until
-  cutover") → `architecture.md` `## Run / env` — it's durable truth, not transient.
-  `state.md` has no `## Notes` section; a one-off precondition on resuming is flagged for
-  `plan`/`checkpoint` to fold into `## Next`, not written here.
-- **A scope-boundary the artifact makes explicit** → `project.md`, as **plain truth** in
-  `## Scope` or `## Not building` — **never a checkbox** (checkboxes are a `project.md`
-  anti-pattern). A *verifiable invariant* the artifact states routes to where it's tested
-  (the milestone done-contract, a plan's acceptance, or a `knowledge/` invariants doc),
-  not a truth doc. Only what the artifact states plainly — don't invent.
-- **A new milestone or backlog one-liner it implies** → flag for `roadmap.md`, but
-  **propose, don't author** — milestone creation + phase planning are `plan`'s job.
+- **Durable run/env facts and conditions** (how to run, env vars, deployment shape, "runs against a dev DB until cutover") → `architecture.md` `## Run / env`. A one-off resume precondition is flagged for `plan`/`checkpoint` to fold into `## Next`, not written.
+- **An explicit scope boundary** → `project.md` `## Scope` or `## Not building`, as plain truth, never a checkbox. A verifiable invariant goes where it is tested (done-contract, a plan's acceptance, `knowledge/`), not a truth doc.
+- **An implied milestone or backlog line** → flag for `/scaffold-plan`; propose, don't author.
 
-Do **not** extract decisions into `decisions/` (Adam-gated — hand off) or author plans /
-a `milestone.md` (`plan`). Present the extraction set before writing, and **STOP for
-confirmation** if there's anything beyond the primary placement:
-
+Present the set and **STOP for confirmation** if there is anything beyond the primary placement:
 > "Extracting into truth docs:
 > - architecture.md: [run/env facts + any durable run/env condition]
 > - project.md: [scope boundary made explicit]
-> Flagging for /scaffold-plan (not authored here): [implied milestone/backlog; any resume
->   precondition for state.md ## Next]."
-
-Set `updated:` on every truth doc you touch.
+> Flagging for /scaffold-plan (not authored here): [implied milestone/backlog; any resume precondition for state.md ## Next]."
 
 ## Step 6: Report + commit
 
@@ -157,19 +88,4 @@ Set `updated:` on every truth doc you touch.
 > **Truth docs touched:** [architecture.md / project.md — or none]
 > **Handed off (not done here):** [ADR → plan/checkpoint; milestone → plan; plans whose `## Governed by` predates a placed knowledge doc → `/scaffold-plan --final` — or none]"
 
-Run `git diff .scaffold/` to show exact changes (the original artifact is
-untouched and won't appear unless it lives under `.scaffold/`). **STOP for confirmation
-before committing.** With git: `git add .scaffold/ && git commit -m "integrate:
-[artifact]"`. If the artifact implies a milestone or backlog item, route forward: "Run
-/scaffold-plan to author it" — integrate proposes, never authors.
-
----
-
-## Principles
-
-**Ingest, then route — nothing more.** Get the artifact to its correct home and lift
-operational facts; authoring/reconciling/migrating belong elsewhere. **Place; don't
-dissect** — a pointer'd spec stays whole; a copied spec is placed as-is, not summarized.
-**The original is never touched** — copy or point, don't move or modify the source unless
-the user says so. **Hand off what you don't own** — a ruling is surfaced and routed to
-`plan`/`checkpoint` for an Adam-gated ADR; an implied milestone is flagged for `plan`.
+Show `git diff .scaffold/`. **STOP for confirmation before committing.** Then `git add .scaffold/ && git commit -m "integrate: [artifact]"`. If a milestone or backlog item was implied: "Run /scaffold-plan to author it."
