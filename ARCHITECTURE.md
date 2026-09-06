@@ -638,6 +638,10 @@ an authoring skill — placing an external artifact as-is (and never cracking a 
 spec open) is the opposite instinct from `plan`, whose job is to dissect and compose. The
 thinness reads as intentional, not vestigial.
 
+### Subagents are Claude's call, and the skills leave the option open
+
+Bulk reading belongs in a fresh read-only subagent that returns conclusions, so the session's judgment stays uncrowded by file dumps; judgment, and anything needing the session's own memory (what happened, what the user agreed to), stays in the session. The skills state the goal and leave the how to Claude: `plan` decides how far into the code to look — deep for a plan about to run, lightly for one far down the road — and marks independent scope items so `go` can build them in parallel; `go` decides whether to fan out. Nothing prescribes agent count, model, or step order.
+
 ### Skills present options, not directives
 
 `status` says "you can do X or Y," not "run X now." `plan` ends with options. The user

@@ -41,7 +41,7 @@ Mark any human-owned deliverable `[USER]` (e.g. `2. [USER] create the OAuth app`
 Out-of-scope discoveries route to checkpoint, never silent expansion.]
 
 ## Approach
-[How to build it.]
+[How to build it. Where scope items are independent of each other, say which — `scaffold-go` may build those in parallel.]
 
 ## Acceptance
 [How we know the phase is done — an OBSERVABLE outcome the reader can verify

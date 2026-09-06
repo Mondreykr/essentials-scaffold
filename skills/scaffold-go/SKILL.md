@@ -69,7 +69,7 @@ Nothing moved → say "nothing has moved since `<sha>`".
 
 ## Step 4: Execute
 
-One scope item at a time: implement (project files only), confirm "Item [N] done: [what was done]. Moving to [N+1]." A single-item plan: "Done: [what was done]." Then Step 5, always.
+One scope item at a time: implement (project files only), confirm "Item [N] done: [what was done]. Moving to [N+1]." Where the plan marks items independent, or you judge them so, you may build those in parallel with subagents — you own the merge, and Step 5 covers the whole. A single-item plan: "Done: [what was done]." Then Step 5, always.
 
 Research output worth keeping (a spike, a gap map) → `.scaffold/investigations/YYYYMMDD-slug.md` with `type: investigation` / `schema_version: 2` / `updated: <today>` frontmatter — the one scaffold doc you write; born conformant; never obligatory. A candidate ruling stays as analysis there for `checkpoint` to propose as an ADR.
 
