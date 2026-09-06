@@ -237,7 +237,8 @@ Move every `.scaffold/plans/phase-*.md` into `milestones/NN-slug/phases/`:
 - `phase-00` does **not** move here — it folded into `milestone.md` above.
 - **Stamp `type: phase-plan` frontmatter** and, where the old plan used `## Goal`, rename
   to `## Objective` (current shape: `# Phase NN — <slug>` / Objective / Scope / Approach /
-  Acceptance).
+  Acceptance; `## Governed by` and `## Targets` are the *finalized*-plan sections and
+  cleanup writes neither — a migrated plan is a draft).
 - `git mv` where git is present; repoint every reference from the Step 4 sweep.
 
 If a pre-written *downstream* plan has been **staled** by a later change (e.g. a Phase 10
@@ -259,7 +260,8 @@ is the sole thing cleanup does when only the rename is behind.
   Do not fabricate a `## Targets`/`as of <sha>` — cleanup cannot judge "validated against
   current code", and inventing one would forge the readiness signal. A plan with no
   `## Targets` stays a **draft** (correct — it gets a real `/scaffold-plan --final` pass
-  before its next `go`).
+  before its next `go`). Nor a `## Governed by` — it is mandatory only on a *finalized*
+  plan, so a draft without one is conformant; leave one that already exists in place.
 
   A plan that already carries `## Targets`: strip the section, demoting it to a draft,
   and tell the user you did. Migration is not a code change, so every path it moves is

@@ -210,6 +210,20 @@ A few concepts span the execution docs and don't belong to any single contract:
   `milestones/NN-slug/phases/NN-slug.md`, written up front (predetermined) or
   just-in-time by `plan` (emergent), executed by `go`, and persisting as the record.
   There is no standalone `plans/` folder.
+- **The read-set — `## Governed by`.** A finalized plan names the `knowledge/` and
+  `decisions/` documents whose rules bind it, as repo-relative paths. It is the twin of
+  `## Targets`: targets are what the phase *writes*, governed-by is what it must have
+  *read*, and `go` resolves and reads the list before executing. Both exist for the same
+  reason — **a plan is paper; it cannot read, only point** — and a pointer written in prose
+  is inert, which scaffold already learned once on `## Targets`. The payoff is a size
+  payoff as much as a correctness one: plans inflate because reading a rule doc has been a
+  *suggestion*, so authors paste the rules in to be safe; once the pointer is honoured, the
+  paste is redundant and the rule keeps exactly one home. Mandatory at finalize — either
+  the section, or a sentence in `## Approach` saying the phase is governed by nothing.
+  **The read-set is stamped once and nothing re-checks it**, so a rule doc placed *after* a
+  plan finalized would never reach it — defended by `integrate`, which flags a finalized
+  plan whose read-set predates the `knowledge/` doc it just placed (see `/scaffold-integrate`).
+  Full statement: `contracts/phase-plan.md`.
 - **Phase granularity — vertical slices, one session each.** A phase cuts through every layer *the change itself touches* — no further — ends in something observable, and fits one agent session; a wide refactor is the one exception and sequences expand–contract. This is the `## Acceptance` rule stated from the other end, so a horizontal cut cannot satisfy it. Full statement: `contracts/phase-plan.md`. **When authoring new phase plans**, `plan` confirms the cut with Adam before writing them (its Phase 4a) — a separate question from the write-set, and the more consequential one.
 - **Draft vs. final — a plan has two states, derived from content + evidence (no
   enum).** A **draft** is code-blind: high-level, may be pre-written, not executable. A
@@ -230,7 +244,7 @@ A few concepts span the execution docs and don't belong to any single contract:
   1. The stamped sha resolves **and is an ancestor of HEAD**. If not — a rebase, a force-push, a different branch — the plan was validated against a history that no longer exists: **stale**, no exemptions.
   2. Every changed tracked path between the stamp and the working tree is either **named in `## Targets`** or lives **under `.scaffold/`**. Anything else → **stale**, and `go` names the offending files. One command covers the committed span *and* uncommitted edits: `git diff --name-only <sha> --`.
 
-  Both exemptions are principled, not conveniences. **Target files** already move under `go` item-by-item within one session with no re-check — the code moving is what executing *is* — so letting them move across a session boundary is exactly as safe, and erasing that boundary is what scaffold exists to do. **`.scaffold/` files** belong to the *other* staleness obligation: doc drift is defended by `plan`'s pivot sweep and `checkpoint`'s coherence sweep, never by this check. A third exemption follows from the repair licence: **a project file touched by a `checkpoint`/`reconcile` commit since the stamp** — refusing a resume because the last save tidied a dead import is the same false refusal the first two exemptions exist to prevent. Untracked files never trip the gate.
+  Both exemptions are principled, not conveniences. **Target files** already move under `go` item-by-item within one session with no re-check — the code moving is what executing *is* — so letting them move across a session boundary is exactly as safe, and erasing that boundary is what scaffold exists to do. **`.scaffold/` files** belong to the **plan-set drift** obligation: doc drift is defended by `plan`'s pivot sweep and `checkpoint`'s coherence sweep, never by this check. A third exemption follows from the repair licence: **a project file touched by a `checkpoint`/`reconcile` commit since the stamp** — refusing a resume because the last save tidied a dead import is the same false refusal the first two exemptions exist to prevent. Untracked files never trip the gate.
 
   **A rewritten plan is not a fresh plan.** Because `.scaffold/` is exempt, editing a finalized plan's scope leaves it reading as *final & fresh* — so whoever rewrites one (the pivot sweep, a migration) **deletes its `## Targets` in the same edit** and sends it back through finalize. Otherwise `go` executes a scope no one validated, against a target list that no longer matches it.
 
@@ -245,8 +259,10 @@ A few concepts span the execution docs and don't belong to any single contract:
   + sha — so it does not reintroduce a driftable status flag. This is the one place
   scaffold takes an argument, and it is justified precisely because it selects an intent
   for *this* invocation rather than recording state.
-- **Staleness obligation.** Because plans *persist* instead of being thrown away, they
-  can go stale two ways, and each has a defense:
+- **Staleness obligations — three, of which the two here face outward from a change.**
+  Because plans *persist* instead of being thrown away, they can go stale, and each way
+  has a defense. These two ask *what did this change invalidate?*; the third — **plan-set
+  coherence**, in the bullet below — does not:
   - **Finalize→execute drift** — a plan finalized `as of X`, then code moves before `go`
     runs (a `/clear`, a pause, a week-long gap — scaffold's whole reason to exist).
     Defended by `go`'s **deterministic** freshness check (it judges nothing — ancestry
@@ -257,6 +273,46 @@ A few concepts span the execution docs and don't belong to any single contract:
     included** — a draft on a superseded ADR still breaks the ADR gate) and
     `checkpoint`'s coherence sweep flagging a *finalized* plan vs a later decision.
   Persistence buys durability at this cost, accepted explicitly.
+- **Plan-set coherence — the invariant over the *relationships between* plans.** *Within a
+  milestone, no two unexecuted phase plans claim the same deliverable; where two genuinely
+  touch the same work, each names the seam.* This is the third staleness obligation, and it
+  differs from the two above in what triggers it. Both of those face **outward from a
+  change** — they ask *what did this just invalidate?* — so a defect that was present the
+  moment the plans were written triggers neither. Two plans cut on the same day with the
+  overlap baked in are never stale, never conflicting, and are simply built twice.
+  **Conflict is loud; duplication is silent** — two plans cannot both be right when they
+  conflict, but both are right when they duplicate. **Two enforcers, and they are not a
+  second home:** `plan`'s **neighbour check** at finalize *writes* the resolution at
+  authoring time, one plan at a time; `/scaffold-audit`'s reality pass *grades* the set
+  read-only, after the fact, and routes what it finds back to `plan`. Audit's is the only
+  one that can see an overlap when no plan is being finalized — a pre-written
+  predetermined milestone, or a set finalized before the check existed. The neighbour
+  check: before committing to a scope, read the `## Objective`, `## Scope`
+  and `## Approach` of every unexecuted sibling plan in the milestone (`## Approach` is in
+  the read set because that is where a written seam and an owned forward pointer live —
+  without it a resolved overlap re-reports on every re-finalize) and resolve each overlap
+  by the answer that produced it: a **whole** hit → one plan owns the item outright; a
+  **partial** hit → narrow this item to the remainder or take the whole of it here, never
+  a bare drop; and where both genuinely touch the work, the seam goes into `## Approach`.
+  **Its reach is siblings in the same milestone, no wider.** **Its admission bar is
+  narrow, and the bar is the design.** The test is *subtraction, not word-matching*: **if
+  that sibling executed first, exactly as written, would this scope item still need doing
+  in full?** Yes → not a finding, which is what two phases editing one file for different
+  reasons answer. No, or only partly → a hit, admitted only if the one artifact both items
+  would leave in the same end state can be **named**. Word-matching cannot work here:
+  deliverable identity is semantic, and the overlap that provoked this whole change shared
+  no noun between the two scopes. The second and only other admission route is an
+  **unresolved forward pointer** — either plan's prose naming an unexecuted sibling without
+  saying who owns the work; a pointer that already names an owner is a written seam and is
+  silent forever after, including on a re-finalize. **Zero hits is the normal result**, and
+  more than three is a finding about the milestone's phase cut rather than a list of
+  items — a **hard stop**: finalize does not complete, the plan stays a draft, and `plan`
+  proposes a re-cut. Declining the re-cut reverts the check to normal — every hit resolves
+  individually, and finalize then completes.
+  Without a bar this narrow the check reports five soft overlaps every run and gets
+  rubber-stamped, which is the failure the freshness gate is already written against: *a
+  gate you pass without reading is not a gate.* Full procedure:
+  `skills/scaffold-plan/SKILL.md` (the finalize pass).
 - **Milestone lifecycle.** Active = wherever `state.md` Next points (not folder
   order). On close, the folder moves whole to `milestones/archived/NN-slug/` and its
   `milestone.md` is stamped `archived: YYYY-MM-DD`; durable rules graduate
@@ -380,6 +436,29 @@ Reads the truth docs + the active milestone's `milestone.md` + the phase plan th
 Next, not folder order.** Surfaces investigation filenames (cheap, no read) so a
 resuming session sees them. Ends with options, not directives.
 
+**Checks the active plan's read-set is intact.** A plan with `## Targets` is finalized, so
+it must carry a non-empty `## Governed by` or, in `## Approach`, the contract's verbatim
+`Governed by: none` line — one grep plus one existence check per listed path, on a file it
+already has open. Neither, an empty heading, or a path that doesn't resolve → it reports
+**read-set malformed** *ahead of* final & fresh (`go` refuses such a plan at load) and
+routes to `/scaffold-plan --final`, never to `go`. Whether the entries are the *right* ones
+is `audit`'s to grade, not status's.
+
+**Names what is coming, not just what is active.** With the active phase it lists the next
+unexecuted phases in the milestone by title — **up to three** of `milestone.md`'s
+unticked `## Phases` entries, which `status` already has open: an unticked entry sitting
+*before* the active one is **stranded, not gone** — named first and marked stranded,
+inside the same three (it is unexecuted by the same rule the neighbour check and `audit`'s
+plan-set check walk — unticked or absent, so the cursor having passed it makes it *more*
+likely to be the duplicated or stale one) — then the rest in list order after the active
+one. **If no active phase resolves** (`## Next` silent or dangling)
+it names the first three unticked entries instead and says the cursor is unanchored. It
+names them and stops: it does not open those plans and does not adjudicate an overlap
+(that is `plan`'s neighbour check, at finalize). Three lines,
+no reads beyond that file. It exists so the user can see an overlap or a mis-ordered cut
+without holding the plan set in memory; nothing else in the system shows the shape of what
+is queued.
+
 ---
 
 ### `/scaffold-plan`
@@ -394,7 +473,10 @@ update the milestone's `milestone.md`; **finalize** a plan; and set `state.md` N
 **pivot**, it sweeps unexecuted plans (drafts included) for staleness.
 
 - **Finalize pass.** `plan` turns a draft plan into a final one: it researches the
-  current code, writes `## Targets` (stamped `as of HEAD`), tightens Scope/Approach,
+  current code, **runs the neighbour check** (below) *before committing to a scope*,
+  **writes `## Governed by`** (the `knowledge/`/`decisions/` paths whose rules bind the
+  phase — or states in `## Approach` that it is governed by none), writes `## Targets`
+  (stamped `as of HEAD`), tightens Scope/Approach,
   ensures `## Acceptance` is user-verifiable, applies the **stranger test** (could a
   builder with no knowledge of this project execute the plan from the plan alone? — each
   no names an unwritten rule the plan leans on, which then gets stated), and **presents
@@ -402,6 +484,41 @@ update the milestone's `milestone.md`; **finalize** a plan; and set `state.md` N
   code-aware, reasoning-heavy work lives — the step `go` no longer does. It reads code but
   still writes only the plan (the "never code" boundary holds). Invocation is
   ask-if-absent, `--draft`/`--final` as a shortcut.
+- **The neighbour check (at finalize).** Before committing to a scope, `plan` reads the
+  `## Objective`, `## Scope` and `## Approach` of **every unexecuted sibling plan in the
+  same milestone** (unexecuted per *State Determination* — unticked **or not yet listed**;
+  `## Approach` is read because it holds the written seam and the owned forward pointer,
+  so without it a resolved overlap re-reports on every re-finalize) and asks, per
+  scope item, *does another plan already claim this?* **Every hit resolves, and the legal
+  resolutions follow the answer that produced it** — a **whole** hit (the sibling leaves
+  the item done) → one plan owns it whole, kept here and dropped from the sibling or
+  dropped here; a **partial** hit → narrow this item to the remainder, or take the whole
+  of it here. **A *partial* hit may not resolve by a bare drop** — dropping it deletes the
+  remainder from the only plan that named it, and the work gets built zero times. Where
+  both plans genuinely touch the work, the seam is written into `## Approach`. **The seam
+  sentence lands in the plan being finalized**, so the check has one writer; a draft
+  sibling may be edited, a **finalized** sibling **never** in place — it was stamped
+  against code, so editing it silently changes what `go` builds. Prefer a this-plan-only
+  move (narrow to the remainder, or drop it here on a *whole* hit); if none is correct,
+  finalize **hard-stops**, this plan stays a draft, and the sibling is re-finalized in a
+  separate pass first — never from inside this one, or the sibling's own check reads this
+  plan's pre-edit scope off disk.
+  Reporting an overlap without resolving it is not a pass. It surfaces at finalize's existing approval seam, so it adds a seam to no
+  one's workflow. **Reach: siblings in this milestone only.** **Admission bar — the
+  subtraction test:** *if that sibling executed first, exactly as written, would this item
+  still need doing in full?* Yes → not a finding. No/partly → a hit, and only if the one
+  artifact both would leave in the same end state can be named. Plus one other route: an
+  unresolved forward pointer in either plan's prose (a named owner means the seam is
+  already written — silent). Two phases touching one file for different reasons is not a
+  finding, zero hits is the normal result, and more than three hits stops the finalize
+  instead of being resolved one by one. This is the plan-set coherence invariant enforced;
+  the reasoning behind both the reach and the bar is in *Execution model → Plan-set
+  coherence*.
+- **Auto-finalize when next up.** If the plan just authored is the one `state.md` Next
+  will point at, `plan` offers to finalize it in the same act rather than making the user
+  re-invoke. **Only that one.** Siblings stay drafts by design: finalizing a plan stamps it
+  against code that will move before the plan runs, so a batch-finalized set arrives at
+  `go` stale, and the freshness gate then fires on plans it was never meant to judge.
 - **Ordering rule:** if a plan depends on a not-yet-approved ADR, `plan` resolves the
   ADR gate *first* — it never authors plans premised on an unratified decision.
 - May **propose** an ADR — present the draft, **stop for Adam's approval.**
@@ -425,7 +542,18 @@ scaffold truth or execution docs** — that is `checkpoint`'s job. Reads its pla
 - **stale** (the stamp is not an ancestor of HEAD, or something moved that `## Targets`
   and `.scaffold/` do not cover) → stop, **name the offending files**, and re-finalize
   with `/scaffold-plan --final`.
-- **final & fresh** → print what has moved since the stamp, then execute exactly what
+- **final & fresh** → print what has moved since the stamp, **read every document
+  `## Governed by` names** (in full, before the first deliverable — resolving those paths
+  is what makes the plan's pointers real). Three ways the read-set stops `go`, all graded
+  as a malformed plan: a path that does not resolve, an **empty** `## Governed by`, and a
+  finalized plan carrying **neither** the section nor the contract's verbatim
+  `Governed by: none` line in `## Approach`. And a document the read-set names that
+  **forbids what `## Approach` directs** stops `go` the same way: it names the rule, its
+  path and the `## Approach` step it conflicts with, builds nothing further, and routes to
+  `/scaffold-plan --final` — the phase is **not** abandoned and the cursor stays on the
+  plan, because only the approach is re-decided. `go` never picks between the governing
+  rule and the approved approach, because choosing one *is* deciding the contradiction, and
+  that is `plan`'s. Otherwise execute exactly what
   `## Scope` names, one deliverable at a time.
   The approach was already approved in plain terms at finalize, so `go` confirms the
   start and works item-by-item — it does not re-propose. Out-of-scope discoveries route
@@ -433,7 +561,7 @@ scaffold truth or execution docs** — that is `checkpoint`'s job. Reads its pla
 
 **The scope check — always, at the end, by a fresh agent.** When the scope items are done, `go` dispatches **one fresh subagent** and hands it the plan's `## Scope` and the diff. It answers three questions: what scope items are **not built**, what was built **differently** from what the plan named, and what was built that **no scope item asked for**. The third is the one nothing else in the system looks for — every other check hunts for missing work, and surplus code on a path nobody asked to review is the same risk from the other side. *Fresh* is the mechanism, not a preference: a model reviewing its own work finds nothing, so `go` cannot run this check itself. The agent reports; it does not fix. A deeper review (`/code-review`) is **offered, never automatic**.
 
-**The unsatisfiable exit.** `go`'s escape hatch has two exits, chosen by one question: *can the scope be satisfied at all?* **Yes, just not as scoped** → offer to re-scope or continue. **No** — the scope contradicts the code, two items can't both hold, a required fact doesn't exist → `go` states the contradiction and stops, and **continuing is not offered.** That is a legitimate terminal result, not a failed phase; the exit has to exist because a plan with no door marked *this cannot be done* is a plan the executor forces a pass on instead. `go` writes nothing; `checkpoint` records it through **abandon** — phase unticked, cursor cleared off the plan, the contradiction as the reason.
+**The unsatisfiable exit.** `go`'s escape hatch has two exits, chosen by one question: *can the scope be satisfied at all?* **Yes, just not as scoped** → offer to re-scope or continue. **No** — the scope contradicts the code, two items can't both hold, a required fact doesn't exist → `go` states the contradiction and stops, and **continuing is not offered.** That is a legitimate terminal result, not a failed phase; the exit has to exist because a plan with no door marked *this cannot be done* is a plan the executor forces a pass on instead. `go` writes nothing; `checkpoint` records it through **abandon** — phase unticked, cursor cleared off the plan, the contradiction as the reason. A read-set document that contradicts `## Approach` is **neither of these exits** — the scope still holds and the phase is still wanted, so it re-finalizes (above) and is never abandoned.
 
 ---
 
@@ -514,6 +642,19 @@ artifact itself or a pointer); if it is cross-cutting durable knowledge → `kno
 Extracts operational info into the truth docs. Does not execute work, author phase
 plans, or modify project files.
 
+**A placed `knowledge/` doc can bind an already-finalized plan.** A plan's `## Governed
+by` read-set is stamped once at finalize and nothing re-checks it, so after placing a
+`knowledge/` doc integrate reads every **unexecuted** plan in every **live** milestone
+(never `milestones/archived/`). A plan with no `## Targets` is a draft — it gets its
+read-set when it finalizes, so it needs no flag. A *finalized* plan — including one
+carrying the `Governed by: none` sentence and no section — takes the binding test `plan`
+applies at finalize: **if that phase were built in violation of this document's rule,
+would the phase be wrong?** Yes, *and* its read-set doesn't already name the path → route
+it to `/scaffold-plan --final`. **The absence of the path on its own is never the
+trigger** — absence-plus-binding is, or every finalized plan in the repo gets
+rubber-stamped after any placement. It never edits a plan — this is the read-set's own
+staleness defense, the one the outward-facing checks cannot see.
+
 ---
 
 ### `/scaffold-cleanup`
@@ -590,7 +731,7 @@ coherent over time; that owner is marked **(primary)** below.
 | `milestones/NN-slug/` (container) | C (first) | R | **C** (new chunk) | — | **move → `archived/` on close** | R | — | C (wrap existing roadmap) |
 | `…/milestone.md` | C (seed) | R | **U** (+ groom/promote Deferred) | R | U (tick + groom Deferred) | R (flag stale Deferred) | — | C (from old roadmap body) |
 | `…/spec/` | — | R | — | R | — | R | **C** (absorb/pointer) | move or pointer |
-| `…/phases/NN-slug.md` | — | R (state) | **C/U** + finalize + stale-sweep | **execute (final&fresh only)** | × (done; tick lands in `milestone.md`) | R (grade `## Targets`) | — | C (move old `plans/`, keep `09.1`) |
+| `…/phases/NN-slug.md` | — | R (state incl. read-set intact; names next unexecuted) | **C/U** + finalize (`## Targets`, `## Governed by`, neighbour check) + stale-sweep | **execute (final&fresh only)**; reads `## Governed by` first | × (done; tick lands in `milestone.md`) | R (grade `## Targets` + `## Governed by`; flag plan-set overlap) | R (flag read-set predating a placed knowledge doc) | C (move old `plans/`, keep `09.1`) |
 
 `update` is omitted — it pulls skill files and touches no `.scaffold/` content. `audit`
 is read-only — it grades and reports across every artifact, never writes. The coherence
@@ -661,12 +802,14 @@ reality.
 | Document type | frontmatter `type:` (authoritative); filename/location as fallback |
 | Active milestone | `state.md` `## Next` names it (authority). Fallback hint only: highest `NN` folder, when Next is silent |
 | Active phase | `state.md` `## Next` names the phase plan |
-| Plan state | no `## Targets` → **draft**; `## Targets` + `as of <sha>` that still **holds** (sha is an ancestor of HEAD, and every changed path is in `## Targets` or under `.scaffold/`) → **final & fresh**; otherwise → **stale**. `go` executes only final & fresh |
+| Plan state | no `## Targets` → **draft**; `## Targets` + `as of <sha>` that still **holds** (sha is an ancestor of HEAD, and every changed path is in `## Targets` or under `.scaffold/`) → **final & fresh**; otherwise → **stale**. A finalized plan carrying neither a non-empty `## Governed by` nor the verbatim `Governed by: none` line, or naming a path that doesn't resolve, is **read-set malformed** — reported ahead of *final & fresh*, since `go` refuses it at load. `go` executes only final & fresh |
 | Phase done? | the milestone's `milestone.md` checklist entry is checked (with a date) |
 | Milestone ready to close? | `milestone.md` fully checked AND its done-contract met (emergent: only when Adam says the chunk is done). The `roadmap.md` `[done]` flip is the *output* of closing, not a precondition |
 | Milestone mode | derived: has `spec/` + pre-written plans → predetermined; else emergent |
 | Blocked | `state.md` `## Blockers` has content other than "None." |
 | Deferred work parked | the active milestone's `milestone.md` `## Deferred` is non-empty |
+| Plan executed? | its `milestone.md` `## Phases` entry is ticked. **Unexecuted** = unticked **or absent** — a plan file with no `## Phases` entry (or in a milestone with no `## Phases` yet) counts as unexecuted, and the missing entry is a structural finding for `checkpoint`. Unexecuted is the set the pivot sweep and the neighbour check walk |
+| Phase read-set | the plan's `## Governed by` paths; `go` reads them before executing |
 
 Signals are not mutually exclusive — a session can be blocked AND have an active phase.
 `status` surfaces all that apply. No status keyword is stored anywhere; every signal is

@@ -73,6 +73,19 @@ clean, and a present-but-ignored rule is never checked. To prevent that, for eac
    explicit verdict — **pass / fail / n-a** — with the evidence (the doc line or section
    that satisfies or violates it). Every anti-pattern is checked **by name**; you may not
    drop one because the doc "seems clean." This per-rule table is the deliverable.
+   A rule this doc **cannot** be graded against alone — its evidence is another doc or the
+   code (the phase-plan rule that no two unexecuted plans claim the same deliverable; a
+   `## Governed by` path resolving on disk, or naming an `Accepted` ADR) — takes the verdict
+   **n-a (graded in Step 3)**, never a guessed fail. That is the token the contracts
+   themselves prescribe for a rule whose subject is the *other* documents, and it is a
+   verdict, not a miss: each rule is graded once, where its evidence is, and the Step 3
+   bullet that owns it does the grading. Only the half that **needs disk** defers: a pure
+   text test — the shape of an entry, the folder a path names, the fixed `Governed by: none`
+   line, an empty heading, both forms present at once — is graded **here**, and deferring
+   one of those is itself a miss. A deferral is accountable, never a disappearance: every
+   **n-a (graded in Step 3)** rule is carried into the Step 4 report with the outcome Step 3
+   gave it, and one Step 3 could not grade because its hard gate fired is reported as
+   **ungraded — blocked by conformance**, naming the malformed doc that blocked it.
 3. **Also check** frontmatter (`type` / `schema_version` / `updated`)
    and brevity (no bloat that signals a Law-1 append-log). For `knowledge/` specifically,
    flag **form-drift**: an entry that restates code (a value/constant with a single code
@@ -81,7 +94,9 @@ clean, and a present-but-ignored rule is never checked. To prevent that, for eac
 Dispatch the fresh grading subagent(s) with the absolute path to this skill's
 `references/` directory and the instructions above, so they grade against the bundled
 contracts rather than recalling rules. A doc's overall grade — **conforms / minor /
-malformed** — is *derived* from its table: **conforms only if every rule passed.** A
+malformed** — is *derived* from its table: **conforms only if every rule passed or was
+n-a** — where a rule deferred to Step 3 counts as n-a only once Step 3 has actually graded
+it; **ungraded — blocked by conformance** is not a pass. A
 contract whose `type` doesn't apply to a given file (e.g. an embedded full spec, which
 keeps its own authoring convention) is marked n-a, not force-graded.
 
@@ -114,6 +129,50 @@ Verify the scaffold's claims against the actual code:
   that comparison. Also flag a stamp that is **not an ancestor of HEAD**
   (`git merge-base --is-ancestor <sha> HEAD`) — the plan was validated against a history
   that no longer exists, so it is stale regardless of what its targets say.
+- **Finalized-plan `## Governed by` resolves** — the read-set is the twin of `## Targets`
+  and is graded the same way. The **doc-local** half of the contract's rules is graded in the
+  Step 2 per-rule walk and is not re-reported here: which of the two forms the plan carries,
+  an empty heading, the shape of each entry, and **the folder each path names** are all pure
+  text tests — folder scope in particular needs no disk at all, so Step 2 owns it. The shape
+  you are resolving, described only so you know what you are reading: a finalized plan (one
+  carrying `## Targets`) has **exactly one** of the two forms — a `## Governed by` section
+  with at least one entry, or `## Approach` carrying the contract's fixed line verbatim —
+  > Governed by: none — no `knowledge/` or `decisions/` document constrains this phase.
+
+  — never both and never neither, and each entry is a repo-relative path under
+  `.scaffold/knowledge/` or `.scaffold/decisions/`. What this pass adds is the part that needs
+  disk, and it is the whole of what you report here:
+  - **Each path resolves on disk.** A path that doesn't is malformed (same grade as an
+    unresolvable `## Targets` sha): `go` resolves and reads this list before executing, so a
+    dangling pointer means nothing was read. Route to `plan` to re-finalize.
+  - **Every entry under `.scaffold/decisions/` names an *Accepted* ADR** — open
+    the ADR and read its `**Status:**` line; anything else is a finding: `Superseded by
+    [[NNNN-…]]` → repoint at the successor, `Proposed` → the ADR gate resolves first. Resolving
+    on disk is not enough, and this is the only place it is caught: a superseded ADR is
+    deliberately kept, so it passes every path test while `go` reads a dead ruling as binding
+    law — and the plan carrying it stays *final & fresh*, because the freshness test exempts
+    everything under `.scaffold/`. Route to `plan` to re-finalize.
+  - A **pasted rule** — a second home for that rule, and the one that goes stale — but only on a computable signature, because the contract *requires* `## Approach` to say how a governing rule applies to this phase and that sentence is never a finding: (a) a heading or lead-in that enumerates rules rather than applying them ("the rules this plan leans on", "rules that apply here", a bulleted list of rule statements), or (b) a passage that restates the rule statement of **any** `.scaffold/knowledge/` or `.scaffold/decisions/` doc inventoried at Step 1 — not just one this plan listed — without naming any of this phase's own scope items, files, or steps; and if that doc is **not** in `## Governed by`, the finding doubles: an unpointed rule was copied rather than listed, which is the paste-instead-of-point case the read-set exists to kill. Prose that ties the rule to this phase's work is the required application, not a copy.
+- **Plan-set coherence within a milestone** — for each live milestone, compare the
+  `## Objective` + `## Scope` + `## Approach` of its **unexecuted** plans (unexecuted = the plan's
+  `milestone.md` `## Phases` entry is unticked, **or the plan has no entry there** — an
+  unlisted plan is in reach, and the missing entry is a structural finding of its own)
+  against each other. `## Approach` is in the read set because that is where a written seam
+  and an owned forward pointer live — the two things that make an apparent overlap not a
+  finding; read only those three sections, and without the third you re-report on every audit
+  the very plans that resolved an overlap the prescribed way. Flag two plans claiming
+  the **same deliverable** with no seam written into either `## Approach` — both plans are
+  correct, so nothing goes stale and nothing conflicts; the work simply gets built twice.
+  Reach is siblings in one milestone, no wider. **Admission bar (narrow, and the bar is the
+  point) — grade exactly what `plan`'s neighbour check grades, or you punish conformance.**
+  Two routes, and no others. **Subtraction, not word-matching:** *if that sibling executed
+  first, exactly as written, would this scope item still need doing in full?* Yes → not a
+  finding, which is what two phases touching one file for different reasons answer. No, or
+  only partly → a hit, and only if the one artifact both items would leave in the same end
+  state can be **named**. **An unresolved forward pointer:** either plan's prose names an
+  unexecuted sibling *without saying who owns the work*; a pointer that already names an
+  owner ("08-splits item 6 owns adding it") is a written seam — the prescribed resolution,
+  so it is never a finding. Route to `plan`.
 - **Standing blockers are real** — each `state.md` Blocker is corroborated by the code /
   state, not stale or already resolved.
 - **Deferred / backlog items aren't already done** — this is the deliberate, expensive
@@ -136,7 +195,9 @@ Verify the scaffold's claims against the actual code:
 **The gate (hard):** if a doc is malformed enough that its state can't be read reliably
 (e.g. `## Next` doesn't resolve, a `milestone.md` checklist is unparseable), report the reality
 of that area as **unreliable — fix conformance first**, rather than guessing. Don't infer
-through a broken doc.
+through a broken doc. A rule Step 2 handed here as **n-a (graded in Step 3)** that this gate
+then blocks is returned as **ungraded — blocked by conformance**, naming the doc that blocked
+it — the deferral is answered, never dropped.
 
 ## Step 4: Report
 

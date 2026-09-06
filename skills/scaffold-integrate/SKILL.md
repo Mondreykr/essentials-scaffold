@@ -117,6 +117,8 @@ rulebook is placed as-is (ingest does not dissect); conforming it to the knowled
 contract's concise *invariant + why + pointer* form is `checkpoint`'s graduation/maintenance
 job as the band's primary owner, not integrate's.
 
+**A new rule can bind an already-finalized plan.** A plan's `## Governed by` read-set is stamped once at finalize and nothing re-checks it, so a doc placed here never reaches a plan that predates it — and `go` reads only what the list names. After placing, read every **unexecuted** phase plan in every **live** milestone (a plan under `milestones/archived/` is closed work — never read it). A plan with **no `## Targets`** is a draft; it gets its read-set when it finalizes, so it needs no flag. A plan **with `## Targets`** is finalized — including one that carries the `Governed by: none` sentence in `## Approach` and no section at all — and takes the same test `plan` applies at finalize: **if that phase were built in violation of this document's rule, would the phase be wrong?** Yes, *and* its read-set doesn't already name this doc's path → name it in the Step 6 report and route: "run `/scaffold-plan --final` on it — its read-set predates `knowledge/<slug>.md`." No → **not a finding**; a plan this doc doesn't bind is left alone, and the absence of the path on its own is never the trigger. Integrate never edits a plan.
+
 ## Step 5: Extract operational facts into the truth docs
 
 Beyond its primary home, lift operational facts — and only these:
@@ -153,7 +155,7 @@ Set `updated:` on every truth doc you touch.
 > **Artifact:** [path]
 > **Routed to:** [`milestones/NN-slug/spec/` (copy | pointer)] or [`knowledge/<slug>.md`]
 > **Truth docs touched:** [architecture.md / project.md — or none]
-> **Handed off (not done here):** [ADR → plan/checkpoint; milestone → plan — or none]"
+> **Handed off (not done here):** [ADR → plan/checkpoint; milestone → plan; plans whose `## Governed by` predates a placed knowledge doc → `/scaffold-plan --final` — or none]"
 
 Run `git diff .scaffold/` to show exact changes (the original artifact is
 untouched and won't appear unless it lives under `.scaffold/`). **STOP for confirmation

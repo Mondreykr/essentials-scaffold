@@ -42,7 +42,9 @@ current phase plan. Read these in order:
    conventions, how to run).
 5. The active milestone's `spec/` if present (the contract, or a pointer to one elsewhere)
    — for a predetermined milestone its `references/` are the live rulebook.
-6. `.scaffold/knowledge/` — durable domain/behavioral rules relevant to the plan.
+6. `.scaffold/knowledge/` — durable domain/behavioral rules relevant to the plan. The
+   plan's `## Governed by` is the binding list, and you read it in full at Step 3 below;
+   this pass is orientation, not a substitute for it.
 7. `.scaffold/glossary.md` if present — name things in code the way the glossary names them.
 
 ## Step 2: Check the plan is executable (deterministic)
@@ -96,10 +98,71 @@ in-progress phase do you use Active focus to find where to pick up.
 it to understand where to resume, especially after a pause. If the user says part of the
 scope is already done, skip it.
 
-Present scope and confirm the start (the approach was approved at finalize — you do **not**
-re-propose it). **Print what has moved since the stamp** — not as a question, as
-visibility. A gate that passes silently teaches nothing; a gate that shows its work is what
-makes the refusing case worth reading:
+**Then read the plan's read-set — `## Governed by` — in full, before you present the
+scope.** `## Targets` is what the phase writes; `## Governed by` is what it must have
+*read*: the `.scaffold/knowledge/` and `.scaffold/decisions/` documents whose rules
+bind this phase, each a repo-relative path with a note naming which rule. **A plan is
+paper — it cannot read, only point, so this step is what makes its pointers real.** Resolve
+every path and read the whole document, not the note beside it and not a skim; a rule the
+plan points at is a rule you are executing under. Those documents are also why the plan
+does not restate them — if a rule appears both in the plan and in the doc it points at,
+the doc is the one that is current. All four branches below are **load-time** checks, so
+every refusal fires *before* you announce the start: a refusal issued after "Starting now"
+is the pattern that teaches a user to dismiss this skill's gates, and reading deferred into
+Step 4 lets the contradiction stop fire with code already written under the contradicted
+approach.
+
+- **A rule that contradicts the plan stops `go` too** — this is the case the read-set
+  exists to catch. **The bar:** the rule and a *named* plan element — an `## Approach`
+  step, a `## Scope` item, or a `## Targets` entry — cannot both hold, and you can state
+  the two and say which would have to be violated to satisfy the other. Anything short of
+  that is **not** a contradiction: a rule the plan simply does not reach, a rule that
+  constrains *how* rather than whether, tension the approach already anticipates in prose
+  — proceed, and execute under the rule. **Executing under these documents is the normal
+  result; zero hits is what this branch usually returns**, and the stop is expensive (it
+  costs a full re-finalize), so it fires only on a contradiction you can state. When one
+  clears the bar, name the rule, its path, and the element it conflicts with, build
+  nothing further, and stop:
+  > "`<path>` rules out `## Approach` step [N] / `## Scope` item [N]: [the rule, the
+  > element]. Nothing built this session. Re-finalize with `/scaffold-plan --final` to
+  > re-decide the approach under that rule."
+
+  On a **resume**, deliverables from earlier sessions may already be on disk — built under
+  the approach now contradicted, which is the likeliest way this fires at all (`integrate`
+  placed a `knowledge/` doc mid-phase). Name them rather than letting "nothing built" read
+  as a clean tree: "items 1–[N] were already built under the previous approach; the
+  re-finalize decides what happens to them."
+
+  `go` never picks between the governing rule and the approved approach — choosing one *is*
+  deciding the contradiction, and that is `plan`'s to decide. **This is not the "not
+  satisfiable as written" exit** (below): the scope still holds and the phase is still
+  wanted, so it does not get abandoned — only the approach is re-decided, and the cursor
+  stays on this plan while that happens.
+- **A path that does not resolve stops `go`** — same grade as a malformed plan; a dangling
+  pointer reads as governance that isn't happening. Stop:
+  > "`## Governed by` names `<path>`, which doesn't exist. Re-finalize with
+  > `/scaffold-plan --final`."
+- **An empty `## Governed by` stops `go` the same way** — a heading with no entries under it
+  names nothing to read, so nothing is read while the plan still looks conformant. Stop:
+  > "`## Governed by` is empty — it names nothing to read. Re-finalize with
+  > `/scaffold-plan --final`."
+- **No `## Governed by` at all** → `## Approach` must carry the fixed sentence, verbatim:
+  > Governed by: none — no `knowledge/` or `decisions/` document constrains this phase.
+
+  It is a literal match, not a reading of the prose — the wording is fixed precisely so this
+  test is a grep and not a judgement. Present → proceed. **Neither the section nor that
+  line → the plan is malformed** (the contract grades it so) and `go` stops, same as for a
+  dangling path — the one obligation the read-set exists to guarantee cannot be waived by
+  continuing:
+  > "This plan carries no `## Governed by` and no `Governed by: none` line in `## Approach`.
+  > Re-finalize with `/scaffold-plan --final` to write one."
+
+You still write no scaffold docs here — reading is the whole of the read-set pass.
+
+**Only then present scope and confirm the start** (the approach was approved at finalize —
+you do **not** re-propose it). **Print what has moved since the stamp** — not as a question,
+as visibility. A gate that passes silently teaches nothing; a gate that shows its work is
+what makes the refusing case worth reading:
 > "Phase: [plan filename], final & fresh. Since `<sha>`: [N] files moved, all declared
 > targets or `.scaffold/` — [list them]. [N] scope items to execute [out of M — N
 > already done]. Starting now."

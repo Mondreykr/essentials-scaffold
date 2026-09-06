@@ -82,12 +82,34 @@ State is derived from what the documents say, not from status keywords. Compute:
   question is "did anything move that this plan didn't declare?", **not** "has the repo
   moved?" — a checkpoint commit moves HEAD on every multi-session phase and is not
   staleness. Untracked files don't count.
+- **Read-set intact?** A plan with `## Targets` is finalized, so it must also carry a
+  non-empty `## Governed by` **or**, in `## Approach`, this line verbatim:
+
+  > Governed by: none — no `knowledge/` or `decisions/` document constrains this phase.
+
+  Neither, an empty heading, or an entry naming a path that doesn't resolve → the plan is
+  **malformed, not runnable**: `go` refuses it at load, so report it and route to
+  `/scaffold-plan --final`, never to `go`. One grep plus one existence check per listed
+  path, on a file you already opened. Whether the entries are the *right* ones is
+  `/scaffold-audit`'s to grade, not yours.
 - **Milestone complete?** Every phase in the active `milestone.md` is checked. For a
   **predetermined** milestone (has `spec/` + pre-written plans) this means it's at its
   done-contract → close + graduate (`/scaffold-checkpoint`) or start a new milestone
   (`/scaffold-plan`). For an **emergent** milestone (no spec), all-phases-checked is the
   *normal* steady state between `plan` calls, **not** a close signal — the next move is
   author the next phase (`/scaffold-plan`); close only if the chunk is genuinely done.
+- **What's coming?** In the active `milestone.md`'s `## Phases`, **up to three** unticked
+  entries, by title, in list order, starting after the active one. Already-open file, no
+  extra reads. **An unticked entry that sits *before* the active one is stranded, not
+  gone** — name it first, marked stranded, inside the same three: the cursor having moved
+  past it makes it *more* likely to be the duplicated or stale one, not less. **Entries
+  only** — a plan file sitting in `phases/` with no `## Phases` entry is unexecuted too,
+  but seeing it costs a directory read `status` doesn't take: the missing entry is
+  `checkpoint`'s structural finding, and the plan itself is in reach of `plan`'s neighbour
+  check and `audit`'s plan-set check. **If no active phase resolves** (`## Next` silent or dangling, and you located a
+  milestone by the Step 2 fallback), take the first three unticked entries in the list
+  instead, and say the cursor is lost so the user knows the queue is unanchored. If Step 2
+  found no live milestone at all, there is nothing to list — skip it.
 - **Blocked?** `state.md`'s `## Blockers` has content other than "None."
 - **Open questions?** `state.md`'s `## Open Questions` has content other than "None."
 - **Deferred work parked?** The active milestone's `milestone.md` has a non-empty `## Deferred` list — **report the count and stop there.** Admission is barred, so the list is short by construction; whether *this* one has grown too long is `checkpoint`'s sweep to judge (it owns that threshold) and `/scaffold-audit`'s to investigate. Reporting the number on the session-entry path is what lets a resuming user see it even if the last session ended without a checkpoint; inventing a second threshold here would just drift from checkpoint's. (A precondition on resuming,
@@ -103,15 +125,21 @@ Keep it short — a briefing, not a report:
 
 1. **Project** — what this is, in one sentence (from `project.md`).
 2. **Milestone + phase** — which milestone is active (per `## Next`), which phase plan is
-   current **and its state (draft / final & fresh / stale)**, and how many phases in its
-   `milestone.md` are checked vs remaining.
-3. **Active focus** — the one-paragraph synopsis from `state.md`.
-4. **Open threads** — Blockers and Open Questions (skip if both "None."). Note the active
+   current **and its state (draft / final & fresh / stale, or final with a broken
+   read-set)**, and how many phases in its `milestone.md` are checked vs remaining.
+3. **Coming up** — up to three unexecuted phases by title, one line each, stranded ones
+   first (skip only if the active phase is the *only* unticked entry anywhere in the list,
+   or if there is nothing to list per Step 4). This is what nothing else in the system
+   shows: it lets the user spot an overlap or a mis-ordered cut without holding the whole
+   plan set in memory. Name them only — do not open those plans, and do not adjudicate the
+   overlap; that is `plan`'s neighbour check at finalize.
+4. **Active focus** — the one-paragraph synopsis from `state.md`.
+5. **Open threads** — Blockers and Open Questions (skip if both "None."). Note the active
    milestone's `## Deferred` count if non-empty.
-5. **Knowledge** — `knowledge/` filenames + one-liners (Step 3). Skip if empty.
-6. **Investigations** — `investigations/` filenames (Step 3). Skip if empty.
-7. **Next action** — route per Step 6.
-8. **Health check** — flag contradictions across docs:
+6. **Knowledge** — `knowledge/` filenames + one-liners (Step 3). Skip if empty.
+7. **Investigations** — `investigations/` filenames (Step 3). Skip if empty.
+8. **Next action** — route per Step 6.
+9. **Health check** — flag contradictions across docs:
    - `## Next` points at a phase plan or milestone folder that doesn't exist.
    - `## Next` is silent while a milestone has unchecked phases (active cursor lost).
    - A `milestone.md` phase is checked but `roadmap.md` still shows the milestone planned, or every phase is checked but the roadmap line isn't flipped to done.
@@ -124,7 +152,7 @@ Keep it short — a briefing, not a report:
    (Plan-vs-decision staleness is NOT checked here — `status` deliberately doesn't read
    `decisions/` or downstream plans. That detection is `checkpoint`'s coherence sweep and
    `plan`'s pivot sweep.)
-9. **Staleness** — report each living-truth doc's `updated:` age in days. Whether an age counts as stale is `checkpoint`'s sweep to decide (it owns that threshold, and it can see whether the content moved); you read no code, so you cannot.
+10. **Staleness** — report each living-truth doc's `updated:` age in days. Whether an age counts as stale is `checkpoint`'s sweep to decide (it owns that threshold, and it can see whether the content moved); you read no code, so you cannot.
 
 ## Step 6: Route to next step
 
@@ -141,6 +169,12 @@ Suggest, don't mandate. Surface multiple options if multiple signals apply.
 > - **stale:** "Active: [milestone] / [phase plan] — **stale**: validated `as of <sha>`,
 >   and [these moved outside its declared targets: `<file>`, `<file>` / that sha is not in
 >   this branch's history]. Re-finalize with `/scaffold-plan --final` before `go`."
+> - **read-set broken** (takes precedence over *final & fresh* — a plan `go` won't
+>   load; a stale plan re-finalizes anyway, so say *stale*): "Active: [milestone] /
+>   [phase plan] — final, but its **read-set is malformed**:
+>   [it carries no `## Governed by` and no `Governed by: none` line in `## Approach` /
+>   `## Governed by` is empty / `## Governed by` names `<path>`, which doesn't exist].
+>   `/scaffold-go` refuses it as-is — re-finalize with `/scaffold-plan --final`."
 
 **Milestone complete (all phases checked):**
 > "[Milestone] is fully checked. If this chunk is genuinely done, run
